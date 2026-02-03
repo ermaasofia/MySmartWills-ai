@@ -147,7 +147,7 @@ export async function POST(req: Request) {
     let model;
     
     if (process.env.GROQ_API_KEY) {
-      model = groq('llama-3.1-70b-versatile');
+      model = groq('llama-3.3-70b-versatile');
     } else if (process.env.GOOGLE_GENERATIVE_AI_API_KEY) {
       model = google('gemini-1.5-flash');
     } else {
