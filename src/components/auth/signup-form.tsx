@@ -65,7 +65,7 @@ export function SignupForm() {
       <div className="text-center p-6 border border-border rounded-lg">
         <h2 className="text-xl font-semibold mb-2">Check your email</h2>
         <p className="text-muted-foreground mb-4">
-          We've sent you a confirmation link. Please check your email to verify your account.
+          We&apos;ve sent you a confirmation link. Please check your email to verify your account.
         </p>
         <Button variant="outline" onClick={() => router.push('/login')}>
           Go to Sign In
