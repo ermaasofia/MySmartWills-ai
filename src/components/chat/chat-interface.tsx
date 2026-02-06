@@ -232,6 +232,19 @@ export function ChatInterface({ userId }: ChatInterfaceProps) {
         className="flex-1 overflow-y-auto px-3 sm:px-6 relative z-10"
       >
         <div className="container mx-auto max-w-3xl py-4 sm:py-8 space-y-4 sm:space-y-6">
+          {/* Welcome Message */}
+          {messages.length === 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, ease: 'easeOut' }}
+              className="flex flex-col items-center justify-center text-center py-16 sm:py-24"
+            >
+              <h2 className="text-2xl sm:text-3xl font-bold mb-2">Hi, Welcome to AI SmartWills!</h2>
+              <p className="text-sm sm:text-base text-muted-foreground">Type your first question below</p>
+            </motion.div>
+          )}
+
           <AnimatePresence mode="popLayout">
             {messages.map((message, index) => (
               <ChatMessage
