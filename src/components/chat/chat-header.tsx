@@ -39,12 +39,12 @@ export function ChatHeader({ user }: ChatHeaderProps) {
 
   return (
     <header className="border-b border-border bg-background">
-      <div className="container mx-auto px-6 py-4 flex items-center justify-between">
-        <Link href="/" className="text-2xl font-bold tracking-tight">
+      <div className="container mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
+        <Link href="/" className="text-lg sm:text-2xl font-bold tracking-tight">
           AI SmartWills
         </Link>
         
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 sm:gap-4">
           <ThemeToggle />
           
           {mounted ? (

@@ -14,8 +14,8 @@ export default function LoginPage() {
     <div className="min-h-screen flex flex-col">
       {/* Header */}
       <header className="border-b border-border">
-        <div className="container mx-auto px-6 py-4 flex items-center justify-between">
-          <Link href="/" className="text-2xl font-bold tracking-tight">
+        <div className="container mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
+          <Link href="/" className="text-lg sm:text-2xl font-bold tracking-tight">
             AI SmartWills
           </Link>
           <ThemeToggle />
@@ -23,10 +23,10 @@ export default function LoginPage() {
       </header>
 
       {/* Main Content */}
-      <main className="flex-1 flex items-center justify-center px-6 py-12">
+      <main className="flex-1 flex items-center justify-center px-4 sm:px-6 py-8 sm:py-12">
         <div className="w-full max-w-md">
-          <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold mb-2">Welcome Back</h1>
+          <div className="text-center mb-6 sm:mb-8">
+            <h1 className="text-2xl sm:text-3xl font-bold mb-2">Welcome Back</h1>
             <p className="text-muted-foreground">
               Sign in to continue your will planning journey
             </p>
@@ -49,7 +49,7 @@ export default function LoginPage() {
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-border py-6 px-6">
+      <footer className="border-t border-border py-4 sm:py-6 px-4 sm:px-6">
         <div className="container mx-auto text-center text-sm text-muted-foreground">
           <p>2026 AI SmartWills. Part of the SmartWills ecosystem.</p>
         </div>

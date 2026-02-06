@@ -251,11 +251,11 @@ export function ChatInterface({ userId }: ChatInterfaceProps) {
       <motion.div
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="border-b border-border/50 px-6 py-3 bg-background/80 backdrop-blur-xl z-10"
+        className="border-b border-border/50 px-3 sm:px-6 py-2 sm:py-3 bg-background/80 backdrop-blur-xl z-10"
       >
-        <div className="container mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <span className="text-sm text-muted-foreground">Jurisdiction:</span>
+        <div className="container mx-auto flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2 sm:gap-4 min-w-0">
+            <span className="text-xs sm:text-sm text-muted-foreground hidden sm:inline">Jurisdiction:</span>
             <CountrySelector
               selectedCountry={selectedCountry}
               onSelect={setSelectedCountry}
@@ -277,9 +277,9 @@ export function ChatInterface({ userId }: ChatInterfaceProps) {
       {/* Messages Area */}
       <div
         ref={scrollRef}
-        className="flex-1 overflow-y-auto px-6 relative z-10"
+        className="flex-1 overflow-y-auto px-3 sm:px-6 relative z-10"
       >
-        <div className="container mx-auto max-w-3xl py-8 space-y-6">
+        <div className="container mx-auto max-w-3xl py-4 sm:py-8 space-y-4 sm:space-y-6">
           <AnimatePresence mode="popLayout">
             {messages.map((message, index) => (
               <ChatMessage
@@ -317,7 +317,7 @@ export function ChatInterface({ userId }: ChatInterfaceProps) {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="border-t border-border/50 px-6 py-4 bg-background/80 backdrop-blur-xl z-10"
+        className="border-t border-border/50 px-3 sm:px-6 py-3 sm:py-4 bg-background/80 backdrop-blur-xl z-10"
       >
         <form
           onSubmit={handleSubmit}
@@ -348,7 +348,7 @@ export function ChatInterface({ userId }: ChatInterfaceProps) {
               )}
             </AnimatePresence>
 
-            <div className="flex items-end gap-3 p-3">
+            <div className="flex items-end gap-2 sm:gap-3 p-2 sm:p-3">
               <textarea
                 ref={textareaRef}
                 value={input}
@@ -358,13 +358,13 @@ export function ChatInterface({ userId }: ChatInterfaceProps) {
                 onBlur={() => setIsFocused(false)}
                 placeholder={`Ask about will planning in ${selectedCountry.name}...`}
                 className={cn(
-                  'flex-1 resize-none bg-transparent px-3 py-2 text-sm',
+                  'flex-1 resize-none bg-transparent px-2 sm:px-3 py-2 text-sm',
                   'placeholder:text-muted-foreground/50',
                   'focus:outline-none',
-                  'min-h-[56px] max-h-[200px]'
+                  'min-h-[48px] sm:min-h-[56px] max-h-[200px]'
                 )}
                 disabled={isLoading}
-                style={{ height: '56px' }}
+                style={{ height: '48px' }}
               />
 
               <motion.div whileTap={{ scale: 0.95 }}>
@@ -373,7 +373,7 @@ export function ChatInterface({ userId }: ChatInterfaceProps) {
                   size="icon"
                   disabled={!input.trim() || isLoading}
                   className={cn(
-                    'h-11 w-11 rounded-xl transition-all duration-300',
+                    'h-10 w-10 sm:h-11 sm:w-11 rounded-xl transition-all duration-300 shrink-0',
                     input.trim()
                       ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/20'
                       : 'bg-muted text-muted-foreground'
@@ -399,7 +399,7 @@ export function ChatInterface({ userId }: ChatInterfaceProps) {
             </div>
           </motion.div>
 
-          <p className="text-xs text-muted-foreground mt-3 text-center">
+          <p className="text-[10px] sm:text-xs text-muted-foreground mt-2 sm:mt-3 text-center">
             AI SmartWills provides general guidance only. Consult a legal
             professional for specific advice.
           </p>

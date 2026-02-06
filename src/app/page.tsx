@@ -1,21 +1,27 @@
 "use client";
 
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { AuroraBackground } from "@/components/ui/aurora-background";
+import { Menu, X } from "lucide-react";
 
 export default function HomePage() {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
   return (
     <AuroraBackground className="h-auto min-h-screen">
       <div className="relative z-10 min-h-screen flex flex-col w-full">
       {/* Header */}
-      <header className="border-b border-border bg-background/80 backdrop-blur-sm">
-        <div className="container mx-auto px-6 py-4 flex items-center justify-between">
-          <Link href="/" className="text-2xl font-bold tracking-tight dark:text-white">
+      <header className="border-b border-border bg-background/80 backdrop-blur-sm sticky top-0 z-50">
+        <div className="container mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
+          <Link href="/" className="text-xl sm:text-2xl font-bold tracking-tight dark:text-white">
             AI SmartWills
           </Link>
-          <nav className="flex items-center gap-6">
+
+          {/* Desktop Nav */}
+          <nav className="hidden md:flex items-center gap-6">
             <Link 
               href="#about" 
               className="text-sm font-medium hover:underline underline-offset-4 dark:text-white"
@@ -46,11 +52,76 @@ export default function HomePage() {
               </button>
             </Link>
           </nav>
+
+          {/* Mobile Nav Controls */}
+          <div className="flex md:hidden items-center gap-2">
+            <ThemeToggle />
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="p-2 rounded-lg hover:bg-accent transition-colors"
+              aria-label="Toggle menu"
+            >
+              {mobileMenuOpen ? (
+                <X className="h-5 w-5 text-foreground" />
+              ) : (
+                <Menu className="h-5 w-5 text-foreground" />
+              )}
+            </button>
+          </div>
         </div>
+
+        {/* Mobile Menu */}
+        <AnimatePresence>
+          {mobileMenuOpen && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="md:hidden border-t border-border overflow-hidden bg-background/95 backdrop-blur-xl"
+            >
+              <nav className="flex flex-col px-4 py-4 gap-3">
+                <Link 
+                  href="#about" 
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="text-sm font-medium py-2 hover:underline underline-offset-4 dark:text-white"
+                >
+                  About
+                </Link>
+                <Link 
+                  href="#countries" 
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="text-sm font-medium py-2 hover:underline underline-offset-4 dark:text-white"
+                >
+                  Countries
+                </Link>
+                <Link 
+                  href="#smartwills" 
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="text-sm font-medium py-2 hover:underline underline-offset-4 dark:text-white"
+                >
+                  SmartWills
+                </Link>
+                <div className="flex gap-3 pt-2">
+                  <Link href="/login" className="flex-1" onClick={() => setMobileMenuOpen(false)}>
+                    <button className="w-full bg-transparent border border-black dark:border-white rounded-full text-black dark:text-white px-4 py-2.5 text-sm font-medium hover:bg-black/10 dark:hover:bg-white/10 transition-colors">
+                      Sign In
+                    </button>
+                  </Link>
+                  <Link href="/chat" className="flex-1" onClick={() => setMobileMenuOpen(false)}>
+                    <button className="w-full bg-black dark:bg-white rounded-full text-white dark:text-black px-4 py-2.5 text-sm font-medium hover:bg-black/80 dark:hover:bg-white/80 transition-colors">
+                      Start Chat
+                    </button>
+                  </Link>
+                </div>
+              </nav>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </header>
 
       {/* Hero Section */}
-      <section className="flex-1 flex items-center justify-center py-24 px-6">
+      <section className="flex-1 flex items-center justify-center py-12 sm:py-16 md:py-24 px-4 sm:px-6">
         <motion.div 
           initial={{ opacity: 0.0, y: 40 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -61,21 +132,21 @@ export default function HomePage() {
           }}
           className="container mx-auto max-w-4xl text-center"
         >
-          <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-6 dark:text-white">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-bold tracking-tight mb-4 sm:mb-6 dark:text-white">
             Your Intelligent Will Planning Assistant
           </h1>
-          <p className="text-xl md:text-2xl text-muted-foreground mb-8 max-w-2xl mx-auto dark:text-neutral-200">
+          <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-muted-foreground mb-6 sm:mb-8 max-w-2xl mx-auto dark:text-neutral-200">
             Navigate the complexities of legal will planning with AI-powered guidance 
             tailored to your country&apos;s laws and requirements.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
             <Link href="/chat">
-              <button className="bg-black dark:bg-white rounded-full w-fit text-white dark:text-black px-8 py-4 text-lg font-medium hover:bg-black/80 dark:hover:bg-white/80 transition-colors">
+              <button className="w-full sm:w-auto bg-black dark:bg-white rounded-full text-white dark:text-black px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg font-medium hover:bg-black/80 dark:hover:bg-white/80 transition-colors">
                 Start Planning Your Will
               </button>
             </Link>
             <Link href="#about">
-              <button className="bg-transparent border border-black dark:border-white rounded-full w-fit text-black dark:text-white px-8 py-4 text-lg font-medium hover:bg-black/10 dark:hover:bg-white/10 transition-colors">
+              <button className="w-full sm:w-auto bg-transparent border border-black dark:border-white rounded-full text-black dark:text-white px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg font-medium hover:bg-black/10 dark:hover:bg-white/10 transition-colors">
                 Learn More
               </button>
             </Link>
@@ -84,17 +155,17 @@ export default function HomePage() {
       </section>
 
       {/* About Section */}
-      <section id="about" className="py-24 px-6 border-t border-border bg-background/80 backdrop-blur-sm">
+      <section id="about" className="py-12 sm:py-16 md:py-24 px-4 sm:px-6 border-t border-border bg-background/80 backdrop-blur-sm">
         <div className="container mx-auto max-w-4xl">
-          <h2 className="text-4xl font-bold text-center mb-12 dark:text-white">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-8 sm:mb-12 dark:text-white">
             About AI SmartWills
           </h2>
-          <div className="grid md:grid-cols-2 gap-12">
+          <div className="grid md:grid-cols-2 gap-8 md:gap-12">
             <div>
-              <h3 className="text-2xl font-semibold mb-4 dark:text-white">
+              <h3 className="text-xl sm:text-2xl font-semibold mb-3 sm:mb-4 dark:text-white">
                 What We Do
               </h3>
-              <p className="text-muted-foreground leading-relaxed dark:text-neutral-200">
+              <p className="text-sm sm:text-base text-muted-foreground leading-relaxed dark:text-neutral-200">
                 AI SmartWills is an intelligent assistant that helps you understand 
                 the will planning process in your country. Our AI is trained on 
                 country-specific legal requirements, making it easier for you to 
@@ -102,10 +173,10 @@ export default function HomePage() {
               </p>
             </div>
             <div>
-              <h3 className="text-2xl font-semibold mb-4 dark:text-white">
+              <h3 className="text-xl sm:text-2xl font-semibold mb-3 sm:mb-4 dark:text-white">
                 How It Works
               </h3>
-              <p className="text-muted-foreground leading-relaxed dark:text-neutral-200">
+              <p className="text-sm sm:text-base text-muted-foreground leading-relaxed dark:text-neutral-200">
                 Simply select your country, and our AI will provide guidance based 
                 on your jurisdiction&apos;s legal framework. Ask questions about estate 
                 planning, beneficiaries, executors, and more. The AI understands 
@@ -117,16 +188,16 @@ export default function HomePage() {
       </section>
 
       {/* Countries Section */}
-      <section id="countries" className="py-24 px-6 border-t border-border bg-secondary/30 backdrop-blur-sm">
+      <section id="countries" className="py-12 sm:py-16 md:py-24 px-4 sm:px-6 border-t border-border bg-secondary/30 backdrop-blur-sm">
         <div className="container mx-auto max-w-4xl">
-          <h2 className="text-4xl font-bold text-center mb-4 dark:text-white">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-3 sm:mb-4 dark:text-white">
             Supported Countries
           </h2>
-          <p className="text-center text-muted-foreground mb-12 max-w-2xl mx-auto dark:text-neutral-200">
+          <p className="text-center text-sm sm:text-base text-muted-foreground mb-8 sm:mb-12 max-w-2xl mx-auto dark:text-neutral-200">
             We provide localized AI assistance for will planning across 12 countries 
             in the Asia-Pacific region.
           </p>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
             {[
               { name: "Malaysia", code: "MY" },
               { name: "Singapore", code: "SG" },
@@ -143,10 +214,10 @@ export default function HomePage() {
             ].map((country) => (
               <div
                 key={country.code}
-                className="p-4 border border-border rounded-lg text-center hover:bg-accent transition-colors bg-background/50"
+                className="p-3 sm:p-4 border border-border rounded-lg text-center hover:bg-accent transition-colors bg-background/50"
               >
-                <p className="font-semibold dark:text-white">{country.name}</p>
-                <p className="text-sm text-muted-foreground dark:text-neutral-300">{country.code}</p>
+                <p className="text-sm sm:text-base font-semibold dark:text-white">{country.name}</p>
+                <p className="text-xs sm:text-sm text-muted-foreground dark:text-neutral-300">{country.code}</p>
               </div>
             ))}
           </div>
@@ -154,16 +225,16 @@ export default function HomePage() {
       </section>
 
       {/* SmartWills Ecosystem Section */}
-      <section id="smartwills" className="py-24 px-6 border-t border-border bg-background/80 backdrop-blur-sm">
+      <section id="smartwills" className="py-12 sm:py-16 md:py-24 px-4 sm:px-6 border-t border-border bg-background/80 backdrop-blur-sm">
         <div className="container mx-auto max-w-4xl">
-          <h2 className="text-4xl font-bold text-center mb-4 dark:text-white">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-3 sm:mb-4 dark:text-white">
             The SmartWills Ecosystem
           </h2>
-          <p className="text-center text-muted-foreground mb-12 max-w-2xl mx-auto dark:text-neutral-200">
+          <p className="text-center text-sm sm:text-base text-muted-foreground mb-8 sm:mb-12 max-w-2xl mx-auto dark:text-neutral-200">
             AI SmartWills is part of the SmartWills family, providing online will 
             writing services across multiple countries.
           </p>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             {[
               {
                 name: "SmartWills Malaysia",
@@ -196,11 +267,11 @@ export default function HomePage() {
                 href={`https://${site.domain}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="block p-6 border border-border rounded-lg hover:bg-accent transition-colors bg-background/50"
+                className="block p-4 sm:p-6 border border-border rounded-lg hover:bg-accent transition-colors bg-background/50"
               >
-                <h3 className="text-xl font-semibold mb-2 dark:text-white">{site.name}</h3>
-                <p className="text-muted-foreground mb-2 dark:text-neutral-200">{site.description}</p>
-                <p className="text-sm underline underline-offset-4 dark:text-neutral-300">{site.domain}</p>
+                <h3 className="text-lg sm:text-xl font-semibold mb-2 dark:text-white">{site.name}</h3>
+                <p className="text-sm text-muted-foreground mb-2 dark:text-neutral-200">{site.description}</p>
+                <p className="text-xs sm:text-sm underline underline-offset-4 dark:text-neutral-300">{site.domain}</p>
               </a>
             ))}
           </div>
@@ -208,16 +279,16 @@ export default function HomePage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-24 px-6 border-t border-border bg-black dark:bg-white text-white dark:text-black">
+      <section className="py-12 sm:py-16 md:py-24 px-4 sm:px-6 border-t border-border bg-black dark:bg-white text-white dark:text-black">
         <div className="container mx-auto max-w-2xl text-center">
-          <h2 className="text-4xl font-bold mb-6">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 sm:mb-6">
             Ready to Start?
           </h2>
-          <p className="text-xl mb-8 opacity-90">
+          <p className="text-base sm:text-lg md:text-xl mb-6 sm:mb-8 opacity-90">
             Begin your will planning journey today with our AI assistant.
           </p>
           <Link href="/chat">
-            <button className="bg-white dark:bg-black rounded-full w-fit text-black dark:text-white px-8 py-4 text-lg font-medium hover:bg-white/80 dark:hover:bg-black/80 transition-colors">
+            <button className="w-full sm:w-auto bg-white dark:bg-black rounded-full text-black dark:text-white px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg font-medium hover:bg-white/80 dark:hover:bg-black/80 transition-colors">
               Chat with AI SmartWills
             </button>
           </Link>
@@ -225,12 +296,12 @@ export default function HomePage() {
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-border py-12 px-6 bg-background/80 backdrop-blur-sm">
+      <footer className="border-t border-border py-8 sm:py-12 px-4 sm:px-6 bg-background/80 backdrop-blur-sm">
         <div className="container mx-auto max-w-4xl">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-6">
-            <div>
+          <div className="flex flex-col md:flex-row justify-between items-center gap-4 sm:gap-6">
+            <div className="text-center md:text-left">
               <p className="font-bold text-lg dark:text-white">AI SmartWills</p>
-              <p className="text-sm text-muted-foreground dark:text-neutral-300">
+              <p className="text-xs sm:text-sm text-muted-foreground dark:text-neutral-300">
                 Intelligent legal will planning assistant
               </p>
             </div>

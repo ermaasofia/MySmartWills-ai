@@ -20,12 +20,12 @@ export function CountrySelector({ selectedCountry, onSelect }: CountrySelectorPr
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" size="sm" className="gap-2 min-w-[180px] justify-between">
-          <span className="flex items-center gap-2">
-            <span className="text-base">{selectedCountry.flag}</span>
-            <span>{selectedCountry.name}</span>
+        <Button variant="outline" size="sm" className="gap-1.5 sm:gap-2 min-w-[130px] sm:min-w-[180px] justify-between">
+          <span className="flex items-center gap-1.5 sm:gap-2 truncate">
+            <span className="text-sm sm:text-base">{selectedCountry.flag}</span>
+            <span className="text-xs sm:text-sm truncate">{selectedCountry.name}</span>
           </span>
-          <ChevronDown className="h-4 w-4 opacity-50" />
+          <ChevronDown className="h-3 w-3 sm:h-4 sm:w-4 opacity-50 shrink-0" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="w-[220px] max-h-[400px] overflow-y-auto">
