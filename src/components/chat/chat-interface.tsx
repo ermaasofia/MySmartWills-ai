@@ -3,8 +3,9 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { CountrySelector } from '@/components/chat/country-selector';
+import { PromptBox } from '@/components/ui/chatgpt-prompt-input';
 import { COUNTRIES } from '@/lib/constants';
-import { Send, RotateCcw } from 'lucide-react';
+import { RotateCcw } from 'lucide-react';
 import { Country } from '@/types';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
@@ -93,22 +94,8 @@ function ChatMessage({
 export function ChatInterface({ userId }: ChatInterfaceProps) {
   const [selectedCountry, setSelectedCountry] = useState<Country>(COUNTRIES[0]);
   const [messages, setMessages] = useState<Message[]>([]);
-  const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [isFocused, setIsFocused] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
-
-  // Initialize with welcome message
-  useEffect(() => {
-    setMessages([
-      {
-        id: 'welcome',
-        role: 'assistant',
-        content: `Welcome to AI SmartWills. I'm here to help you understand will planning in ${selectedCountry.name}. Feel free to ask me any questions about estate planning, beneficiaries, executors, or the legal requirements in your jurisdiction.`,
-      },
-    ]);
-  }, [selectedCountry.name]);
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
@@ -120,40 +107,18 @@ export function ChatInterface({ userId }: ChatInterfaceProps) {
     }
   }, [messages]);
 
-  // Auto-resize textarea
-  const adjustTextareaHeight = useCallback(() => {
-    const textarea = textareaRef.current;
-    if (textarea) {
-      textarea.style.height = '56px';
-      const newHeight = Math.min(Math.max(textarea.scrollHeight, 56), 200);
-      textarea.style.height = `${newHeight}px`;
-    }
-  }, []);
-
-  useEffect(() => {
-    adjustTextareaHeight();
-  }, [input, adjustTextareaHeight]);
-
-  const handleSubmit = useCallback(
-    async (e: React.FormEvent) => {
-      e.preventDefault();
-
-      if (!input.trim() || isLoading) return;
+  const handleSend = useCallback(
+    async (text: string) => {
+      if (!text.trim() || isLoading) return;
 
       const userMessage: Message = {
         id: Date.now().toString(),
         role: 'user',
-        content: input.trim(),
+        content: text.trim(),
       };
 
       setMessages((prev) => [...prev, userMessage]);
-      setInput('');
       setIsLoading(true);
-
-      // Reset textarea height
-      if (textareaRef.current) {
-        textareaRef.current.style.height = '56px';
-      }
 
       try {
         const response = await fetch('/api/chat', {
@@ -219,24 +184,11 @@ export function ChatInterface({ userId }: ChatInterfaceProps) {
         setIsLoading(false);
       }
     },
-    [input, isLoading, messages, selectedCountry, userId]
+    [isLoading, messages, selectedCountry, userId]
   );
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSubmit(e);
-    }
-  };
-
   const handleNewChat = () => {
-    setMessages([
-      {
-        id: 'welcome',
-        role: 'assistant',
-        content: `Welcome to AI SmartWills. I'm here to help you understand will planning in ${selectedCountry.name}. Feel free to ask me any questions about estate planning, beneficiaries, executors, or the legal requirements in your jurisdiction.`,
-      },
-    ]);
+    setMessages([]);
   };
 
   return (
@@ -317,93 +269,19 @@ export function ChatInterface({ userId }: ChatInterfaceProps) {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="border-t border-border/50 px-3 sm:px-6 py-3 sm:py-4 bg-background/80 backdrop-blur-xl z-10"
+        className="px-3 sm:px-6 py-3 sm:py-4 bg-background/80 backdrop-blur-xl z-10"
       >
-        <form
-          onSubmit={handleSubmit}
-          className="container mx-auto max-w-3xl"
-        >
-          <motion.div
-            className={cn(
-              'relative rounded-2xl border transition-all duration-300',
-              isFocused
-                ? 'border-primary/50 shadow-lg shadow-primary/5'
-                : 'border-border/50 bg-muted/30'
-            )}
-          >
-            {/* Animated border glow */}
-            <AnimatePresence>
-              {isFocused && (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  className="absolute inset-0 rounded-2xl pointer-events-none"
-                  style={{
-                    background:
-                      'linear-gradient(90deg, transparent, var(--primary) 50%, transparent)',
-                    opacity: 0.1,
-                  }}
-                />
-              )}
-            </AnimatePresence>
-
-            <div className="flex items-end gap-2 sm:gap-3 p-2 sm:p-3">
-              <textarea
-                ref={textareaRef}
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyDown={handleKeyDown}
-                onFocus={() => setIsFocused(true)}
-                onBlur={() => setIsFocused(false)}
-                placeholder={`Ask about will planning in ${selectedCountry.name}...`}
-                className={cn(
-                  'flex-1 resize-none bg-transparent px-2 sm:px-3 py-2 text-sm',
-                  'placeholder:text-muted-foreground/50',
-                  'focus:outline-none',
-                  'min-h-[48px] sm:min-h-[56px] max-h-[200px]'
-                )}
-                disabled={isLoading}
-                style={{ height: '48px' }}
-              />
-
-              <motion.div whileTap={{ scale: 0.95 }}>
-                <Button
-                  type="submit"
-                  size="icon"
-                  disabled={!input.trim() || isLoading}
-                  className={cn(
-                    'h-10 w-10 sm:h-11 sm:w-11 rounded-xl transition-all duration-300 shrink-0',
-                    input.trim()
-                      ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/20'
-                      : 'bg-muted text-muted-foreground'
-                  )}
-                >
-                  {isLoading ? (
-                    <motion.div
-                      animate={{ rotate: 360 }}
-                      transition={{
-                        duration: 1,
-                        repeat: Infinity,
-                        ease: 'linear',
-                      }}
-                    >
-                      <div className="h-5 w-5 border-2 border-current border-t-transparent rounded-full" />
-                    </motion.div>
-                  ) : (
-                    <Send className="h-5 w-5" />
-                  )}
-                  <span className="sr-only">Send message</span>
-                </Button>
-              </motion.div>
-            </div>
-          </motion.div>
-
+        <div className="container mx-auto max-w-3xl">
+          <PromptBox
+            placeholder={`Ask about will planning in ${selectedCountry.name}...`}
+            onSend={handleSend}
+            isLoading={isLoading}
+          />
           <p className="text-[10px] sm:text-xs text-muted-foreground mt-2 sm:mt-3 text-center">
             AI SmartWills provides general guidance only. Consult a legal
             professional for specific advice.
           </p>
-        </form>
+        </div>
       </motion.div>
     </div>
   );
