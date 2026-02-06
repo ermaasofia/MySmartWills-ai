@@ -12,25 +12,25 @@ export default function HomePage() {
       {/* Header */}
       <header className="border-b border-border bg-background/80 backdrop-blur-sm">
         <div className="container mx-auto px-6 py-4 flex items-center justify-between">
-          <Link href="/" className="text-2xl font-bold tracking-tight">
+          <Link href="/" className="text-2xl font-bold tracking-tight dark:text-white">
             AI SmartWills
           </Link>
           <nav className="flex items-center gap-6">
             <Link 
               href="#about" 
-              className="text-sm font-medium hover:underline underline-offset-4"
+              className="text-sm font-medium hover:underline underline-offset-4 dark:text-white"
             >
               About
             </Link>
             <Link 
               href="#countries" 
-              className="text-sm font-medium hover:underline underline-offset-4"
+              className="text-sm font-medium hover:underline underline-offset-4 dark:text-white"
             >
               Countries
             </Link>
             <Link 
               href="#smartwills" 
-              className="text-sm font-medium hover:underline underline-offset-4"
+              className="text-sm font-medium hover:underline underline-offset-4 dark:text-white"
             >
               SmartWills
             </Link>
@@ -163,7 +163,7 @@ export default function HomePage() {
             AI SmartWills is part of the SmartWills family, providing online will 
             writing services across multiple countries.
           </p>
-          <div className="grid md:grid-cols-2 gap-6">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[
               {
                 name: "SmartWills Malaysia",
@@ -184,6 +184,11 @@ export default function HomePage() {
                 name: "MySmartwills",
                 domain: "mysmartwills.com",
                 description: "Global platform for will management",
+              },
+              {
+                name: "SmartWill Wasiatku",
+                domain: "wasiatku.com.my",
+                description: "Online will for Malaysian Muslims",
               },
             ].map((site) => (
               <a
