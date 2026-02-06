@@ -19,53 +19,41 @@ Your Supabase Custom SMTP settings:
 | **Port** | `465` |
 | **Username** | `resend` |
 | **Password** | Your Resend API key (`re_4wWRZhsA...`) |
-| **Sender Email** | `onboarding@resend.dev` |
+| **Sender Email** | `onboarding@resend.dev` (testing) |
 | **Sender Name** | `AI SmartWills` |
 
 ---
 
-## ⚠️ Testing Limitation
+## 🎯 Next: Verify Your Custom Domain (aismartwills.me)
 
-**Important:** With `onboarding@resend.dev`, you can only send test emails to:
-- The email address you used to sign up for Resend
-- Any email you manually verify in Resend dashboard
-
-To send to **any user**, you need a custom domain (see below).
-
----
-
-## 🎯 How to Test Right Now
-
-1. Go to `https://aismartwills.vercel.app/signup`
-2. Sign up with **the email you used for Resend** (or one you verified)
-3. Check your inbox for the verification email
-4. It should come from "AI SmartWills via Resend" or similar
-
----
-
-## 🚀 To Send to All Users (Production)
-
-### Step 1: Buy a Domain
-- Namecheap, GoDaddy, Cloudflare, etc.
-- Example: `smartwills.com`
-
-### Step 2: Verify Domain in Resend
+### Step 1: Add Domain in Resend
 1. Go to [resend.com/domains](https://resend.com/domains)
 2. Click **Add Domain**
-3. Enter your domain (e.g., `smartwills.com`)
-4. Add the DNS records Resend provides to your domain registrar:
-   - **SPF record** (TXT)
-   - **DKIM record** (TXT)
-   - **DMARC record** (TXT, optional but recommended)
-5. Wait 5-30 minutes for verification
+3. Enter: `aismartwills.me`
+4. Resend will give you DNS records to add
 
-### Step 3: Update Supabase SMTP Settings
-1. Go to Supabase → Authentication → Email Settings
-2. Change **Sender email address** to: `noreply@smartwills.com`
+### Step 2: Add DNS Records in Namecheap
+1. Go to [Namecheap Dashboard](https://ap.www.namecheap.com/)
+2. Click **Domain List** → **Manage** next to `aismartwills.me`
+3. Click **Advanced DNS**
+4. Add the records Resend provided (typically):
+   - **SPF** (TXT record): `v=spf1 include:send.resend.com ~all`
+   - **DKIM** (TXT record): Resend will provide this
+   - **DMARC** (TXT record): `v=DMARC1; p=none;` (can strengthen later)
+5. Wait 5-30 minutes for DNS propagation
+
+### Step 3: Verify in Resend
+1. Go back to Resend → Domains
+2. Click **Verify** next to `aismartwills.me`
+3. Once verified, you're ready
+
+### Step 4: Update Supabase SMTP Sender
+1. Go to Supabase → Authentication → SMTP Settings
+2. Change **Sender email address** to: `noreply@aismartwills.me`
 3. Click **Save changes**
 
 ### Done!
-Now you can send to anyone, unlimited users.
+Now ALL users can receive emails from `noreply@aismartwills.me`
 
 ---
 

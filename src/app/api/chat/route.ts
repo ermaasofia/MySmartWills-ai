@@ -1,6 +1,7 @@
 import { streamText } from 'ai';
 import { createGoogleGenerativeAI } from '@ai-sdk/google';
 import { createGroq } from '@ai-sdk/groq';
+import { rateLimit } from '@/lib/rate-limit';
 
 // Initialize AI providers - using free tiers
 const google = createGoogleGenerativeAI({
@@ -141,7 +142,48 @@ Respond in a helpful, professional, and empathetic manner. Will planning is a se
 
 export async function POST(req: Request) {
   try {
-    const { messages, countryCode, countryName } = await req.json();
+    // Rate limiting by IP
+    const forwarded = req.headers.get('x-forwarded-for');
+    const ip = forwarded?.split(',')[0]?.trim() || 'unknown';
+    const { success, remaining } = rateLimit(ip, { maxRequests: 20, windowMs: 60_000 });
+
+    if (!success) {
+      return new Response(
+        JSON.stringify({ error: 'Too many requests. Please wait a moment.' }),
+        {
+          status: 429,
+          headers: {
+            'Content-Type': 'application/json',
+            'Retry-After': '60',
+            'X-RateLimit-Remaining': '0',
+          },
+        }
+      );
+    }
+
+    const body = await req.json();
+    const { messages, countryCode, countryName } = body;
+
+    // Input validation
+    if (!messages || !Array.isArray(messages) || messages.length === 0) {
+      return new Response(
+        JSON.stringify({ error: 'Invalid messages format' }),
+        { status: 400, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Sanitize: limit message count and content length
+    const sanitizedMessages = messages
+      .slice(-20)
+      .map((m: { role: string; content: string }) => ({
+        role: (m.role === 'user' ? 'user' : 'assistant') as 'user' | 'assistant',
+        content: typeof m.content === 'string' ? m.content.slice(0, 4000) : '',
+      }));
+
+    // Validate country code
+    const validCodes = ['MY', 'SG', 'HK', 'CN', 'TW', 'ID', 'TH', 'AU', 'NZ', 'BN', 'VN', 'PH'];
+    const safeCountryCode = validCodes.includes(countryCode) ? countryCode : 'MY';
+    const safeCountryName = typeof countryName === 'string' ? countryName.slice(0, 50) : 'Malaysia';
 
     // Try Groq first (faster, free tier), fall back to Google Gemini
     let model;
@@ -162,8 +204,8 @@ export async function POST(req: Request) {
 
     const result = streamText({
       model,
-      system: getSystemPrompt(countryCode || 'MY', countryName || 'Malaysia'),
-      messages,
+      system: getSystemPrompt(safeCountryCode, safeCountryName),
+      messages: sanitizedMessages,
       maxOutputTokens: 1024,
     });
 
