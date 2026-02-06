@@ -52,27 +52,40 @@ function ChatMessage({
 }) {
   const isUser = message.role === 'user';
 
+  if (isUser) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 20, scale: 0.95 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        transition={{ duration: 0.3, ease: 'easeOut' }}
+        className="flex gap-4 justify-end"
+      >
+        <motion.div
+          className="max-w-[85%] rounded-2xl px-5 py-3 shadow-sm bg-primary text-primary-foreground"
+          whileHover={{ scale: 1.01 }}
+          transition={{ duration: 0.2 }}
+        >
+          <p className="whitespace-pre-wrap text-sm leading-relaxed">
+            {message.content}
+          </p>
+        </motion.div>
+      </motion.div>
+    );
+  }
+
+  // AI response - no box, just plain text
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20, scale: 0.95 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, ease: 'easeOut' }}
-      className={cn('flex gap-4', isUser ? 'justify-end' : 'justify-start')}
+      className="flex gap-4 justify-start"
     >
-      <motion.div
-        className={cn(
-          'max-w-[85%] rounded-2xl px-5 py-3 shadow-sm',
-          isUser
-            ? 'bg-primary text-primary-foreground'
-            : 'bg-muted/80 backdrop-blur-sm border border-border/50'
-        )}
-        whileHover={{ scale: 1.01 }}
-        transition={{ duration: 0.2 }}
-      >
-        <p className="whitespace-pre-wrap text-sm leading-relaxed">
+      <div className="max-w-[85%] px-1 py-1">
+        <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground">
           {message.content}
         </p>
-      </motion.div>
+      </div>
     </motion.div>
   );
 }
@@ -281,12 +294,12 @@ export function ChatInterface({ userId }: ChatInterfaceProps) {
           <AnimatePresence>
             {isLoading && messages[messages.length - 1]?.role === 'user' && (
               <motion.div
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
                 className="flex justify-start"
               >
-                <div className="bg-muted/80 backdrop-blur-sm border border-border/50 rounded-2xl px-5 py-4 shadow-sm">
+                <div className="px-1 py-1">
                   <div className="flex items-center gap-3">
                     <span className="text-sm text-muted-foreground">
                       Thinking
