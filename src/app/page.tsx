@@ -2,14 +2,23 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { AuroraBackground } from "@/components/ui/aurora-background";
 import { Menu, X } from "lucide-react";
+import { createClient } from "@/lib/supabase/client";
 
 export default function HomePage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      setIsLoggedIn(!!user);
+    });
+  }, []);
 
   return (
     <AuroraBackground className="h-auto min-h-screen">
@@ -43,16 +52,26 @@ export default function HomePage() {
               SmartWills
             </Link>
             <ThemeToggle />
-            <Link href="/login">
-              <button className="bg-transparent border border-black dark:border-white rounded-full w-fit text-black dark:text-white px-4 py-2 text-sm font-medium hover:bg-black/10 dark:hover:bg-white/10 transition-colors">
-                Sign In
-              </button>
-            </Link>
-            <Link href="/chat">
-              <button className="bg-black dark:bg-white rounded-full w-fit text-white dark:text-black px-4 py-2 text-sm font-medium hover:bg-black/80 dark:hover:bg-white/80 transition-colors">
-                Start Chat
-              </button>
-            </Link>
+            {isLoggedIn ? (
+              <Link href="/chat">
+                <button className="bg-black dark:bg-white rounded-full w-fit text-white dark:text-black px-4 py-2 text-sm font-medium hover:bg-black/80 dark:hover:bg-white/80 transition-colors">
+                  Chat with AI SmartWills
+                </button>
+              </Link>
+            ) : (
+              <>
+                <Link href="/login">
+                  <button className="bg-transparent border border-black dark:border-white rounded-full w-fit text-black dark:text-white px-4 py-2 text-sm font-medium hover:bg-black/10 dark:hover:bg-white/10 transition-colors">
+                    Sign In
+                  </button>
+                </Link>
+                <Link href="/signup">
+                  <button className="bg-black dark:bg-white rounded-full w-fit text-white dark:text-black px-4 py-2 text-sm font-medium hover:bg-black/80 dark:hover:bg-white/80 transition-colors">
+                    Get Started
+                  </button>
+                </Link>
+              </>
+            )}
           </nav>
 
           {/* Mobile Nav Controls */}
@@ -105,16 +124,26 @@ export default function HomePage() {
                   SmartWills
                 </Link>
                 <div className="flex gap-3 pt-2">
-                  <Link href="/login" className="flex-1" onClick={() => setMobileMenuOpen(false)}>
-                    <button className="w-full bg-transparent border border-black dark:border-white rounded-full text-black dark:text-white px-4 py-2.5 text-sm font-medium hover:bg-black/10 dark:hover:bg-white/10 transition-colors">
-                      Sign In
-                    </button>
-                  </Link>
-                  <Link href="/chat" className="flex-1" onClick={() => setMobileMenuOpen(false)}>
-                    <button className="w-full bg-black dark:bg-white rounded-full text-white dark:text-black px-4 py-2.5 text-sm font-medium hover:bg-black/80 dark:hover:bg-white/80 transition-colors">
-                      Start Chat
-                    </button>
-                  </Link>
+                  {isLoggedIn ? (
+                    <Link href="/chat" className="flex-1" onClick={() => setMobileMenuOpen(false)}>
+                      <button className="w-full bg-black dark:bg-white rounded-full text-white dark:text-black px-4 py-2.5 text-sm font-medium hover:bg-black/80 dark:hover:bg-white/80 transition-colors">
+                        Chat with AI SmartWills
+                      </button>
+                    </Link>
+                  ) : (
+                    <>
+                      <Link href="/login" className="flex-1" onClick={() => setMobileMenuOpen(false)}>
+                        <button className="w-full bg-transparent border border-black dark:border-white rounded-full text-black dark:text-white px-4 py-2.5 text-sm font-medium hover:bg-black/10 dark:hover:bg-white/10 transition-colors">
+                          Sign In
+                        </button>
+                      </Link>
+                      <Link href="/signup" className="flex-1" onClick={() => setMobileMenuOpen(false)}>
+                        <button className="w-full bg-black dark:bg-white rounded-full text-white dark:text-black px-4 py-2.5 text-sm font-medium hover:bg-black/80 dark:hover:bg-white/80 transition-colors">
+                          Get Started
+                        </button>
+                      </Link>
+                    </>
+                  )}
                 </div>
               </nav>
             </motion.div>
