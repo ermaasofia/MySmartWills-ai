@@ -1,5 +1,6 @@
 import { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
 import { SignupForm } from "@/components/auth/signup-form";
 import { ThemeToggle } from "@/components/theme-toggle";
 
@@ -14,7 +15,8 @@ export default function SignupPage() {
       {/* Header */}
       <header className="border-b border-border">
         <div className="container mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
-          <Link href="/" className="text-lg sm:text-2xl font-bold tracking-tight">
+          <Link href="/" className="flex items-center gap-2 text-lg sm:text-2xl font-bold tracking-tight">
+            <Image src="/logo.png" alt="SmartWills" width={32} height={32} className="h-7 w-7 sm:h-8 sm:w-8 object-contain" />
             AI SmartWills
           </Link>
           <ThemeToggle />
