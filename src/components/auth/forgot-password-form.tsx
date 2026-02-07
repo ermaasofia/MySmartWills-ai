@@ -26,22 +26,10 @@ export function ForgotPasswordForm() {
     setLoading(true);
 
     try {
-      // Verify Turnstile token server-side before sending reset email
-      const verifyRes = await fetch('/api/auth/verify-turnstile', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token: turnstileToken }),
-      });
-
-      if (!verifyRes.ok) {
-        setError('Security verification failed. Please try again.');
-        setLoading(false);
-        return;
-      }
-
       const supabase = createClient();
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: `${window.location.origin}/auth/callback?next=/reset-password`,
+        captchaToken: turnstileToken,
       });
 
       if (error) {

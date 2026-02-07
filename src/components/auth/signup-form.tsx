@@ -54,24 +54,12 @@ export function SignupForm() {
     }
 
     try {
-      // Verify Turnstile token server-side first
-      const verifyRes = await fetch('/api/auth/verify-turnstile', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token: turnstileToken }),
-      });
-
-      if (!verifyRes.ok) {
-        setError('Security verification failed. Please refresh and try again.');
-        setTurnstileToken(null);
-        return;
-      }
-
       const supabase = createClient();
       const { error } = await supabase.auth.signUp({
         email,
         password,
         options: {
+          captchaToken: turnstileToken,
           data: {
             full_name: fullName,
           },
