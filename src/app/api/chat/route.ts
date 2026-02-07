@@ -1,6 +1,7 @@
 import { streamText } from 'ai';
 import { createGoogleGenerativeAI } from '@ai-sdk/google';
 import { createGroq } from '@ai-sdk/groq';
+import { createClient } from '@/lib/supabase/server';
 import { rateLimit } from '@/lib/rate-limit';
 
 // Initialize AI providers - using free tiers
@@ -142,10 +143,19 @@ Respond in a helpful, professional, and empathetic manner. Will planning is a se
 
 export async function POST(req: Request) {
   try {
-    // Rate limiting by IP
-    const forwarded = req.headers.get('x-forwarded-for');
-    const ip = forwarded?.split(',')[0]?.trim() || 'unknown';
-    const { success, remaining } = rateLimit(ip, { maxRequests: 20, windowMs: 60_000 });
+    // AUTHENTICATION: Verify user is logged in
+    const supabase = await createClient();
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    
+    if (authError || !user) {
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized. Please sign in.' }),
+        { status: 401, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Rate limiting by authenticated user ID (more reliable than IP)
+    const { success, remaining } = rateLimit(user.id, { maxRequests: 20, windowMs: 60_000 });
 
     if (!success) {
       return new Response(

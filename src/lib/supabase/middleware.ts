@@ -58,5 +58,10 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
+  // Add security headers to all responses
+  supabaseResponse.headers.set('X-Content-Type-Options', 'nosniff');
+  supabaseResponse.headers.set('X-Frame-Options', 'DENY');
+  supabaseResponse.headers.set('X-XSS-Protection', '1; mode=block');
+
   return supabaseResponse;
 }

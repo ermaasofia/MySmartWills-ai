@@ -133,7 +133,6 @@ export function ChatInterface({ userId }: ChatInterfaceProps) {
             })),
             countryCode: selectedCountry.code,
             countryName: selectedCountry.name,
-            userId,
           }),
         });
 

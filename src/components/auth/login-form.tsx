@@ -8,10 +8,20 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { TurnstileWidget } from './turnstile';
 
+// Validate redirect URL to prevent open redirect attacks
+function getSafeRedirect(url: string | null): string {
+  if (!url) return '/chat';
+  // Only allow relative paths starting with /
+  if (url.startsWith('/') && !url.startsWith('//')) {
+    return url;
+  }
+  return '/chat';
+}
+
 export function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const redirectTo = searchParams.get('redirect') || '/chat';
+  const redirectTo = getSafeRedirect(searchParams.get('redirect'));
   
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
