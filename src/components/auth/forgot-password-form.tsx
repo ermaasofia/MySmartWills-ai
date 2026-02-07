@@ -1,48 +1,32 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { TurnstileWidget } from './turnstile';
 
-// Validate redirect URL to prevent open redirect attacks
-function getSafeRedirect(url: string | null): string {
-  if (!url) return '/chat';
-  // Only allow relative paths starting with /
-  if (url.startsWith('/') && !url.startsWith('//')) {
-    return url;
-  }
-  return '/chat';
-}
-
-export function LoginForm() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const redirectTo = getSafeRedirect(searchParams.get('redirect'));
-  
+export function ForgotPasswordForm() {
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-    
+
     if (!turnstileToken) {
       setError('Please complete the security check');
       return;
     }
-    
+
     setLoading(true);
 
     try {
-      // Verify Turnstile token server-side first
+      // Verify Turnstile token server-side before sending reset email
       const verifyRes = await fetch('/api/auth/verify-turnstile', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -50,30 +34,44 @@ export function LoginForm() {
       });
 
       if (!verifyRes.ok) {
-        setError('Security verification failed. Please refresh and try again.');
-        setTurnstileToken(null);
+        setError('Security verification failed. Please try again.');
+        setLoading(false);
         return;
       }
 
       const supabase = createClient();
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/auth/callback?next=/reset-password`,
       });
 
       if (error) {
-        setError(error.message);
-        return;
+        // Don't reveal whether the email exists - always show success
+        console.error('Password reset error:', error.message);
       }
 
-      router.push(redirectTo);
-      router.refresh();
+      // Always show success to prevent email enumeration
+      setSuccess(true);
     } catch {
-      setError('An unexpected error occurred');
+      setError('An unexpected error occurred. Please try again.');
     } finally {
       setLoading(false);
     }
   };
+
+  if (success) {
+    return (
+      <div className="text-center p-6 border border-border rounded-lg">
+        <h2 className="text-xl font-semibold mb-2">Check your email</h2>
+        <p className="text-muted-foreground mb-4">
+          If an account exists with that email, we&apos;ve sent a password reset link.
+          Please check your inbox and spam folder.
+        </p>
+        <p className="text-sm text-muted-foreground">
+          The link will expire in 1 hour.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
@@ -82,9 +80,9 @@ export function LoginForm() {
           {error}
         </div>
       )}
-      
+
       <div className="space-y-2">
-        <Label htmlFor="email">Email</Label>
+        <Label htmlFor="email">Email Address</Label>
         <Input
           id="email"
           type="email"
@@ -97,21 +95,6 @@ export function LoginForm() {
         />
       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="password">Password</Label>
-        <Input
-          id="password"
-          type="password"
-          placeholder="Your password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-          disabled={loading}
-          minLength={8}
-          autoComplete="current-password"
-        />
-      </div>
-
       <div className="flex justify-center">
         <TurnstileWidget
           onSuccess={(token) => setTurnstileToken(token)}
@@ -120,17 +103,8 @@ export function LoginForm() {
       </div>
 
       <Button type="submit" className="w-full" disabled={loading || !turnstileToken}>
-        {loading ? 'Signing in...' : 'Sign In'}
+        {loading ? 'Sending...' : 'Send Reset Link'}
       </Button>
-
-      <div className="text-center">
-        <Link
-          href="/forgot-password"
-          className="text-sm text-muted-foreground underline underline-offset-4 hover:text-foreground"
-        >
-          Forgot your password?
-        </Link>
-      </div>
     </form>
   );
 }

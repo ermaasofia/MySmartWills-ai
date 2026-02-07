@@ -2,7 +2,7 @@ import { streamText } from 'ai';
 import { createGoogleGenerativeAI } from '@ai-sdk/google';
 import { createGroq } from '@ai-sdk/groq';
 import { createClient } from '@/lib/supabase/server';
-import { rateLimit } from '@/lib/rate-limit';
+import { rateLimitAsync } from '@/lib/rate-limit';
 
 // Initialize AI providers - using free tiers
 const google = createGoogleGenerativeAI({
@@ -154,8 +154,8 @@ export async function POST(req: Request) {
       );
     }
 
-    // Rate limiting by authenticated user ID (more reliable than IP)
-    const { success, remaining } = rateLimit(user.id, { maxRequests: 20, windowMs: 60_000 });
+    // Rate limiting by authenticated user ID (distributed via Upstash Redis)
+    const { success, remaining } = await rateLimitAsync(user.id, { maxRequests: 20, windowMs: 60_000 });
 
     if (!success) {
       return new Response(
