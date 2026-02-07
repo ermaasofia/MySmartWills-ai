@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { TurnstileWidget } from './turnstile';
 
 export function LoginForm() {
   const router = useRouter();
@@ -16,10 +17,17 @@ export function LoginForm() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+    
+    if (!turnstileToken) {
+      setError('Please complete the security check');
+      return;
+    }
+    
     setLoading(true);
 
     try {
@@ -78,7 +86,14 @@ export function LoginForm() {
         />
       </div>
 
-      <Button type="submit" className="w-full" disabled={loading}>
+      <div className="flex justify-center">
+        <TurnstileWidget
+          onSuccess={(token) => setTurnstileToken(token)}
+          onError={() => setTurnstileToken(null)}
+        />
+      </div>
+
+      <Button type="submit" className="w-full" disabled={loading || !turnstileToken}>
         {loading ? 'Signing in...' : 'Sign In'}
       </Button>
     </form>
