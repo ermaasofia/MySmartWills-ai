@@ -48,7 +48,7 @@ export function LoginForm() {
         email,
         password,
         options: {
-          captchaToken: turnstileToken,
+          captchaToken: turnstileToken ?? undefined,
         },
       });
 

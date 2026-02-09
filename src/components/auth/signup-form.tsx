@@ -60,7 +60,7 @@ export function SignupForm() {
         email,
         password,
         options: {
-          captchaToken: turnstileToken,
+          captchaToken: turnstileToken ?? undefined,
           data: {
             full_name: fullName,
           },
