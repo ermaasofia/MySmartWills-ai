@@ -6,6 +6,20 @@ const verifyAttempts = new Map<string, { count: number; resetAt: number }>();
 
 export async function POST(req: Request) {
   try {
+    // SECURITY: Origin check
+    const origin = req.headers.get('origin');
+    const allowedOrigins = [
+      'https://aismartwills.me',
+      'https://www.aismartwills.me',
+      ...(process.env.NODE_ENV === 'development' ? ['http://localhost:3000'] : []),
+    ];
+    if (origin && !allowedOrigins.includes(origin)) {
+      return NextResponse.json(
+        { error: 'Forbidden' },
+        { status: 403 }
+      );
+    }
+
     // Basic IP-based rate limiting for this endpoint
     const forwarded = req.headers.get('x-forwarded-for');
     const ip = forwarded?.split(',')[0]?.trim() || 'unknown';

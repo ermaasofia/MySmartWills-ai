@@ -143,6 +143,20 @@ Respond in a helpful, professional, and empathetic manner. Will planning is a se
 
 export async function POST(req: Request) {
   try {
+    // SECURITY: Reject non-POST or suspicious origins
+    const origin = req.headers.get('origin');
+    const allowedOrigins = [
+      'https://aismartwills.me',
+      'https://www.aismartwills.me',
+      ...(process.env.NODE_ENV === 'development' ? ['http://localhost:3000'] : []),
+    ];
+    if (origin && !allowedOrigins.includes(origin)) {
+      return new Response(
+        JSON.stringify({ error: 'Forbidden' }),
+        { status: 403, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+
     // AUTHENTICATION: Verify user is logged in
     const supabase = await createClient();
     const { data: { user }, error: authError } = await supabase.auth.getUser();
@@ -187,8 +201,9 @@ export async function POST(req: Request) {
       .slice(-20)
       .map((m: { role: string; content: string }) => ({
         role: (m.role === 'user' ? 'user' : 'assistant') as 'user' | 'assistant',
-        content: typeof m.content === 'string' ? m.content.slice(0, 4000) : '',
-      }));
+        content: typeof m.content === 'string' ? m.content.slice(0, 4000).replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g, '') : '',
+      }))
+      .filter((m: { content: string }) => m.content.length > 0);
 
     // Validate country code
     const validCodes = ['MY', 'SG', 'HK', 'CN', 'TW', 'ID', 'TH', 'AU', 'NZ', 'BN', 'VN', 'PH'];
@@ -221,9 +236,10 @@ export async function POST(req: Request) {
 
     return result.toTextStreamResponse();
   } catch (error) {
+    // Log internally but never leak error details to client
     console.error('Chat API error:', error);
     return new Response(
-      JSON.stringify({ error: 'Failed to process chat request' }),
+      JSON.stringify({ error: 'Something went wrong. Please try again.' }),
       { status: 500, headers: { 'Content-Type': 'application/json' } }
     );
   }
