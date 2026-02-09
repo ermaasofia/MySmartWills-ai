@@ -1,13 +1,14 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { TurnstileWidget } from './turnstile';
+import { TurnstileWidget, TurnstileWidgetRef } from './turnstile';
 
 export function ForgotPasswordForm() {
+  const turnstileRef = useRef<TurnstileWidgetRef>(null);
   const [email, setEmail] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
@@ -41,6 +42,9 @@ export function ForgotPasswordForm() {
       setSuccess(true);
     } catch {
       setError('An unexpected error occurred. Please try again.');
+      // Reset Turnstile to get a new token for next attempt
+      setTurnstileToken(null);
+      turnstileRef.current?.reset();
     } finally {
       setLoading(false);
     }
@@ -85,6 +89,7 @@ export function ForgotPasswordForm() {
 
       <div className="flex justify-center">
         <TurnstileWidget
+          ref={turnstileRef}
           onSuccess={(token) => setTurnstileToken(token)}
           onError={() => setTurnstileToken(null)}
         />

@@ -1,15 +1,16 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { TurnstileWidget } from './turnstile';
+import { TurnstileWidget, TurnstileWidgetRef } from './turnstile';
 
 export function SignupForm() {
   const router = useRouter();
+  const turnstileRef = useRef<TurnstileWidgetRef>(null);
   
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
@@ -68,12 +69,18 @@ export function SignupForm() {
 
       if (error) {
         setError(error.message);
+        // Reset Turnstile to get a new token for next attempt
+        setTurnstileToken(null);
+        turnstileRef.current?.reset();
         return;
       }
 
       setSuccess(true);
     } catch {
       setError('An unexpected error occurred');
+      // Reset Turnstile to get a new token for next attempt
+      setTurnstileToken(null);
+      turnstileRef.current?.reset();
     } finally {
       setLoading(false);
     }
@@ -162,6 +169,7 @@ export function SignupForm() {
 
       <div className="flex justify-center">
         <TurnstileWidget
+          ref={turnstileRef}
           onSuccess={(token) => setTurnstileToken(token)}
           onError={() => setTurnstileToken(null)}
         />

@@ -1,13 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { TurnstileWidget } from './turnstile';
+import { TurnstileWidget, TurnstileWidgetRef } from './turnstile';
 
 // Validate redirect URL to prevent open redirect attacks
 function getSafeRedirect(url: string | null): string {
@@ -23,6 +23,7 @@ export function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirectTo = getSafeRedirect(searchParams.get('redirect'));
+  const turnstileRef = useRef<TurnstileWidgetRef>(null);
   
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -53,6 +54,9 @@ export function LoginForm() {
 
       if (error) {
         setError(error.message);
+        // Reset Turnstile to get a new token for next attempt
+        setTurnstileToken(null);
+        turnstileRef.current?.reset();
         return;
       }
 
@@ -60,6 +64,9 @@ export function LoginForm() {
       router.refresh();
     } catch {
       setError('An unexpected error occurred');
+      // Reset Turnstile to get a new token for next attempt
+      setTurnstileToken(null);
+      turnstileRef.current?.reset();
     } finally {
       setLoading(false);
     }
@@ -104,6 +111,7 @@ export function LoginForm() {
 
       <div className="flex justify-center">
         <TurnstileWidget
+          ref={turnstileRef}
           onSuccess={(token) => setTurnstileToken(token)}
           onError={() => setTurnstileToken(null)}
         />
