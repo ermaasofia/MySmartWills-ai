@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Crimson_Text } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/providers/theme-provider";
+import { AuthHandler } from "@/components/auth/auth-handler";
+import { Suspense } from "react";
 
 const crimsonText = Crimson_Text({
   subsets: ["latin"],
@@ -74,6 +76,9 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange={false}
         >
+          <Suspense fallback={null}>
+            <AuthHandler />
+          </Suspense>
           {children}
         </ThemeProvider>
       </body>
