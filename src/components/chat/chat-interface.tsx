@@ -149,14 +149,14 @@ export function ChatInterface({
     loadHistory();
   }, [initialSessionId]);
 
-  // ..."€..."€ Auto-scroll ..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€
+  // Auto-scroll
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' });
     }
   }, [messages]);
 
-  // ..."€..."€ Rename session title ..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€
+  //  Rename session title 
   const handleTitleSave = useCallback(
     async (newTitle: string) => {
       if (!currentSessionId) return;
@@ -171,7 +171,7 @@ export function ChatInterface({
     [currentSessionId, onTitleChange],
   );
 
-  // ..."€..."€ Send message ..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€
+  // Send message 
   const handleSend = useCallback(
     async (text: string) => {
       if (!text.trim() || isLoading) return;
@@ -262,7 +262,7 @@ export function ChatInterface({
     [isLoading, messages, selectedCountry, currentSessionId, router, onSessionCreated, userId],
   );
 
-  // ..."€..."€ New chat ..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€
+  // New chat 
   const handleNewChat = () => {
     setMessages([]);
     setSessionTitle('New Chat');
