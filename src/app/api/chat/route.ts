@@ -1,11 +1,11 @@
 import { streamText } from 'ai';
-import { createGoogleGenerativeAI } from '@ai-sdk/google';
+import { createGroq } from '@ai-sdk/groq';
 import { createClient } from '@/lib/supabase/server';
 import { rateLimitAsync } from '@/lib/rate-limit';
 
-// Initialize Google Gemini
-const google = createGoogleGenerativeAI({
-  apiKey: process.env.GOOGLE_GENERATIVE_AI_API_KEY,
+// Initialize Groq
+const groq = createGroq({
+  apiKey: process.env.GROQ_API_KEY,
 });
 
 // Country-specific context for will planning
@@ -232,17 +232,17 @@ export async function POST(req: Request) {
     const safeCountryCode = validCodes.includes(countryCode) ? countryCode : 'MY';
     const safeCountryName = typeof countryName === 'string' ? countryName.slice(0, 50) : 'Malaysia';
 
-    // Use Google Gemini
-    if (!process.env.GOOGLE_GENERATIVE_AI_API_KEY) {
+    // Use Groq
+    if (!process.env.GROQ_API_KEY) {
       return new Response(
         JSON.stringify({ 
-          error: 'No AI provider configured. Please set GOOGLE_GENERATIVE_AI_API_KEY.' 
+          error: 'No AI provider configured. Please set GROQ_API_KEY.' 
         }),
         { status: 500, headers: { 'Content-Type': 'application/json' } }
       );
     }
 
-    const model = google('gemini-2.5-flash');
+    const model = groq('openai/gpt-oss-120b');
 
     const result = streamText({
       model,
