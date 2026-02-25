@@ -2,6 +2,7 @@ import { streamText } from 'ai';
 import { createGroq } from '@ai-sdk/groq';
 import { createClient } from '@/lib/supabase/server';
 import { rateLimitAsync } from '@/lib/rate-limit';
+import { createChatSession, saveChatMessage, updateSessionTitle } from '@/lib/chat';
 
 // Initialize Groq
 const groq = createGroq({
@@ -208,7 +209,7 @@ export async function POST(req: Request) {
     }
 
     const body = await req.json();
-    const { messages, countryCode, countryName } = body;
+    const { messages, countryCode, countryName, sessionId: incomingSessionId } = body;
 
     // Input validation
     if (!messages || !Array.isArray(messages) || messages.length === 0) {
@@ -242,6 +243,50 @@ export async function POST(req: Request) {
       );
     }
 
+    // ── Session management ────────────────────────────────────────────────────
+    // Resolve or create the chat session
+    let sessionId: string = '';
+    const isNewSession = !incomingSessionId;
+
+    if (incomingSessionId && typeof incomingSessionId === 'string') {
+      // Verify ownership (RLS will reject if not theirs)
+      const { data: existingSession } = await supabase
+        .from('chat_sessions')
+        .select('id')
+        .eq('id', incomingSessionId)
+        .single();
+
+      if (existingSession) {
+        sessionId = existingSession.id;
+      }
+    }
+
+    if (!sessionId) {
+      // Start a new session — title will be updated to first user message
+      const session = await createChatSession(
+        supabase,
+        user.id,
+        safeCountryCode,
+        'New Chat',
+      );
+      sessionId = session.id;
+    }
+
+    // The last message in the array is always the user's latest message
+    const lastUserMessage = sanitizedMessages[sanitizedMessages.length - 1];
+
+    // Persist the user message immediately (before streaming starts)
+    await saveChatMessage(supabase, sessionId, 'user', lastUserMessage.content);
+
+    // Update session title to the first user message (truncated)
+    if (isNewSession) {
+      await updateSessionTitle(
+        supabase,
+        sessionId,
+        lastUserMessage.content.slice(0, 80),
+      );
+    }
+
     const model = groq('openai/gpt-oss-120b');
 
     const result = streamText({
@@ -249,9 +294,25 @@ export async function POST(req: Request) {
       system: getSystemPrompt(safeCountryCode, safeCountryName),
       messages: sanitizedMessages,
       maxOutputTokens: 1024,
+      onFinish: async ({ text }) => {
+        // Persist the full assistant response after the stream completes
+        try {
+          await saveChatMessage(supabase, sessionId, 'assistant', text);
+        } catch (err) {
+          console.error('Failed to save assistant message:', err);
+        }
+      },
     });
 
-    return result.toTextStreamResponse();
+    // Return the stream and expose the session ID to the client via a header
+    const streamResponse = result.toTextStreamResponse();
+    return new Response(streamResponse.body, {
+      headers: {
+        ...Object.fromEntries(streamResponse.headers.entries()),
+        'X-Session-Id': sessionId,
+        'Access-Control-Expose-Headers': 'X-Session-Id',
+      },
+    });
   } catch (error) {
     // Log internally but never leak error details to client
     console.error('Chat API error:', error);

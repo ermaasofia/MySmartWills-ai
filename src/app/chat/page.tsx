@@ -1,27 +1,34 @@
 import { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { ChatInterface } from "@/components/chat/chat-interface";
-import { ChatHeader } from "@/components/chat/chat-header";
+import { ChatShell } from "@/components/chat/chat-shell";
 
 export const metadata: Metadata = {
   title: "Chat - AI SmartWills",
   description: "Chat with your AI will planning assistant",
 };
 
-export default async function ChatPage() {
+interface ChatPageProps {
+  searchParams: Promise<{ session?: string }>;
+}
+
+export default async function ChatPage({ searchParams }: ChatPageProps) {
   const supabase = await createClient();
-  
+
   const { data: { user } } = await supabase.auth.getUser();
-  
+
   if (!user) {
     redirect('/login?redirect=/chat');
   }
 
+  const { session: sessionId } = await searchParams;
+
   return (
-    <div className="min-h-screen flex flex-col bg-background">
-      <ChatHeader user={user} />
-      <ChatInterface userId={user.id} />
-    </div>
+    <ChatShell
+      userId={user.id}
+      userName={user.user_metadata?.full_name ?? ''}
+      userEmail={user.email ?? ''}
+      initialSessionId={sessionId}
+    />
   );
 }
