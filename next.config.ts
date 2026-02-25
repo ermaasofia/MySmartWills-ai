@@ -9,7 +9,10 @@ const nextConfig: NextConfig = {
   // Image optimization
   images: {
     formats: ['image/avif', 'image/webp'],
-    remotePatterns: [],
+    remotePatterns: [
+      // Google OAuth avatars
+      { protocol: 'https', hostname: 'lh3.googleusercontent.com' },
+    ],
   },
 
   // Security headers
@@ -50,10 +53,10 @@ const nextConfig: NextConfig = {
             key: 'Content-Security-Policy',
             value: [
               "default-src 'self'",
-              "script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com",
+              "script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com https://static.cloudflareinsights.com",
               "style-src 'self' 'unsafe-inline'",
               "font-src 'self'",
-              "img-src 'self' data: blob:",
+              "img-src 'self' data: blob: https://lh3.googleusercontent.com",
               "connect-src 'self' https://*.supabase.co https://api.groq.com https://generativelanguage.googleapis.com https://challenges.cloudflare.com https://*.upstash.io",
               "frame-src https://challenges.cloudflare.com",
               "frame-ancestors 'none'",

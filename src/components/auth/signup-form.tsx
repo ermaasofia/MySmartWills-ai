@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { TurnstileWidget, TurnstileWidgetRef } from './turnstile';
+import { OAuthButtons } from './oauth-buttons';
 
 export function SignupForm() {
   const router = useRouter();
@@ -101,7 +102,10 @@ export function SignupForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <div className="space-y-4">
+      <OAuthButtons redirectTo="/chat" mode="signup" />
+
+      <form onSubmit={handleSubmit} className="space-y-4">
       {error && (
         <div className="p-3 text-sm text-destructive bg-destructive/10 border border-destructive/20 rounded-lg">
           {error}
@@ -179,5 +183,6 @@ export function SignupForm() {
         {loading ? 'Creating account...' : 'Create Account'}
       </Button>
     </form>
+    </div>
   );
 }
