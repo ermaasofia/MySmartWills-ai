@@ -102,7 +102,7 @@ export function ChatInterface({
   );
 
   const scrollRef = useRef<HTMLDivElement>(null);
-  // Tracks which session is currently loaded — used to skip redundant fetches
+  // Tracks which session is currently loaded - used to skip redundant fetches
   const loadedSessionRef = useRef<string | null>(initialSessionId ?? null);
 
   // Load history when an existing session is provided
@@ -115,7 +115,7 @@ export function ChatInterface({
       return;
     }
 
-    // Already loaded or streaming into this session — skip re-fetch
+    // Already loaded or streaming into this session - skip re-fetch
     if (initialSessionId === loadedSessionRef.current) return;
     loadedSessionRef.current = initialSessionId;
 
@@ -149,14 +149,14 @@ export function ChatInterface({
     loadHistory();
   }, [initialSessionId]);
 
-  // â”€â”€ Auto-scroll â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ..."€..."€ Auto-scroll ..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' });
     }
   }, [messages]);
 
-  // â”€â”€ Rename session title â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ..."€..."€ Rename session title ..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€
   const handleTitleSave = useCallback(
     async (newTitle: string) => {
       if (!currentSessionId) return;
@@ -171,7 +171,7 @@ export function ChatInterface({
     [currentSessionId, onTitleChange],
   );
 
-  // â”€â”€ Send message â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ..."€..."€ Send message ..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€
   const handleSend = useCallback(
     async (text: string) => {
       if (!text.trim() || isLoading) return;
@@ -262,7 +262,7 @@ export function ChatInterface({
     [isLoading, messages, selectedCountry, currentSessionId, router, onSessionCreated, userId],
   );
 
-  // â”€â”€ New chat â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ..."€..."€ New chat ..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€..."€
   const handleNewChat = () => {
     setMessages([]);
     setSessionTitle('New Chat');
@@ -272,9 +272,9 @@ export function ChatInterface({
 
   return (
     <div className="flex-1 flex flex-col min-h-0 relative bg-background">
-      {/* â”€â”€ Top bar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {/* Top bar */}
       <div className="flex items-center gap-2 px-3 sm:px-4 py-2.5 border-b border-border/60 bg-background/90 backdrop-blur-md z-10 shrink-0">
-        {/* Hamburger â€” mobile only */}
+        {/* Hamburger - mobile only */}
         <button
           onClick={onOpenSidebar}
           className="md:hidden p-1.5 rounded hover:bg-muted transition-colors shrink-0"
@@ -309,7 +309,7 @@ export function ChatInterface({
         </Button>
       </div>
 
-      {/* â”€â”€ Messages â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {/* Messages */}
       <div
         ref={scrollRef}
         className="flex-1 overflow-y-auto px-3 sm:px-6 relative"
@@ -323,7 +323,7 @@ export function ChatInterface({
         <div className="relative container mx-auto max-w-3xl py-4 sm:py-8 space-y-4 sm:space-y-6">
           {isLoadingHistory ? (
             <div className="flex items-center justify-center py-24">
-              <p className="text-sm text-muted-foreground animate-pulse">Loading conversationâ€¦</p>
+              <p className="text-sm text-muted-foreground animate-pulse">Loading conversation...</p>
             </div>
           ) : messages.length === 0 ? (
             <motion.div
@@ -368,11 +368,11 @@ export function ChatInterface({
         </div>
       </div>
 
-      {/* â”€â”€ Input â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {/* Input */}
       <div className="shrink-0 px-3 sm:px-6 py-3 sm:py-4 bg-background/90 backdrop-blur-md border-t border-border/40 z-10">
         <div className="container mx-auto max-w-3xl">
           <PromptBox
-            placeholder={`Ask about will planning in ${selectedCountry.name}â€¦`}
+            placeholder={`Ask about will planning in ${selectedCountry.name}...`}
             onSend={handleSend}
             isLoading={isLoading}
           />
