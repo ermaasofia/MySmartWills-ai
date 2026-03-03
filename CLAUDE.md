@@ -84,7 +84,7 @@ Schema defined in `supabase/schema.sql`. All tables have RLS policies.
 
 ## Environment Variables
 
-See `.env.local.example` for the full template. Key variables:
+See `.env.local` for the full template. Key variables:
 - `NEXT_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_ANON_KEY` — Supabase connection
 - `GROQ_API_KEY` — Primary AI provider (required)
 - `GOOGLE_GENERATIVE_AI_API_KEY` — Fallback AI provider (optional)
