@@ -247,10 +247,13 @@ interface SessionItemProps {
 function SessionItem({ session, isActive, onSelect, onDelete }: SessionItemProps) {
   return (
     <li>
-      <button
+      <div
+        role="button"
+        tabIndex={0}
         onClick={onSelect}
+        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onSelect(); } }}
         className={cn(
-          'w-full flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-left',
+          'w-full flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-left cursor-pointer',
           'hover:bg-sidebar-accent transition-colors group',
           isActive && 'bg-sidebar-accent font-medium',
         )}
@@ -271,7 +274,7 @@ function SessionItem({ session, isActive, onSelect, onDelete }: SessionItemProps
         >
           <Trash2 className="h-3 w-3" />
         </button>
-      </button>
+      </div>
     </li>
   );
 }
