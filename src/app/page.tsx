@@ -5,7 +5,6 @@ import Image from "next/image";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { AuroraBackground } from "@/components/ui/aurora-background";
 import {
   Menu,
   X,
@@ -232,7 +231,7 @@ export default function HomePage() {
     "bg-transparent border border-black dark:border-white rounded-full text-black dark:text-white px-4 py-2 text-sm font-medium hover:bg-black/10 dark:hover:bg-white/10 transition-colors";
 
   return (
-    <AuroraBackground className="h-auto min-h-screen">
+    <main className="h-auto min-h-screen bg-background">
       <div className="relative z-10 min-h-screen flex flex-col w-full">
         {/* ═══════════════ Header ═══════════════ */}
         <header className="border-b border-border bg-background/80 backdrop-blur-sm sticky top-0 z-50">
@@ -766,6 +765,6 @@ export default function HomePage() {
           </div>
         </footer>
       </div>
-    </AuroraBackground>
+    </main>
   );
 }
