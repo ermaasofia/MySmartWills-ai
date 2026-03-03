@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { TurnstileWidget, TurnstileWidgetRef } from './turnstile';
 import { OAuthButtons } from './oauth-buttons';
+import { CAPTCHA_ERROR } from '@/lib/validation';
 
 // Validate redirect URL to prevent open redirect attacks
 function getSafeRedirect(url: string | null): string {
@@ -37,10 +38,10 @@ export function LoginForm() {
     setError(null);
     
     if (!turnstileToken) {
-      setError('Please complete the security check');
+      setError(CAPTCHA_ERROR);
       return;
     }
-    
+
     setLoading(true);
 
     try {
@@ -122,6 +123,7 @@ export function LoginForm() {
       </div>
 
       <Button type="submit" className="w-full" disabled={loading || !turnstileToken}>
+        {loading && <span className="mr-2 h-4 w-4 border-2 border-current border-t-transparent rounded-full animate-spin inline-block" />}
         {loading ? 'Signing in...' : 'Sign In'}
       </Button>
 

@@ -61,7 +61,7 @@ function ChatMessage({ message, isLatest }: { message: Message; isLatest: boolea
           whileHover={{ scale: 1.01 }}
           transition={{ duration: 0.2 }}
         >
-          <p className="whitespace-pre-wrap text-sm leading-relaxed">{message.content}</p>
+          <p className="whitespace-pre-wrap break-words text-sm leading-relaxed">{message.content}</p>
         </motion.div>
       </motion.div>
     );
@@ -75,7 +75,7 @@ function ChatMessage({ message, isLatest }: { message: Message; isLatest: boolea
       className="flex gap-4 justify-start"
     >
       <div className="max-w-[85%] px-1 py-1">
-        <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground">
+        <p className="whitespace-pre-wrap break-words text-sm leading-relaxed text-foreground">
           {message.content}
         </p>
       </div>
@@ -132,8 +132,7 @@ export function ChatInterface({
         setCurrentSessionId(initialSessionId);
 
         setMessages(
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          dbMessages.map((m: any) => ({
+          dbMessages.map((m: { id: string; role: string; content: string }) => ({
             id: m.id,
             role: m.role as 'user' | 'assistant',
             content: m.content,

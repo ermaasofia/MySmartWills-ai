@@ -230,8 +230,25 @@ export default function HomePage() {
   const btnOutlineSm =
     "bg-transparent border border-black dark:border-white rounded-full text-black dark:text-white px-4 py-2 text-sm font-medium hover:bg-black/10 dark:hover:bg-white/10 transition-colors";
 
+  const faqJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: FAQ_ITEMS.map((item) => ({
+      '@type': 'Question',
+      name: item.q,
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: item.a,
+      },
+    })),
+  };
+
   return (
     <main className="h-auto min-h-screen bg-background">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
+      />
       <div className="relative z-10 min-h-screen flex flex-col w-full">
         {/* ═══════════════ Header ═══════════════ */}
         <header className="border-b border-border bg-background/80 backdrop-blur-sm sticky top-0 z-50">
@@ -245,6 +262,7 @@ export default function HomePage() {
                 alt="SmartWills"
                 width={32}
                 height={32}
+                priority
                 className="h-7 w-7 sm:h-8 sm:w-8 object-contain"
               />
               AI SmartWills
@@ -448,7 +466,7 @@ export default function HomePage() {
               {HOW_IT_WORKS.map((h) => (
                 <div
                   key={h.step}
-                  className="relative p-6 sm:p-8 border border-border rounded-2xl bg-background/60 text-center"
+                  className="relative p-6 border border-border rounded-2xl bg-background/60 text-center"
                 >
                   <span className="absolute -top-4 left-1/2 -translate-x-1/2 text-xs font-bold bg-black dark:bg-white text-white dark:text-black rounded-full px-3 py-1">
                     STEP {h.step}
@@ -585,7 +603,7 @@ export default function HomePage() {
                   href={`https://${site.domain}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="group block p-5 sm:p-6 border border-border rounded-2xl hover:bg-accent transition-colors bg-background/50"
+                  className="group block p-6 border border-border rounded-2xl hover:bg-accent transition-colors bg-background/50"
                 >
                   <h3 className="text-lg sm:text-xl font-semibold mb-2 dark:text-white">
                     {site.name}

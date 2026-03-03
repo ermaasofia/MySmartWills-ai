@@ -66,8 +66,39 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'Organization',
+        name: 'AI SmartWills',
+        url: 'https://aismartwills.me',
+        logo: 'https://aismartwills.me/logo.png',
+        description: 'AI-powered will planning assistant for Asia-Pacific.',
+        sameAs: [
+          'https://www.facebook.com/smartwillsmalaysia',
+          'https://www.instagram.com/smartwills',
+          'https://www.linkedin.com/company/smartwills',
+          'https://www.youtube.com/@smartwills',
+        ],
+      },
+      {
+        '@type': 'WebSite',
+        name: 'AI SmartWills',
+        url: 'https://aismartwills.me',
+        description: 'Your AI-powered assistant for legal will planning across 12 countries in Asia-Pacific.',
+      },
+    ],
+  };
+
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+      </head>
       <body className={`${crimsonText.variable} font-serif antialiased`}>
         <ThemeProvider
           attribute="class"

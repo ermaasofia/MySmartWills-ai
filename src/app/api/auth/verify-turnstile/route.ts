@@ -8,9 +8,10 @@ export async function POST(req: Request) {
   try {
     // SECURITY: Origin check
     const origin = req.headers.get('origin');
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://aismartwills.me';
     const allowedOrigins = [
-      'https://aismartwills.me',
-      'https://www.aismartwills.me',
+      appUrl,
+      appUrl.replace('://', '://www.'),
       ...(process.env.NODE_ENV === 'development' ? ['http://localhost:3000'] : []),
     ];
     if (origin && !allowedOrigins.includes(origin)) {

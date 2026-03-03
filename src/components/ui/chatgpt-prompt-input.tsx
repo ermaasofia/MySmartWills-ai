@@ -109,7 +109,7 @@ export const PromptBox = React.forwardRef<HTMLTextAreaElement, PromptBoxProps>(
     return (
       <div
         className={cn(
-          "flex flex-col rounded-[28px] p-2 shadow-sm transition-colors bg-card border border-border dark:bg-[#171717] dark:border-[#303030] cursor-text",
+          "flex flex-col rounded-[28px] p-2 shadow-sm transition-colors bg-card border border-border dark:bg-card dark:border-border cursor-text",
           className
         )}
         onClick={() => internalTextareaRef.current?.focus()}
@@ -134,7 +134,7 @@ export const PromptBox = React.forwardRef<HTMLTextAreaElement, PromptBoxProps>(
                     type="button"
                     onClick={handleSubmit}
                     disabled={!hasValue || isLoading}
-                    className="flex h-8 w-8 items-center justify-center rounded-full text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none bg-primary text-primary-foreground hover:bg-primary/80 disabled:opacity-40"
+                    className="flex h-8 w-8 items-center justify-center rounded-full text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none bg-primary text-primary-foreground hover:bg-primary/80 disabled:opacity-50"
                   >
                     {isLoading ? (
                       <div className="h-5 w-5 border-2 border-current border-t-transparent rounded-full animate-spin" />

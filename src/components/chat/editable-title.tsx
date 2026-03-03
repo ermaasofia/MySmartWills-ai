@@ -80,7 +80,7 @@ export function EditableTitle({ title, onSave, className }: EditableTitleProps) 
           onClick={handleSave}
           disabled={isSaving}
           aria-label="Save title"
-          className="p-1 rounded hover:bg-primary/10 text-primary disabled:opacity-40 shrink-0"
+          className="p-1 rounded hover:bg-primary/10 text-primary disabled:opacity-50 shrink-0"
         >
           <Check className="h-3.5 w-3.5" />
         </button>
@@ -88,7 +88,7 @@ export function EditableTitle({ title, onSave, className }: EditableTitleProps) 
           onClick={handleCancel}
           disabled={isSaving}
           aria-label="Cancel edit"
-          className="p-1 rounded hover:bg-destructive/10 text-muted-foreground disabled:opacity-40 shrink-0"
+          className="p-1 rounded hover:bg-destructive/10 text-muted-foreground disabled:opacity-50 shrink-0"
         >
           <X className="h-3.5 w-3.5" />
         </button>

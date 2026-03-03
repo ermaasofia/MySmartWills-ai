@@ -3,6 +3,7 @@ import { createGroq } from '@ai-sdk/groq';
 import { createClient } from '@/lib/supabase/server';
 import { rateLimitAsync } from '@/lib/rate-limit';
 import { createChatSession, saveChatMessage, updateSessionTitle } from '@/lib/chat';
+import { COUNTRIES } from '@/lib/constants';
 
 // Initialize Groq
 const groq = createGroq({
@@ -168,9 +169,10 @@ export async function POST(req: Request) {
   try {
     // SECURITY: Reject non-POST or suspicious origins
     const origin = req.headers.get('origin');
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://aismartwills.me';
     const allowedOrigins = [
-      'https://aismartwills.me',
-      'https://www.aismartwills.me',
+      appUrl,
+      appUrl.replace('://', '://www.'),
       ...(process.env.NODE_ENV === 'development' ? ['http://localhost:3000'] : []),
     ];
     if (origin && !allowedOrigins.includes(origin)) {
@@ -229,7 +231,7 @@ export async function POST(req: Request) {
       .filter((m: { content: string }) => m.content.length > 0);
 
     // Validate country code
-    const validCodes = ['MY', 'SG', 'HK', 'CN', 'TW', 'ID', 'TH', 'AU', 'NZ', 'BN', 'VN', 'PH'];
+    const validCodes = COUNTRIES.map((c) => c.code);
     const safeCountryCode = validCodes.includes(countryCode) ? countryCode : 'MY';
     const safeCountryName = typeof countryName === 'string' ? countryName.slice(0, 50) : 'Malaysia';
 

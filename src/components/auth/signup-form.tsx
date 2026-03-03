@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { TurnstileWidget, TurnstileWidgetRef } from './turnstile';
 import { OAuthButtons } from './oauth-buttons';
+import { validatePasswordStrength, CAPTCHA_ERROR } from '@/lib/validation';
 
 export function SignupForm() {
   const router = useRouter();
@@ -27,10 +28,10 @@ export function SignupForm() {
     setError(null);
     
     if (!turnstileToken) {
-      setError('Please complete the security check');
+      setError(CAPTCHA_ERROR);
       return;
     }
-    
+
     setLoading(true);
 
     if (password !== confirmPassword) {
@@ -39,18 +40,9 @@ export function SignupForm() {
       return;
     }
 
-    if (password.length < 8) {
-      setError('Password must be at least 8 characters');
-      setLoading(false);
-      return;
-    }
-
-    // Password strength check
-    const hasUppercase = /[A-Z]/.test(password);
-    const hasLowercase = /[a-z]/.test(password);
-    const hasNumber = /[0-9]/.test(password);
-    if (!hasUppercase || !hasLowercase || !hasNumber) {
-      setError('Password must contain uppercase, lowercase, and a number');
+    const passwordError = validatePasswordStrength(password);
+    if (passwordError) {
+      setError(passwordError);
       setLoading(false);
       return;
     }
@@ -180,6 +172,7 @@ export function SignupForm() {
       </div>
 
       <Button type="submit" className="w-full" disabled={loading || !turnstileToken}>
+        {loading && <span className="mr-2 h-4 w-4 border-2 border-current border-t-transparent rounded-full animate-spin inline-block" />}
         {loading ? 'Creating account...' : 'Create Account'}
       </Button>
     </form>

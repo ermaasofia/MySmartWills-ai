@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { TurnstileWidget, TurnstileWidgetRef } from './turnstile';
+import { CAPTCHA_ERROR } from '@/lib/validation';
 
 export function ForgotPasswordForm() {
   const turnstileRef = useRef<TurnstileWidgetRef>(null);
@@ -20,7 +21,7 @@ export function ForgotPasswordForm() {
     setError(null);
 
     if (!turnstileToken) {
-      setError('Please complete the security check');
+      setError(CAPTCHA_ERROR);
       return;
     }
 
@@ -96,6 +97,7 @@ export function ForgotPasswordForm() {
       </div>
 
       <Button type="submit" className="w-full" disabled={loading || !turnstileToken}>
+        {loading && <span className="mr-2 h-4 w-4 border-2 border-current border-t-transparent rounded-full animate-spin inline-block" />}
         {loading ? 'Sending...' : 'Send Reset Link'}
       </Button>
     </form>

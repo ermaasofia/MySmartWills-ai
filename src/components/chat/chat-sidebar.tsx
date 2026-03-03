@@ -257,19 +257,12 @@ function SessionItem({ session, isActive, onSelect, onDelete }: SessionItemProps
       >
         <MessageSquare className="h-3.5 w-3.5 shrink-0 text-muted-foreground/60" />
         <span className="flex-1 truncate text-xs">{session.title}</span>
-        <span
-          role="button"
-          tabIndex={0}
+        <button
+          type="button"
           aria-label="Delete conversation"
           onClick={(e) => {
             e.stopPropagation();
             onDelete();
-          }}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-              e.stopPropagation();
-              onDelete();
-            }
           }}
           className={cn(
             'shrink-0 p-1 rounded opacity-0 group-hover:opacity-100 transition-opacity',
@@ -277,7 +270,7 @@ function SessionItem({ session, isActive, onSelect, onDelete }: SessionItemProps
           )}
         >
           <Trash2 className="h-3 w-3" />
-        </span>
+        </button>
       </button>
     </li>
   );

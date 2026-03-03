@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { validatePasswordStrength } from '@/lib/validation';
 
 export function ResetPasswordForm() {
   const router = useRouter();
@@ -19,22 +20,14 @@ export function ResetPasswordForm() {
     e.preventDefault();
     setError(null);
 
-    if (password.length < 8) {
-      setError('Password must be at least 8 characters');
+    const passwordError = validatePasswordStrength(password);
+    if (passwordError) {
+      setError(passwordError);
       return;
     }
 
     if (password !== confirmPassword) {
       setError('Passwords do not match');
-      return;
-    }
-
-    // Password strength check
-    const hasUppercase = /[A-Z]/.test(password);
-    const hasLowercase = /[a-z]/.test(password);
-    const hasNumber = /[0-9]/.test(password);
-    if (!hasUppercase || !hasLowercase || !hasNumber) {
-      setError('Password must contain uppercase, lowercase, and a number');
       return;
     }
 
@@ -117,6 +110,7 @@ export function ResetPasswordForm() {
       </div>
 
       <Button type="submit" className="w-full" disabled={loading}>
+        {loading && <span className="mr-2 h-4 w-4 border-2 border-current border-t-transparent rounded-full animate-spin inline-block" />}
         {loading ? 'Updating...' : 'Update Password'}
       </Button>
     </form>
