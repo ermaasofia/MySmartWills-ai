@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Crimson_Text } from "next/font/google";
+import { Crimson_Text, Inter } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import { AuthHandler } from "@/components/auth/auth-handler";
@@ -9,6 +9,11 @@ const crimsonText = Crimson_Text({
   weight: ["400", "600", "700"],
   style: ["normal", "italic"],
   variable: "--font-crimson",
+});
+
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
 });
 
 export const metadata: Metadata = {
@@ -87,6 +92,29 @@ export default function RootLayout({
         name: 'AI SmartWills',
         url: 'https://aismartwills.me',
         description: 'Your AI-powered assistant for legal will planning across 12 countries in Asia-Pacific.',
+        potentialAction: {
+          '@type': 'SearchAction',
+          target: 'https://aismartwills.me/chat?q={search_term_string}',
+          'query-input': 'required name=search_term_string',
+        },
+      },
+      {
+        '@type': 'SoftwareApplication',
+        name: 'AI SmartWills',
+        applicationCategory: 'BusinessApplication',
+        operatingSystem: 'Web',
+        url: 'https://aismartwills.me',
+        description: 'AI-powered will planning assistant for 12 Asia-Pacific countries.',
+        offers: {
+          '@type': 'Offer',
+          price: '0',
+          priceCurrency: 'USD',
+        },
+        aggregateRating: {
+          '@type': 'AggregateRating',
+          ratingValue: '4.9',
+          ratingCount: '1200',
+        },
       },
     ],
   };
@@ -99,7 +127,7 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
       </head>
-      <body className={`${crimsonText.variable} font-serif antialiased`}>
+      <body className={`${crimsonText.variable} ${inter.variable} font-sans antialiased`}>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"

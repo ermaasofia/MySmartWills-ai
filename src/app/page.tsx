@@ -2,54 +2,68 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ThemeToggle } from "@/components/theme-toggle";
 import {
-  Menu,
-  X,
-  Brain,
-  Globe,
-  MessageSquareText,
+  Sparkles,
   ShieldCheck,
-  Zap,
-  Users,
+  Lock,
+  MessageSquareText,
+  RefreshCw,
+  MapPin,
+  CheckCircle2,
   ChevronDown,
   ChevronUp,
-  MapPin,
   ArrowRight,
   Star,
-  CheckCircle2,
+  Users,
   Mail,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { Header } from "@/components/layout/header";
+import dynamic from "next/dynamic";
+
+const DarkVeil = dynamic(() => import("@/components/ui/DarkVeil"), {
+  ssr: false,
+});
 
 /* ───────────────────────── Data ───────────────────────── */
 
-const VALUE_PROPS = [
+const FEATURES = [
   {
-    icon: Brain,
-    title: "AI-Powered Legal Guidance",
+    icon: Sparkles,
+    title: "AI-Powered Generation",
     description:
-      "Cuts through the complexity of will planning — get clear, personalized answers in minutes.",
+      "Advanced AI creates personalized legal wills in minutes, not months. Get instant clarity on complex estate matters.",
+    span: "lg:col-span-2",
   },
   {
-    icon: Globe,
-    title: "Localized & Law-Specific",
+    icon: ShieldCheck,
+    title: "Legally Compliant",
     description:
-      "Support for Malaysia, Singapore, Hong Kong and 9 more Asia-Pacific jurisdictions.",
+      "Every document follows your jurisdiction's legal requirements across 12 Asia-Pacific countries.",
+    span: "lg:col-span-2",
+  },
+  {
+    icon: Lock,
+    title: "Bank-Level Security",
+    description:
+      "256-bit encryption protects your sensitive information at every step.",
+    span: "lg:col-span-1",
   },
   {
     icon: MessageSquareText,
-    title: "No Legal Jargon",
+    title: "24/7 AI Assistant",
     description:
-      "Plain-language guidance in English and local languages so everyone can understand.",
+      "Get instant answers to your estate planning questions anytime.",
+    span: "lg:col-span-2",
   },
   {
-    icon: Zap,
-    title: "Fast & Trusted",
+    icon: RefreshCw,
+    title: "Easy Updates",
     description:
-      "Backed by the SmartWills ecosystem — trusted by thousands of users across the region.",
+      "Modify your will anytime as your life changes — no extra cost.",
+    span: "lg:col-span-1",
   },
 ];
 
@@ -164,6 +178,12 @@ const ECOSYSTEM = [
   },
 ];
 
+const TRUST_METRICS = [
+  { value: 10000, suffix: "+", label: "Wills Created", countUp: true, decimals: 0 },
+  { value: 4.9, suffix: "★", label: "Rating", countUp: true, decimals: 1 },
+  { value: 0, suffix: "", label: "Security", countUp: false, decimals: 0, staticText: "Bank-Level" },
+];
+
 /* ───────────────────── Helpers ───────────────────── */
 
 const sectionFade = {
@@ -173,13 +193,49 @@ const sectionFade = {
   transition: { duration: 0.6, ease: "easeOut" as const },
 } as const;
 
+function useCountUp(target: number, duration: number = 2000, decimals: number = 0) {
+  const [count, setCount] = useState(0);
+  const [started, setStarted] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && !started) {
+          setStarted(true);
+        }
+      },
+      { threshold: 0.5 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [started]);
+
+  useEffect(() => {
+    if (!started) return;
+    const startTime = performance.now();
+    const step = (now: number) => {
+      const elapsed = now - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      setCount(Number((eased * target).toFixed(decimals)));
+      if (progress < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  }, [started, target, duration, decimals]);
+
+  return { count, ref };
+}
+
 function FAQItem({ q, a }: { q: string; a: string }) {
   const [open, setOpen] = useState(false);
   return (
     <div className="border border-border rounded-xl overflow-hidden bg-background/60">
       <button
         onClick={() => setOpen(!open)}
-        className="w-full flex items-center justify-between gap-4 px-5 py-4 text-left font-semibold text-sm sm:text-base dark:text-white hover:bg-accent/50 transition-colors"
+        className="w-full flex items-center justify-between gap-4 px-5 py-4 text-left font-semibold text-sm sm:text-base hover:bg-accent/50 transition-colors"
       >
         {q}
         {open ? (
@@ -197,7 +253,7 @@ function FAQItem({ q, a }: { q: string; a: string }) {
             transition={{ duration: 0.2 }}
             className="overflow-hidden"
           >
-            <p className="px-5 pb-4 text-sm text-muted-foreground leading-relaxed dark:text-neutral-300">
+            <p className="px-5 pb-4 text-sm text-muted-foreground leading-relaxed">
               {a}
             </p>
           </motion.div>
@@ -207,10 +263,29 @@ function FAQItem({ q, a }: { q: string; a: string }) {
   );
 }
 
+function TrustMetric({ metric }: { metric: typeof TRUST_METRICS[number] }) {
+  const { count, ref } = useCountUp(metric.value, 2000, metric.decimals);
+
+  return (
+    <div ref={ref} className="text-center">
+      <p className="text-2xl sm:text-3xl font-bold text-white">
+        {metric.countUp ? (
+          <>
+            {metric.decimals ? count.toFixed(metric.decimals) : count.toLocaleString()}
+            {metric.suffix}
+          </>
+        ) : (
+          metric.staticText
+        )}
+      </p>
+      <p className="text-xs sm:text-sm text-white/60 mt-1">{metric.label}</p>
+    </div>
+  );
+}
+
 /* ═══════════════════ Page Component ═══════════════════ */
 
 export default function HomePage() {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
@@ -220,569 +295,454 @@ export default function HomePage() {
     });
   }, []);
 
-  /* ──── shared button styles ──── */
-  const btnPrimary =
-    "bg-black dark:bg-white rounded-full text-white dark:text-black px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg font-medium hover:bg-black/80 dark:hover:bg-white/80 transition-colors";
-  const btnOutline =
-    "bg-transparent border border-black dark:border-white rounded-full text-black dark:text-white px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg font-medium hover:bg-black/10 dark:hover:bg-white/10 transition-colors";
-  const btnPrimarySm =
-    "bg-black dark:bg-white rounded-full text-white dark:text-black px-4 py-2 text-sm font-medium hover:bg-black/80 dark:hover:bg-white/80 transition-colors";
-  const btnOutlineSm =
-    "bg-transparent border border-black dark:border-white rounded-full text-black dark:text-white px-4 py-2 text-sm font-medium hover:bg-black/10 dark:hover:bg-white/10 transition-colors";
-
   const faqJsonLd = {
-    '@context': 'https://schema.org',
-    '@type': 'FAQPage',
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
     mainEntity: FAQ_ITEMS.map((item) => ({
-      '@type': 'Question',
+      "@type": "Question",
       name: item.q,
-      acceptedAnswer: {
-        '@type': 'Answer',
-        text: item.a,
-      },
+      acceptedAnswer: { "@type": "Answer", text: item.a },
     })),
   };
 
   return (
-    <main className="h-auto min-h-screen bg-background">
+    <main className="min-h-screen bg-background">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
       />
-      <div className="relative z-10 min-h-screen flex flex-col w-full">
-        {/* ═══════════════ Header ═══════════════ */}
-        <header className="border-b border-border bg-background/80 backdrop-blur-sm sticky top-0 z-50">
-          <div className="container mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
-            <Link
-              href="/"
-              className="flex items-center gap-2 text-xl sm:text-2xl font-bold tracking-tight dark:text-white"
-            >
-              <Image
-                src="/logo.png"
-                alt="SmartWills"
-                width={32}
-                height={32}
-                priority
-                className="h-7 w-7 sm:h-8 sm:w-8 object-contain"
-              />
-              AI SmartWills
-            </Link>
 
-            {/* Desktop Nav */}
-            <nav className="hidden md:flex items-center gap-6">
-              {["How It Works", "Countries", "FAQ", "SmartWills"].map((label) => (
-                <Link
-                  key={label}
-                  href={`#${label.toLowerCase().replace(/ /g, "-")}`}
-                  className="text-sm font-medium hover:underline underline-offset-4 dark:text-white"
-                >
-                  {label}
-                </Link>
-              ))}
-              <ThemeToggle />
-              {isLoggedIn ? (
-                <Link href="/chat">
-                  <button className={btnPrimarySm}>Chat with AI</button>
-                </Link>
-              ) : (
-                <>
-                  <Link href="/login">
-                    <button className={btnOutlineSm}>Sign In</button>
-                  </Link>
-                  <Link href="/signup">
-                    <button className={btnPrimarySm}>Get Started</button>
-                  </Link>
-                </>
-              )}
-            </nav>
+      {/* ═══════════════ Header ═══════════════ */}
+      <Header isLoggedIn={isLoggedIn} />
 
-            {/* Mobile Controls */}
-            <div className="flex md:hidden items-center gap-2">
-              <ThemeToggle />
-              <button
-                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="p-2 rounded-lg hover:bg-accent transition-colors"
-                aria-label="Toggle menu"
-              >
-                {mobileMenuOpen ? (
-                  <X className="h-5 w-5 text-foreground" />
-                ) : (
-                  <Menu className="h-5 w-5 text-foreground" />
-                )}
-              </button>
-            </div>
-          </div>
+      {/* ═══════════════ Hero ═══════════════ */}
+      <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
+        {/* DarkVeil WebGL Background */}
+        <div className="absolute inset-0">
+          <DarkVeil
+            hueShift={240}
+            noiseIntensity={0}
+            scanlineIntensity={0}
+            speed={0.5}
+            scanlineFrequency={0}
+            warpAmount={0}
+          />
+        </div>
 
-          {/* Mobile Menu */}
-          <AnimatePresence>
-            {mobileMenuOpen && (
-              <motion.div
-                initial={{ height: 0, opacity: 0 }}
-                animate={{ height: "auto", opacity: 1 }}
-                exit={{ height: 0, opacity: 0 }}
-                transition={{ duration: 0.2 }}
-                className="md:hidden border-t border-border overflow-hidden bg-background/95 backdrop-blur-xl"
-              >
-                <nav className="flex flex-col px-4 py-4 gap-3">
-                  {["How It Works", "Countries", "FAQ", "SmartWills"].map((label) => (
-                    <Link
-                      key={label}
-                      href={`#${label.toLowerCase().replace(/ /g, "-")}`}
-                      onClick={() => setMobileMenuOpen(false)}
-                      className="text-sm font-medium py-2 hover:underline underline-offset-4 dark:text-white"
-                    >
-                      {label}
-                    </Link>
-                  ))}
-                  <div className="flex gap-3 pt-2">
-                    {isLoggedIn ? (
-                      <Link href="/chat" className="flex-1" onClick={() => setMobileMenuOpen(false)}>
-                        <button className={`w-full ${btnPrimarySm}`}>Chat with AI</button>
-                      </Link>
-                    ) : (
-                      <>
-                        <Link href="/login" className="flex-1" onClick={() => setMobileMenuOpen(false)}>
-                          <button className={`w-full ${btnOutlineSm}`}>Sign In</button>
-                        </Link>
-                        <Link href="/signup" className="flex-1" onClick={() => setMobileMenuOpen(false)}>
-                          <button className={`w-full ${btnPrimarySm}`}>Get Started</button>
-                        </Link>
-                      </>
-                    )}
-                  </div>
-                </nav>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </header>
-
-        {/* ═══════════════ Hero ═══════════════ */}
-        <section className="flex-1 flex items-center justify-center py-16 sm:py-20 md:py-28 px-4 sm:px-6">
-          <motion.div
-            initial={{ opacity: 0, y: 40 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2, duration: 0.8, ease: "easeInOut" }}
-            className="container mx-auto max-w-4xl text-center"
-          >
+        {/* Content */}
+        <div className="relative z-10 container mx-auto px-4 sm:px-6 pt-24 pb-16 sm:pb-20">
+          <div className="max-w-4xl mx-auto text-center">
             {/* Badge */}
-            <div className="inline-flex items-center gap-2 border border-border rounded-full px-4 py-1.5 mb-6 text-xs sm:text-sm font-medium text-muted-foreground dark:text-neutral-300 bg-background/60 backdrop-blur-sm">
-              <ShieldCheck className="h-4 w-4" />
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              className="inline-flex items-center gap-2 border border-white/10 rounded-full px-4 py-1.5 mb-8 text-xs sm:text-sm font-medium text-white/70 bg-white/5 backdrop-blur-sm"
+            >
+              <ShieldCheck className="h-4 w-4 text-white/70" />
               Trusted by thousands across Asia-Pacific
-            </div>
+            </motion.div>
 
-            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-bold tracking-tight mb-5 sm:mb-6 dark:text-white leading-[1.1]">
-              Plan Your Will with{" "}
-              <span className="underline decoration-2 underline-offset-4">
-                Smart AI Guidance
+            {/* Headline */}
+            <motion.h1
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.35 }}
+              className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight mb-6 text-white leading-[1.1]"
+            >
+              Create Your Legal Will
+              <br />
+              with AI —{" "}
+              <span className="text-white/80">
+                In Minutes
               </span>
-            </h1>
+            </motion.h1>
 
-            <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-muted-foreground mb-8 sm:mb-10 max-w-2xl mx-auto dark:text-neutral-200 leading-relaxed">
-              AI-driven guidance tailored to your country&apos;s legal framework
-              — get clarity and confidence in planning your estate.
-            </p>
+            {/* Subtitle */}
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.5 }}
+              className="text-base sm:text-lg md:text-xl text-white/60 mb-10 max-w-2xl mx-auto leading-relaxed"
+            >
+              AI SmartWills uses advanced AI to generate legally-compliant wills
+              tailored to your country&apos;s laws. No lawyers needed.
+            </motion.p>
 
-            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
+            {/* CTAs */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.65 }}
+              className="flex flex-col sm:flex-row gap-4 justify-center"
+            >
               <Link href={isLoggedIn ? "/chat" : "/signup"}>
-                <button className={`w-full sm:w-auto ${btnPrimary} group`}>
-                  Begin Your Will Plan Today
-                  <ArrowRight className="inline ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
-                </button>
-              </Link>
-              <Link href="#how-it-works">
-                <button className={`w-full sm:w-auto ${btnOutline}`}>
-                  See How It Works
-                </button>
-              </Link>
-            </div>
-
-            {/* Trust micro-stats */}
-            <div className="mt-12 flex flex-wrap justify-center gap-8 sm:gap-12 text-center">
-              {[
-                { value: "12", label: "Countries" },
-                { value: "24/7", label: "AI Available" },
-                { value: "Free", label: "To Use" },
-              ].map((s) => (
-                <div key={s.label}>
-                  <p className="text-2xl sm:text-3xl font-bold dark:text-white">{s.value}</p>
-                  <p className="text-xs sm:text-sm text-muted-foreground dark:text-neutral-300">
-                    {s.label}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </motion.div>
-        </section>
-
-        {/* ═══════════════ Value Propositions ═══════════════ */}
-        <section
-          id="about"
-          className="py-16 sm:py-20 md:py-28 px-4 sm:px-6 border-t border-border bg-background/80 backdrop-blur-sm"
-        >
-          <motion.div {...sectionFade} className="container mx-auto max-w-5xl">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-4 dark:text-white">
-              Why Choose AI SmartWills?
-            </h2>
-            <p className="text-center text-sm sm:text-base text-muted-foreground mb-12 max-w-xl mx-auto dark:text-neutral-200">
-              We take the confusion out of will planning so you can focus on
-              what matters most — your family.
-            </p>
-
-            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {VALUE_PROPS.map((v) => (
-                <div
-                  key={v.title}
-                  className="p-6 border border-border rounded-2xl bg-background/60 hover:bg-accent/60 transition-colors text-center"
-                >
-                  <div className="inline-flex items-center justify-center h-12 w-12 rounded-full bg-black dark:bg-white text-white dark:text-black mb-4">
-                    <v.icon className="h-5 w-5" />
-                  </div>
-                  <h3 className="font-semibold text-base sm:text-lg mb-2 dark:text-white">
-                    {v.title}
-                  </h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed dark:text-neutral-300">
-                    {v.description}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </motion.div>
-        </section>
-
-        {/* ═══════════════ How It Works ═══════════════ */}
-        <section
-          id="how-it-works"
-          className="py-16 sm:py-20 md:py-28 px-4 sm:px-6 border-t border-border bg-secondary/30 backdrop-blur-sm"
-        >
-          <motion.div {...sectionFade} className="container mx-auto max-w-5xl">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-4 dark:text-white">
-              How It Works
-            </h2>
-            <p className="text-center text-sm sm:text-base text-muted-foreground mb-12 max-w-xl mx-auto dark:text-neutral-200">
-              Three simple steps to clarity and confidence in your will planning.
-            </p>
-
-            <div className="grid md:grid-cols-3 gap-8">
-              {HOW_IT_WORKS.map((h) => (
-                <div
-                  key={h.step}
-                  className="relative p-6 border border-border rounded-2xl bg-background/60 text-center"
-                >
-                  <span className="absolute -top-4 left-1/2 -translate-x-1/2 text-xs font-bold bg-black dark:bg-white text-white dark:text-black rounded-full px-3 py-1">
-                    STEP {h.step}
-                  </span>
-                  <div className="inline-flex items-center justify-center h-12 w-12 rounded-full border-2 border-border mb-4 mt-2">
-                    <h.icon className="h-5 w-5 text-foreground" />
-                  </div>
-                  <h3 className="font-semibold text-lg mb-2 dark:text-white">{h.title}</h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed dark:text-neutral-300">
-                    {h.description}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </motion.div>
-        </section>
-
-        {/* ═══════════════ Social Proof ═══════════════ */}
-        <section className="py-16 sm:py-20 md:py-28 px-4 sm:px-6 border-t border-border bg-background/80 backdrop-blur-sm">
-          <motion.div {...sectionFade} className="container mx-auto max-w-5xl">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-4 dark:text-white">
-              What Our Users Say
-            </h2>
-            <p className="text-center text-sm sm:text-base text-muted-foreground mb-12 max-w-xl mx-auto dark:text-neutral-200">
-              Thousands of families across Asia-Pacific trust AI SmartWills to guide
-              them through estate planning.
-            </p>
-
-            <div className="grid md:grid-cols-3 gap-6">
-              {TESTIMONIALS.map((t) => (
-                <div
-                  key={t.name}
-                  className="p-6 border border-border rounded-2xl bg-background/60"
-                >
-                  <div className="flex gap-1 mb-3">
-                    {Array.from({ length: t.rating }).map((_, i) => (
-                      <Star
-                        key={i}
-                        className="h-4 w-4 fill-yellow-400 text-yellow-400"
-                      />
-                    ))}
-                  </div>
-                  <p className="text-sm leading-relaxed mb-4 dark:text-neutral-200">
-                    &ldquo;{t.text}&rdquo;
-                  </p>
-                  <div className="flex items-center gap-3">
-                    <Users className="h-8 w-8 text-muted-foreground" />
-                    <div>
-                      <p className="text-sm font-semibold dark:text-white">{t.name}</p>
-                      <p className="text-xs text-muted-foreground dark:text-neutral-400">
-                        {t.country}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </motion.div>
-        </section>
-
-        {/* ═══════════════ Countries ═══════════════ */}
-        <section
-          id="countries"
-          className="py-16 sm:py-20 md:py-28 px-4 sm:px-6 border-t border-border bg-secondary/30 backdrop-blur-sm"
-        >
-          <motion.div {...sectionFade} className="container mx-auto max-w-5xl">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-4 dark:text-white">
-              12 Countries Supported
-            </h2>
-            <p className="text-center text-sm sm:text-base text-muted-foreground mb-12 max-w-xl mx-auto dark:text-neutral-200">
-              Localized AI guidance for will planning across the Asia-Pacific region.
-            </p>
-
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
-              {COUNTRIES.map((c) => (
-                <div
-                  key={c.code}
-                  className="flex items-center gap-3 p-3 sm:p-4 border border-border rounded-xl hover:bg-accent transition-colors bg-background/50"
-                >
-                  <span className="text-2xl">{c.flag}</span>
-                  <div>
-                    <p className="text-sm sm:text-base font-semibold dark:text-white">
-                      {c.name}
-                    </p>
-                    <p className="text-xs text-muted-foreground dark:text-neutral-400">
-                      {c.code}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </motion.div>
-        </section>
-
-        {/* ═══════════════ FAQ ═══════════════ */}
-        <section
-          id="faq"
-          className="py-16 sm:py-20 md:py-28 px-4 sm:px-6 border-t border-border bg-background/80 backdrop-blur-sm"
-        >
-          <motion.div {...sectionFade} className="container mx-auto max-w-3xl">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-4 dark:text-white">
-              Frequently Asked Questions
-            </h2>
-            <p className="text-center text-sm sm:text-base text-muted-foreground mb-12 max-w-xl mx-auto dark:text-neutral-200">
-              Everything you need to know before getting started.
-            </p>
-
-            <div className="space-y-3">
-              {FAQ_ITEMS.map((f) => (
-                <FAQItem key={f.q} q={f.q} a={f.a} />
-              ))}
-            </div>
-          </motion.div>
-        </section>
-
-        {/* ═══════════════ SmartWills Ecosystem ═══════════════ */}
-        <section
-          id="smartwills"
-          className="py-16 sm:py-20 md:py-28 px-4 sm:px-6 border-t border-border bg-secondary/30 backdrop-blur-sm"
-        >
-          <motion.div {...sectionFade} className="container mx-auto max-w-5xl">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-center mb-4 dark:text-white">
-              The SmartWills Ecosystem
-            </h2>
-            <p className="text-center text-sm sm:text-base text-muted-foreground mb-12 max-w-xl mx-auto dark:text-neutral-200">
-              AI SmartWills is part of the SmartWills family — online will
-              writing services trusted across multiple countries.
-            </p>
-
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-              {ECOSYSTEM.map((site) => (
-                <a
-                  key={site.domain}
-                  href={`https://${site.domain}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="group block p-6 border border-border rounded-2xl hover:bg-accent transition-colors bg-background/50"
-                >
-                  <h3 className="text-lg sm:text-xl font-semibold mb-2 dark:text-white">
-                    {site.name}
-                  </h3>
-                  <p className="text-sm text-muted-foreground mb-3 dark:text-neutral-200">
-                    {site.description}
-                  </p>
-                  <span className="text-xs sm:text-sm underline underline-offset-4 dark:text-neutral-300 group-hover:text-foreground transition-colors">
-                    {site.domain}
-                  </span>
-                </a>
-              ))}
-            </div>
-          </motion.div>
-        </section>
-
-        {/* ═══════════════ Final CTA ═══════════════ */}
-        <section className="py-16 sm:py-20 md:py-28 px-4 sm:px-6 border-t border-border bg-black dark:bg-white text-white dark:text-black">
-          <div className="container mx-auto max-w-2xl text-center">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 sm:mb-6">
-              Start Planning Your Will Today
-            </h2>
-            <p className="text-base sm:text-lg md:text-xl mb-8 sm:mb-10 opacity-90 leading-relaxed">
-              Don&apos;t leave your family&apos;s future to chance. Get personalized,
-              AI-powered will planning guidance — free and available 24/7.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
-              <Link href={isLoggedIn ? "/chat" : "/signup"}>
-                <button className="w-full sm:w-auto bg-white dark:bg-black rounded-full text-black dark:text-white px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg font-medium hover:bg-white/80 dark:hover:bg-black/80 transition-colors group">
-                  Begin Your Will Plan
-                  <ArrowRight className="inline ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                <button className="w-full sm:w-auto bg-white text-black hover:bg-white/90 rounded-full px-8 py-4 text-lg font-medium transition-all duration-300 hover:scale-105 hover:shadow-xl flex items-center justify-center gap-2">
+                  Start Free Now
+                  <ArrowRight className="h-5 w-5" />
                 </button>
               </Link>
               <a
-                href="https://wa.me/60123456789"
-                target="_blank"
-                rel="noopener noreferrer"
+                href="#how-it-works"
+                onClick={(e) => {
+                  e.preventDefault();
+                  document.getElementById("how-it-works")?.scrollIntoView({ behavior: "smooth" });
+                }}
               >
-                <button className="w-full sm:w-auto bg-transparent border border-white dark:border-black rounded-full text-white dark:text-black px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg font-medium hover:bg-white/10 dark:hover:bg-black/10 transition-colors">
-                  Talk to an Expert
+                <button className="w-full sm:w-auto border border-white/20 hover:border-white/40 text-white rounded-full px-8 py-4 text-lg font-medium transition-all duration-300 hover:bg-white/5 flex items-center justify-center gap-2">
+                  See How It Works
                 </button>
               </a>
-            </div>
-          </div>
-        </section>
+            </motion.div>
 
-        {/* ═══════════════ Footer ═══════════════ */}
-        <footer className="border-t border-border py-12 sm:py-16 px-4 sm:px-6 bg-background/80 backdrop-blur-sm">
-          <div className="container mx-auto max-w-5xl">
-            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-10">
-              {/* Brand */}
-              <div className="sm:col-span-2 lg:col-span-1">
-                <div className="flex items-center gap-2 mb-3">
-                  <Image
-                    src="/logo.png"
-                    alt="SmartWills"
-                    width={28}
-                    height={28}
-                    className="h-7 w-7 object-contain"
-                  />
-                  <span className="font-bold text-lg dark:text-white">AI SmartWills</span>
+            {/* Trust Metrics */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.8 }}
+              className="mt-16 flex flex-wrap justify-center gap-12 sm:gap-16"
+            >
+              {TRUST_METRICS.map((metric) => (
+                <TrustMetric key={metric.label} metric={metric} />
+              ))}
+            </motion.div>
+          </div>
+        </div>
+
+        {/* Bottom fade — always dark since hero uses DarkVeil */}
+        <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-black to-transparent" />
+      </section>
+
+      {/* ═══════════════ Features — Bento Grid ═══════════════ */}
+      <section id="features" className="py-20 sm:py-28 px-4 sm:px-6">
+        <motion.div {...sectionFade} className="container mx-auto max-w-6xl">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight mb-4">
+              Why Choose AI SmartWills?
+            </h2>
+            <p className="text-base sm:text-lg text-muted-foreground max-w-xl mx-auto">
+              We take the confusion out of will planning so you can focus on
+              what matters most — your family.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {FEATURES.map((feature, i) => (
+              <motion.div
+                key={feature.title}
+                initial={{ opacity: 0, y: 24 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.2 }}
+                transition={{ duration: 0.5, delay: i * 0.1 }}
+                className={`card-shine group relative p-8 rounded-2xl border border-border/50 dark:border-white/5 bg-neutral-50 dark:bg-neutral-950 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-black/5 hover:border-foreground/30 ${feature.span}`}
+              >
+                <div className="relative z-10">
+                  <div className="inline-flex items-center justify-center h-12 w-12 rounded-xl bg-foreground/10 mb-5">
+                    <feature.icon className="h-6 w-6 text-foreground" />
+                  </div>
+                  <h3 className="font-semibold text-lg mb-2">{feature.title}</h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    {feature.description}
+                  </p>
                 </div>
-                <p className="text-sm text-muted-foreground dark:text-neutral-300 leading-relaxed">
-                  Your intelligent will planning assistant — powered by AI,
-                  built on the trusted SmartWills ecosystem.
+              </motion.div>
+            ))}
+          </div>
+        </motion.div>
+      </section>
+
+      {/* ═══════════════ How It Works ═══════════════ */}
+      <section
+        id="how-it-works"
+        className="py-20 sm:py-28 px-4 sm:px-6 border-t border-border bg-secondary/30"
+      >
+        <motion.div {...sectionFade} className="container mx-auto max-w-5xl">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight mb-4">
+              How It Works
+            </h2>
+            <p className="text-base sm:text-lg text-muted-foreground max-w-xl mx-auto">
+              Three simple steps to clarity and confidence in your will planning.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8">
+            {HOW_IT_WORKS.map((h, i) => (
+              <motion.div
+                key={h.step}
+                initial={{ opacity: 0, y: 24 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: i * 0.15 }}
+                className="relative p-6 border border-border rounded-2xl bg-background/60 text-center"
+              >
+                <span className="absolute -top-4 left-1/2 -translate-x-1/2 text-xs font-bold bg-foreground text-background rounded-full px-3 py-1">
+                  STEP {h.step}
+                </span>
+                <div className="inline-flex items-center justify-center h-12 w-12 rounded-full border-2 border-border mb-4 mt-2">
+                  <h.icon className="h-5 w-5 text-foreground" />
+                </div>
+                <h3 className="font-semibold text-lg mb-2">{h.title}</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  {h.description}
                 </p>
-              </div>
+              </motion.div>
+            ))}
+          </div>
+        </motion.div>
+      </section>
 
-              {/* Quick Links */}
-              <div>
-                <h4 className="font-semibold text-sm mb-3 dark:text-white">Quick Links</h4>
-                <ul className="space-y-2 text-sm text-muted-foreground dark:text-neutral-300">
-                  <li>
-                    <Link href="#how-it-works" className="hover:underline underline-offset-4">
-                      How It Works
-                    </Link>
-                  </li>
-                  <li>
-                    <Link href="#countries" className="hover:underline underline-offset-4">
-                      Supported Countries
-                    </Link>
-                  </li>
-                  <li>
-                    <Link href="#faq" className="hover:underline underline-offset-4">
-                      FAQ
-                    </Link>
-                  </li>
-                  <li>
-                    <Link href="#smartwills" className="hover:underline underline-offset-4">
-                      SmartWills Ecosystem
-                    </Link>
-                  </li>
-                </ul>
-              </div>
+      {/* ═══════════════ Social Proof ═══════════════ */}
+      <section className="py-20 sm:py-28 px-4 sm:px-6 border-t border-border">
+        <motion.div {...sectionFade} className="container mx-auto max-w-5xl">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight mb-4">
+              What Our Users Say
+            </h2>
+            <p className="text-base sm:text-lg text-muted-foreground max-w-xl mx-auto">
+              Thousands of families across Asia-Pacific trust AI SmartWills to guide
+              them through estate planning.
+            </p>
+          </div>
 
-              {/* Legal */}
-              <div>
-                <h4 className="font-semibold text-sm mb-3 dark:text-white">Legal</h4>
-                <ul className="space-y-2 text-sm text-muted-foreground dark:text-neutral-300">
-                  <li>
-                    <Link href="/privacy" className="hover:underline underline-offset-4">
-                      Privacy Policy
-                    </Link>
-                  </li>
-                  <li>
-                    <Link href="/terms" className="hover:underline underline-offset-4">
-                      Terms of Service
-                    </Link>
-                  </li>
-                </ul>
-              </div>
-
-              {/* Connect */}
-              <div>
-                <h4 className="font-semibold text-sm mb-3 dark:text-white">Connect</h4>
-                <ul className="space-y-2 text-sm text-muted-foreground dark:text-neutral-300">
-                  <li>
-                    <a
-                      href="https://www.facebook.com/smartwillsmalaysia"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="hover:underline underline-offset-4"
-                    >
-                      Facebook
-                    </a>
-                  </li>
-                  <li>
-                    <a
-                      href="https://www.instagram.com/smartwills"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="hover:underline underline-offset-4"
-                    >
-                      Instagram
-                    </a>
-                  </li>
-                  <li>
-                    <a
-                      href="https://www.linkedin.com/company/smartwills"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="hover:underline underline-offset-4"
-                    >
-                      LinkedIn
-                    </a>
-                  </li>
-                  <li>
-                    <a
-                      href="https://www.youtube.com/@smartwills"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="hover:underline underline-offset-4"
-                    >
-                      YouTube
-                    </a>
-                  </li>
-                </ul>
-
-                {/* Contact */}
-                <div className="mt-4 flex items-center gap-2 text-sm text-muted-foreground dark:text-neutral-300">
-                  <Mail className="h-4 w-4" />
-                  <a
-                    href="mailto:support@mysmartwills.com"
-                    className="hover:underline underline-offset-4"
-                  >
-                    support@mysmartwills.com
-                  </a>
+          <div className="grid md:grid-cols-3 gap-6">
+            {TESTIMONIALS.map((t, i) => (
+              <motion.div
+                key={t.name}
+                initial={{ opacity: 0, y: 24 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: i * 0.1 }}
+                className="p-6 border border-border rounded-2xl bg-background/60"
+              >
+                <div className="flex gap-1 mb-3">
+                  {Array.from({ length: t.rating }).map((_, j) => (
+                    <Star key={j} className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                  ))}
                 </div>
+                <p className="text-sm leading-relaxed mb-4">
+                  &ldquo;{t.text}&rdquo;
+                </p>
+                <div className="flex items-center gap-3">
+                  <Users className="h-8 w-8 text-muted-foreground" />
+                  <div>
+                    <p className="text-sm font-semibold">{t.name}</p>
+                    <p className="text-xs text-muted-foreground">{t.country}</p>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </motion.div>
+      </section>
+
+      {/* ═══════════════ Countries ═══════════════ */}
+      <section
+        id="countries"
+        className="py-20 sm:py-28 px-4 sm:px-6 border-t border-border bg-secondary/30"
+      >
+        <motion.div {...sectionFade} className="container mx-auto max-w-5xl">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight mb-4">
+              12 Countries Supported
+            </h2>
+            <p className="text-base sm:text-lg text-muted-foreground max-w-xl mx-auto">
+              Localized AI guidance for will planning across the Asia-Pacific region.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
+            {COUNTRIES.map((c, i) => (
+              <motion.div
+                key={c.code}
+                initial={{ opacity: 0, scale: 0.95 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.3, delay: i * 0.03 }}
+                className="flex items-center gap-3 p-3 sm:p-4 border border-border rounded-xl hover:bg-accent transition-colors bg-background/50"
+              >
+                <span className="text-2xl">{c.flag}</span>
+                <div>
+                  <p className="text-sm sm:text-base font-semibold">{c.name}</p>
+                  <p className="text-xs text-muted-foreground">{c.code}</p>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </motion.div>
+      </section>
+
+      {/* ═══════════════ FAQ ═══════════════ */}
+      <section id="faq" className="py-20 sm:py-28 px-4 sm:px-6 border-t border-border">
+        <motion.div {...sectionFade} className="container mx-auto max-w-3xl">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight mb-4">
+              Frequently Asked Questions
+            </h2>
+            <p className="text-base sm:text-lg text-muted-foreground max-w-xl mx-auto">
+              Everything you need to know before getting started.
+            </p>
+          </div>
+
+          <div className="space-y-3">
+            {FAQ_ITEMS.map((f) => (
+              <FAQItem key={f.q} q={f.q} a={f.a} />
+            ))}
+          </div>
+        </motion.div>
+      </section>
+
+      {/* ═══════════════ SmartWills Ecosystem ═══════════════ */}
+      <section
+        id="smartwills"
+        className="py-20 sm:py-28 px-4 sm:px-6 border-t border-border bg-secondary/30"
+      >
+        <motion.div {...sectionFade} className="container mx-auto max-w-5xl">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight mb-4">
+              The SmartWills Ecosystem
+            </h2>
+            <p className="text-base sm:text-lg text-muted-foreground max-w-xl mx-auto">
+              AI SmartWills is part of the SmartWills family — online will
+              writing services trusted across multiple countries.
+            </p>
+          </div>
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+            {ECOSYSTEM.map((site, i) => (
+              <motion.a
+                key={site.domain}
+                href={`https://${site.domain}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                initial={{ opacity: 0, y: 16 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.4, delay: i * 0.08 }}
+                className="group block p-6 border border-border rounded-2xl hover:bg-accent transition-colors bg-background/50"
+              >
+                <h3 className="text-lg sm:text-xl font-semibold mb-2">
+                  {site.name}
+                </h3>
+                <p className="text-sm text-muted-foreground mb-3">
+                  {site.description}
+                </p>
+                <span className="text-xs sm:text-sm underline underline-offset-4 text-muted-foreground group-hover:text-foreground transition-colors">
+                  {site.domain}
+                </span>
+              </motion.a>
+            ))}
+          </div>
+        </motion.div>
+      </section>
+
+      {/* ═══════════════ Footer ═══════════════ */}
+      <footer className="border-t border-border py-12 sm:py-16 px-4 sm:px-6">
+        <div className="container mx-auto max-w-5xl">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-10">
+            {/* Brand */}
+            <div className="sm:col-span-2 lg:col-span-1">
+              <div className="flex items-center gap-2 mb-3">
+                <Image
+                  src="/logo.png"
+                  alt="AI SmartWills"
+                  width={28}
+                  height={28}
+                  className="h-7 w-7 object-contain"
+                />
+                <span className="font-bold text-lg">AI SmartWills</span>
               </div>
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                Your intelligent will planning assistant — powered by AI,
+                built on the trusted SmartWills ecosystem.
+              </p>
             </div>
 
-            {/* Bottom bar */}
-            <div className="pt-8 border-t border-border flex flex-col sm:flex-row justify-between items-center gap-4 text-sm text-muted-foreground dark:text-neutral-300">
-              <p>&copy; 2026 AI SmartWills. Part of the SmartWills ecosystem.</p>
-              <p className="text-xs">PDPA &amp; GDPR Compliant</p>
+            {/* Quick Links */}
+            <div>
+              <h4 className="font-semibold text-sm mb-3">Quick Links</h4>
+              <ul className="space-y-2 text-sm text-muted-foreground">
+                <li>
+                  <Link href="#how-it-works" className="hover:text-foreground transition-colors">
+                    How It Works
+                  </Link>
+                </li>
+                <li>
+                  <Link href="#countries" className="hover:text-foreground transition-colors">
+                    Supported Countries
+                  </Link>
+                </li>
+                <li>
+                  <Link href="#faq" className="hover:text-foreground transition-colors">
+                    FAQ
+                  </Link>
+                </li>
+                <li>
+                  <Link href="#smartwills" className="hover:text-foreground transition-colors">
+                    SmartWills Ecosystem
+                  </Link>
+                </li>
+              </ul>
+            </div>
+
+            {/* Legal */}
+            <div>
+              <h4 className="font-semibold text-sm mb-3">Legal</h4>
+              <ul className="space-y-2 text-sm text-muted-foreground">
+                <li>
+                  <Link href="/privacy" className="hover:text-foreground transition-colors">
+                    Privacy Policy
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/terms" className="hover:text-foreground transition-colors">
+                    Terms of Service
+                  </Link>
+                </li>
+              </ul>
+            </div>
+
+            {/* Connect */}
+            <div>
+              <h4 className="font-semibold text-sm mb-3">Connect</h4>
+              <ul className="space-y-2 text-sm text-muted-foreground">
+                <li>
+                  <a href="https://www.facebook.com/smartwillsmalaysia" target="_blank" rel="noopener noreferrer" className="hover:text-foreground transition-colors">
+                    Facebook
+                  </a>
+                </li>
+                <li>
+                  <a href="https://www.instagram.com/smartwills" target="_blank" rel="noopener noreferrer" className="hover:text-foreground transition-colors">
+                    Instagram
+                  </a>
+                </li>
+                <li>
+                  <a href="https://www.linkedin.com/company/smartwills" target="_blank" rel="noopener noreferrer" className="hover:text-foreground transition-colors">
+                    LinkedIn
+                  </a>
+                </li>
+                <li>
+                  <a href="https://www.youtube.com/@smartwills" target="_blank" rel="noopener noreferrer" className="hover:text-foreground transition-colors">
+                    YouTube
+                  </a>
+                </li>
+              </ul>
+              <div className="mt-4 flex items-center gap-2 text-sm text-muted-foreground">
+                <Mail className="h-4 w-4" />
+                <a href="mailto:support@mysmartwills.com" className="hover:text-foreground transition-colors">
+                  support@mysmartwills.com
+                </a>
+              </div>
             </div>
           </div>
-        </footer>
-      </div>
+
+          {/* Bottom bar */}
+          <div className="pt-8 border-t border-border flex flex-col sm:flex-row justify-between items-center gap-4 text-sm text-muted-foreground">
+            <p>&copy; 2026 AI SmartWills. Part of the SmartWills ecosystem.</p>
+            <p className="text-xs">PDPA &amp; GDPR Compliant</p>
+          </div>
+        </div>
+      </footer>
     </main>
   );
 }

@@ -2,15 +2,25 @@ import { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { Breadcrumb, breadcrumbJsonLd } from "@/components/layout/breadcrumb";
 
 export const metadata: Metadata = {
   title: "Terms of Service - AI SmartWills",
-  description: "Terms of Service for AI SmartWills",
+  description: "Read the Terms of Service for AI SmartWills. Understand your rights and obligations when using our AI will planning assistant.",
+  openGraph: {
+    title: "Terms of Service - AI SmartWills",
+    description: "Terms of Service for using AI SmartWills will planning assistant.",
+    url: "/terms",
+  },
 };
 
 export default function TermsPage() {
   return (
     <div className="min-h-screen flex flex-col">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd('Terms of Service', '/terms')) }}
+      />
       <header className="border-b border-border">
         <div className="container mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2 text-lg sm:text-2xl font-bold tracking-tight">
@@ -23,6 +33,7 @@ export default function TermsPage() {
 
       <main className="flex-1 px-4 sm:px-6 py-8 sm:py-12">
         <div className="container mx-auto max-w-3xl prose dark:prose-invert">
+          <Breadcrumb currentPage="Terms of Service" />
           <h1>Terms of Service</h1>
           <p className="text-muted-foreground">Last updated: February 7, 2026</p>
 

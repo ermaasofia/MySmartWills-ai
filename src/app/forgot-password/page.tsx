@@ -3,15 +3,25 @@ import Link from "next/link";
 import Image from "next/image";
 import { ForgotPasswordForm } from "@/components/auth/forgot-password-form";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { Breadcrumb, breadcrumbJsonLd } from "@/components/layout/breadcrumb";
 
 export const metadata: Metadata = {
   title: "Forgot Password - AI SmartWills",
-  description: "Reset your AI SmartWills account password",
+  description: "Reset your AI SmartWills account password. We'll send you a secure link to create a new one.",
+  openGraph: {
+    title: "Forgot Password - AI SmartWills",
+    description: "Reset your AI SmartWills account password.",
+    url: "/forgot-password",
+  },
 };
 
 export default function ForgotPasswordPage() {
   return (
     <div className="min-h-screen flex flex-col">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd('Forgot Password', '/forgot-password')) }}
+      />
       {/* Header */}
       <header className="border-b border-border">
         <div className="container mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
@@ -26,6 +36,7 @@ export default function ForgotPasswordPage() {
       {/* Main Content */}
       <main className="flex-1 flex items-center justify-center px-4 sm:px-6 py-8 sm:py-12">
         <div className="w-full max-w-md">
+          <Breadcrumb currentPage="Forgot Password" />
           <div className="text-center mb-6 sm:mb-8">
             <h1 className="text-2xl sm:text-3xl font-bold mb-2">Forgot Password</h1>
             <p className="text-muted-foreground">

@@ -3,15 +3,25 @@ import Link from "next/link";
 import Image from "next/image";
 import { ResetPasswordForm } from "@/components/auth/reset-password-form";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { Breadcrumb, breadcrumbJsonLd } from "@/components/layout/breadcrumb";
 
 export const metadata: Metadata = {
   title: "Reset Password - AI SmartWills",
-  description: "Set a new password for your AI SmartWills account",
+  description: "Set a new secure password for your AI SmartWills account.",
+  openGraph: {
+    title: "Reset Password - AI SmartWills",
+    description: "Set a new secure password for your AI SmartWills account.",
+    url: "/reset-password",
+  },
 };
 
 export default function ResetPasswordPage() {
   return (
     <div className="min-h-screen flex flex-col">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd('Reset Password', '/reset-password')) }}
+      />
       {/* Header */}
       <header className="border-b border-border">
         <div className="container mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
@@ -26,6 +36,7 @@ export default function ResetPasswordPage() {
       {/* Main Content */}
       <main className="flex-1 flex items-center justify-center px-4 sm:px-6 py-8 sm:py-12">
         <div className="w-full max-w-md">
+          <Breadcrumb currentPage="Reset Password" />
           <div className="text-center mb-6 sm:mb-8">
             <h1 className="text-2xl sm:text-3xl font-bold mb-2">Reset Password</h1>
             <p className="text-muted-foreground">

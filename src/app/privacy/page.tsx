@@ -2,15 +2,25 @@ import { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { Breadcrumb, breadcrumbJsonLd } from "@/components/layout/breadcrumb";
 
 export const metadata: Metadata = {
   title: "Privacy Policy - AI SmartWills",
-  description: "Privacy Policy for AI SmartWills - How we handle your data",
+  description: "Learn how AI SmartWills collects, uses, and protects your personal data. PDPA and GDPR compliant.",
+  openGraph: {
+    title: "Privacy Policy - AI SmartWills",
+    description: "Learn how AI SmartWills collects, uses, and protects your personal data.",
+    url: "/privacy",
+  },
 };
 
 export default function PrivacyPolicyPage() {
   return (
     <div className="min-h-screen flex flex-col">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd('Privacy Policy', '/privacy')) }}
+      />
       <header className="border-b border-border">
         <div className="container mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2 text-lg sm:text-2xl font-bold tracking-tight">
@@ -23,6 +33,7 @@ export default function PrivacyPolicyPage() {
 
       <main className="flex-1 px-4 sm:px-6 py-8 sm:py-12">
         <div className="container mx-auto max-w-3xl prose dark:prose-invert">
+          <Breadcrumb currentPage="Privacy Policy" />
           <h1>Privacy Policy</h1>
           <p className="text-muted-foreground">Last updated: February 7, 2026</p>
 

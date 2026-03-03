@@ -3,15 +3,25 @@ import Link from "next/link";
 import Image from "next/image";
 import { SignupForm } from "@/components/auth/signup-form";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { Breadcrumb, breadcrumbJsonLd } from "@/components/layout/breadcrumb";
 
 export const metadata: Metadata = {
   title: "Sign Up - AI SmartWills",
-  description: "Create your AI SmartWills account",
+  description: "Create your free AI SmartWills account and start planning your will with AI guidance.",
+  openGraph: {
+    title: "Sign Up - AI SmartWills",
+    description: "Create your free AI SmartWills account and start planning your will with AI guidance.",
+    url: "/signup",
+  },
 };
 
 export default function SignupPage() {
   return (
     <div className="min-h-screen flex flex-col">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd('Sign Up', '/signup')) }}
+      />
       {/* Header */}
       <header className="border-b border-border">
         <div className="container mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
@@ -26,6 +36,7 @@ export default function SignupPage() {
       {/* Main Content */}
       <main className="flex-1 flex items-center justify-center px-4 sm:px-6 py-8 sm:py-12">
         <div className="w-full max-w-md">
+          <Breadcrumb currentPage="Sign Up" />
           <div className="text-center mb-6 sm:mb-8">
             <h1 className="text-2xl sm:text-3xl font-bold mb-2">Create Account</h1>
             <p className="text-muted-foreground">
