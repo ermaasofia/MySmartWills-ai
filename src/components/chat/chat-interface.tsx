@@ -8,6 +8,7 @@ import { EditableTitle } from '@/components/chat/editable-title';
 import { PromptBox } from '@/components/ui/chatgpt-prompt-input';
 import { COUNTRIES } from '@/lib/constants';
 import { Menu, RotateCcw } from 'lucide-react';
+import { MarkdownRenderer } from '@/components/chat/markdown-renderer';
 import { Country } from '@/types';
 import { SessionSummary } from '@/hooks/use-chat-sessions';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -57,7 +58,7 @@ function ChatMessage({ message, isLatest }: { message: Message; isLatest: boolea
         className="flex gap-4 justify-end"
       >
         <motion.div
-          className="max-w-[85%] rounded-2xl px-5 py-3 shadow-sm bg-primary text-primary-foreground"
+          className="max-w-[75%] rounded-2xl px-4 py-2.5 shadow-sm bg-primary text-primary-foreground"
           whileHover={{ scale: 1.01 }}
           transition={{ duration: 0.2 }}
         >
@@ -72,12 +73,12 @@ function ChatMessage({ message, isLatest }: { message: Message; isLatest: boolea
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, ease: 'easeOut' }}
-      className="flex gap-4 justify-start"
+      className="flex gap-3 justify-start items-start"
     >
-      <div className="max-w-[85%] px-1 py-1">
-        <p className="whitespace-pre-wrap break-words text-sm leading-relaxed text-foreground">
-          {message.content}
-        </p>
+      <div className="max-w-[85%] min-w-0">
+        <div className="text-sm text-foreground">
+          <MarkdownRenderer content={message.content} />
+        </div>
       </div>
     </motion.div>
   );
