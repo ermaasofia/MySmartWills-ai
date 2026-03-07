@@ -160,6 +160,75 @@ CREATE TRIGGER update_documents_updated_at
   BEFORE UPDATE ON public.documents
   FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
 
+-- ─── AI Memory System ────────────────────────────────────────────────────────
+
+-- User memories table (cross-session persistent facts)
+CREATE TABLE IF NOT EXISTS public.user_memories (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL UNIQUE,
+  facts JSONB NOT NULL DEFAULT '{}',
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_user_memories_user_id ON public.user_memories(user_id);
+
+ALTER TABLE public.user_memories ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can view their own memories"
+  ON public.user_memories FOR SELECT
+  USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can insert their own memories"
+  ON public.user_memories FOR INSERT
+  WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can update their own memories"
+  ON public.user_memories FOR UPDATE
+  USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can delete their own memories"
+  ON public.user_memories FOR DELETE
+  USING (auth.uid() = user_id);
+
+CREATE TRIGGER update_user_memories_updated_at
+  BEFORE UPDATE ON public.user_memories
+  FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
+
+-- Conversation summaries table (per-session rolling summary)
+CREATE TABLE IF NOT EXISTS public.conversation_summaries (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  session_id UUID REFERENCES public.chat_sessions(id) ON DELETE CASCADE NOT NULL UNIQUE,
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
+  summary TEXT NOT NULL DEFAULT '',
+  message_count INT NOT NULL DEFAULT 0,
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_conversation_summaries_session_id ON public.conversation_summaries(session_id);
+CREATE INDEX IF NOT EXISTS idx_conversation_summaries_user_id ON public.conversation_summaries(user_id);
+
+ALTER TABLE public.conversation_summaries ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can view their own summaries"
+  ON public.conversation_summaries FOR SELECT
+  USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can insert their own summaries"
+  ON public.conversation_summaries FOR INSERT
+  WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can update their own summaries"
+  ON public.conversation_summaries FOR UPDATE
+  USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can delete their own summaries"
+  ON public.conversation_summaries FOR DELETE
+  USING (auth.uid() = user_id);
+
+CREATE TRIGGER update_conversation_summaries_updated_at
+  BEFORE UPDATE ON public.conversation_summaries
+  FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
+
 -- Function for semantic search (RAG)
 CREATE OR REPLACE FUNCTION match_documents(
   query_embedding VECTOR(384),

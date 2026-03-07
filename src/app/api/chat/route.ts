@@ -4,6 +4,12 @@ import { createClient } from '@/lib/supabase/server';
 import { rateLimitAsync } from '@/lib/rate-limit';
 import { createChatSession, saveChatMessage, updateSessionTitle } from '@/lib/chat';
 import { COUNTRIES } from '@/lib/constants';
+import {
+  getUserMemory,
+  getSessionSummary,
+  extractAndSaveMemory,
+  formatMemoryForPrompt,
+} from '@/lib/memory';
 
 // Initialize Groq
 const groq = createGroq({
@@ -112,9 +118,9 @@ const COUNTRY_CONTEXTS: Record<string, string> = {
 - Foreign ownership restrictions on land`,
 };
 
-function getSystemPrompt(countryCode: string, countryName: string): string {
+function getSystemPrompt(countryCode: string, countryName: string, memoryContext: string = ''): string {
   const countryContext = COUNTRY_CONTEXTS[countryCode] || '';
-  
+
   return `You are AI SmartWills, an intelligent legal will planning assistant specializing in ${countryName}. Your role is to help users understand the will planning process in their jurisdiction.
 
 ═══════════════════════════════════════════
@@ -165,7 +171,7 @@ WILL PLANNING GUIDELINES
 16. If asked about topics outside will planning, politely redirect to your area of expertise.
 17. Never invent legal requirements, statistics, institutional details, or specific procedures. If you are unsure about any factual claim, explicitly state your uncertainty.
 18. Consider religious and cultural factors that may apply (e.g., Islamic law/Faraid, Chinese customs).
-
+${memoryContext}
 ═══════════════════════════════════════════
 ACCURACY & ANTI-HALLUCINATION RULES
 ═══════════════════════════════════════════
@@ -312,10 +318,23 @@ export async function POST(req: Request) {
 
     const model = groq('openai/gpt-oss-120b');
 
+    // ── AI Memory: fetch user memory and session summary ──────────────────────
+    const [memory, summaryData] = await Promise.all([
+      getUserMemory(supabase, user.id),
+      getSessionSummary(supabase, sessionId),
+    ]);
+
+    const memoryContext = formatMemoryForPrompt(memory, summaryData?.summary ?? null);
+
+    // If we have a conversation summary, reduce message window (summary covers earlier context)
+    const messagesForAI = summaryData?.summary
+      ? sanitizedMessages.slice(-6)
+      : sanitizedMessages;
+
     const result = streamText({
       model,
-      system: getSystemPrompt(safeCountryCode, safeCountryName),
-      messages: sanitizedMessages,
+      system: getSystemPrompt(safeCountryCode, safeCountryName, memoryContext),
+      messages: messagesForAI,
       maxOutputTokens: 3072,
       onFinish: async ({ text }) => {
         // Persist the full assistant response after the stream completes
@@ -324,6 +343,13 @@ export async function POST(req: Request) {
         } catch (err) {
           console.error('Failed to save assistant message:', err);
         }
+
+        // Fire-and-forget: extract memory from this exchange
+        extractAndSaveMemory(
+          model, supabase, user.id, sessionId,
+          lastUserMessage.content, text,
+          memory, summaryData,
+        ).catch(err => console.error('Memory extraction failed:', err));
       },
     });
 
