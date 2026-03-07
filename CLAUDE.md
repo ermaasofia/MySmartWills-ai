@@ -24,7 +24,7 @@ No test framework is configured.
 - **Styling:** Tailwind CSS 4 + shadcn/ui (New York style) + Framer Motion
 - **Auth:** Supabase Auth (email/password + Google OAuth), middleware-protected routes
 - **Database:** Supabase PostgreSQL with Row Level Security, pgvector for embeddings
-- **AI:** Vercel AI SDK v6 with Groq (primary, gpt-oss-120b model) and Google Generative AI (fallback), streaming responses
+- **AI:** Vercel AI SDK v6 with Groq (primary, gpt-oss-120b model) , streaming responses
 - **Rate Limiting:** Upstash Redis (distributed) with in-memory fallback
 - **CAPTCHA:** Cloudflare Turnstile on signup
 - **Package Manager:** pnpm
