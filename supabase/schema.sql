@@ -46,10 +46,21 @@ CREATE TABLE IF NOT EXISTS public.documents (
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- AI Prompts/Instructions table (admin-configurable AI behavior)
+CREATE TABLE IF NOT EXISTS public.ai_prompts (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  prompt_type TEXT NOT NULL UNIQUE CHECK (prompt_type IN ('character', 'sop', 'company_info', 'services', 'other')),
+  content TEXT NOT NULL DEFAULT '',
+  is_active BOOLEAN DEFAULT true,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
 -- Create indexes for better query performance
 CREATE INDEX IF NOT EXISTS idx_chat_sessions_user_id ON public.chat_sessions(user_id);
 CREATE INDEX IF NOT EXISTS idx_chat_messages_session_id ON public.chat_messages(session_id);
 CREATE INDEX IF NOT EXISTS idx_documents_country ON public.documents(country_code);
+CREATE INDEX IF NOT EXISTS idx_ai_prompts_type ON public.ai_prompts(prompt_type);
 
 -- Create index for vector similarity search
 CREATE INDEX IF NOT EXISTS idx_documents_embedding ON public.documents 
@@ -61,6 +72,7 @@ ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.chat_sessions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.chat_messages ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.documents ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.ai_prompts ENABLE ROW LEVEL SECURITY;
 
 -- Profiles policies
 CREATE POLICY "Users can view their own profile"
@@ -118,6 +130,16 @@ CREATE POLICY "Anyone can read documents"
   ON public.documents FOR SELECT
   USING (true);
 
+-- AI Prompts policies (authenticated users can read, only service role can write)
+CREATE POLICY "Authenticated users can read AI prompts"
+  ON public.ai_prompts FOR SELECT
+  TO authenticated
+  USING (is_active = true);
+
+CREATE POLICY "Service role can manage AI prompts"
+  ON public.ai_prompts FOR ALL
+  USING (auth.jwt()->>'role' = 'service_role');
+
 -- Function to automatically create profile on signup
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$
@@ -158,6 +180,10 @@ CREATE TRIGGER update_chat_sessions_updated_at
 
 CREATE TRIGGER update_documents_updated_at
   BEFORE UPDATE ON public.documents
+  FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
+
+CREATE TRIGGER update_ai_prompts_updated_at
+  BEFORE UPDATE ON public.ai_prompts
   FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
 
 -- ─── AI Memory System ────────────────────────────────────────────────────────

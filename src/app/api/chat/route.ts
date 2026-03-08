@@ -118,11 +118,93 @@ const COUNTRY_CONTEXTS: Record<string, string> = {
 - Foreign ownership restrictions on land`,
 };
 
-function getSystemPrompt(countryCode: string, countryName: string, memoryContext: string = ''): string {
+// Fetch custom AI prompts from database
+async function getCustomPrompts(supabase: Awaited<ReturnType<typeof createClient>>): Promise<{
+  character: string;
+  sop: string;
+  company_info: string;
+  services: string;
+  other: string;
+}> {
+  try {
+    const { data: prompts, error } = await supabase
+      .from('ai_prompts')
+      .select('prompt_type, content, is_active')
+      .eq('is_active', true);
+
+    if (error || !prompts) {
+      return {
+        character: '',
+        sop: '',
+        company_info: '',
+        services: '',
+        other: '',
+      };
+    }
+
+    const result = prompts.reduce((acc: Record<string, string>, prompt: { prompt_type: string; content: string; is_active: boolean }) => {
+      acc[prompt.prompt_type] = prompt.content || '';
+      return acc;
+    }, {
+      character: '',
+      sop: '',
+      company_info: '',
+      services: '',
+      other: '',
+    } as Record<string, string>);
+
+    return result as {
+      character: string;
+      sop: string;
+      company_info: string;
+      services: string;
+      other: string;
+    };
+  } catch (error) {
+    console.error('Error fetching custom prompts:', error);
+    return {
+      character: '',
+      sop: '',
+      company_info: '',
+      services: '',
+      other: '',
+    };
+  }
+}
+
+function getSystemPrompt(
+  countryCode: string, 
+  countryName: string, 
+  memoryContext: string = '',
+  customPrompts: { character: string; sop: string; company_info: string; services: string; other: string }
+): string {
   const countryContext = COUNTRY_CONTEXTS[countryCode] || '';
 
-  return `You are AI SmartWills, an intelligent legal will planning assistant specializing in ${countryName}. Your role is to help users understand the will planning process in their jurisdiction.
+  // Build custom prompts section if any exist
+  let customPromptsSection = '';
+  
+  if (customPrompts.character) {
+    customPromptsSection += `\n═══════════════════════════════════════════\nAI CHARACTER & PERSONALITY\n═══════════════════════════════════════════\n${customPrompts.character}\n`;
+  }
+  
+  if (customPrompts.sop) {
+    customPromptsSection += `\n═══════════════════════════════════════════\nSTANDARD OPERATING PROCEDURES\n═══════════════════════════════════════════\n${customPrompts.sop}\n`;
+  }
+  
+  if (customPrompts.company_info) {
+    customPromptsSection += `\n═══════════════════════════════════════════\nCOMPANY INFORMATION\n═══════════════════════════════════════════\n${customPrompts.company_info}\n`;
+  }
+  
+  if (customPrompts.services) {
+    customPromptsSection += `\n═══════════════════════════════════════════\nSERVICES & PRODUCTS\n═══════════════════════════════════════════\n${customPrompts.services}\n`;
+  }
+  
+  if (customPrompts.other) {
+    customPromptsSection += `\n═══════════════════════════════════════════\nADDITIONAL INSTRUCTIONS\n═══════════════════════════════════════════\n${customPrompts.other}\n`;
+  }
 
+  return `You are AI SmartWills, an intelligent legal will planning assistant specializing in ${countryName}. Your role is to help users understand the will planning process in their jurisdiction.
+${customPromptsSection}
 ═══════════════════════════════════════════
 IDENTITY — NON-NEGOTIABLE, PERMANENT RULES
 ═══════════════════════════════════════════
@@ -221,7 +303,7 @@ export async function POST(req: Request) {
     }
 
     // Rate limiting by authenticated user ID (distributed via Upstash Redis)
-    const { success, remaining } = await rateLimitAsync(user.id, { maxRequests: 20, windowMs: 60_000 });
+    const { success } = await rateLimitAsync(user.id, { maxRequests: 20, windowMs: 60_000 });
 
     if (!success) {
       return new Response(
@@ -318,10 +400,11 @@ export async function POST(req: Request) {
 
     const model = groq('openai/gpt-oss-120b');
 
-    // ── AI Memory: fetch user memory and session summary ──────────────────────
-    const [memory, summaryData] = await Promise.all([
+    // ── AI Memory: fetch user memory, session summary, and custom prompts ─────
+    const [memory, summaryData, customPrompts] = await Promise.all([
       getUserMemory(supabase, user.id),
       getSessionSummary(supabase, sessionId),
+      getCustomPrompts(supabase),
     ]);
 
     const memoryContext = formatMemoryForPrompt(memory, summaryData?.summary ?? null);
@@ -333,7 +416,7 @@ export async function POST(req: Request) {
 
     const result = streamText({
       model,
-      system: getSystemPrompt(safeCountryCode, safeCountryName, memoryContext),
+      system: getSystemPrompt(safeCountryCode, safeCountryName, memoryContext, customPrompts),
       messages: messagesForAI,
       maxOutputTokens: 3072,
       onFinish: async ({ text }) => {
