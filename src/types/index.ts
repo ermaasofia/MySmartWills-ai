@@ -28,5 +28,6 @@ export type UserProfile = {
   email: string;
   fullName: string | null;
   preferredCountry: string | null;
+  role: 'user' | 'admin';
   createdAt: Date;
 };

@@ -287,3 +287,41 @@ BEGIN
   LIMIT match_count;
 END;
 $$;
+
+-- ─── Admin Role System ─────────────────────────────────────────────────────
+
+-- Add role column to profiles
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS role TEXT NOT NULL DEFAULT 'user'
+  CHECK (role IN ('user', 'admin'));
+
+-- Helper function: check if current user is admin (used in RLS policies)
+CREATE OR REPLACE FUNCTION public.is_admin()
+RETURNS BOOLEAN AS $$
+  SELECT EXISTS (
+    SELECT 1 FROM public.profiles
+    WHERE id = auth.uid() AND role = 'admin'
+  );
+$$ LANGUAGE sql SECURITY DEFINER STABLE;
+
+-- Replace old ai_prompts policies with admin-aware ones
+DROP POLICY IF EXISTS "Authenticated users can read AI prompts" ON public.ai_prompts;
+DROP POLICY IF EXISTS "Service role can manage AI prompts" ON public.ai_prompts;
+
+CREATE POLICY "Authenticated users can read active AI prompts"
+  ON public.ai_prompts FOR SELECT
+  TO authenticated
+  USING (is_active = true);
+
+CREATE POLICY "Admins can manage AI prompts"
+  ON public.ai_prompts FOR ALL
+  TO authenticated
+  USING (public.is_admin());
+
+-- Allow admins to view all profiles (for future user management)
+CREATE POLICY "Admins can view all profiles"
+  ON public.profiles FOR SELECT
+  TO authenticated
+  USING (public.is_admin());
+
+-- Bootstrap: run this manually in Supabase SQL Editor to grant yourself admin
+-- UPDATE public.profiles SET role = 'admin' WHERE email = '<your-email>';

@@ -1,18 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { isAdmin } from '@/lib/admin';
 
 // GET: Fetch all AI prompts
 export async function GET() {
   try {
     const supabase = await createClient();
-    
-    // Check authentication
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-    
-    if (authError || !user) {
+
+    // Check admin authorization
+    const { isAdmin: adminStatus } = await isAdmin(supabase);
+
+    if (!adminStatus) {
       return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
+        { error: 'Forbidden' },
+        { status: 403 }
       );
     }
 
@@ -50,14 +51,14 @@ export async function GET() {
 export async function PUT(req: NextRequest) {
   try {
     const supabase = await createClient();
-    
-    // Check authentication
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-    
-    if (authError || !user) {
+
+    // Check admin authorization
+    const { isAdmin: adminStatus } = await isAdmin(supabase);
+
+    if (!adminStatus) {
       return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
+        { error: 'Forbidden' },
+        { status: 403 }
       );
     }
 
@@ -131,14 +132,14 @@ export async function PUT(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const supabase = await createClient();
-    
-    // Check authentication
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-    
-    if (authError || !user) {
+
+    // Check admin authorization
+    const { isAdmin: adminStatus } = await isAdmin(supabase);
+
+    if (!adminStatus) {
       return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
+        { error: 'Forbidden' },
+        { status: 403 }
       );
     }
 

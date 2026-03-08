@@ -15,9 +15,49 @@ interface PromptData {
   other: string;
 }
 
+type PromptType = keyof PromptData;
+
 interface SaveStatus {
   [key: string]: 'idle' | 'saving' | 'success' | 'error';
 }
+
+const PROMPT_CONFIGS: {
+  key: PromptType;
+  title: string;
+  description: string;
+  placeholder: string;
+}[] = [
+  {
+    key: 'character',
+    title: 'AI Character / Personality',
+    description: 'Define how the AI behaves and its personality. E.g: Friendly, professional, empathetic.',
+    placeholder: 'E.g: You are friendly and professional. You speak in a warm, empathetic tone...',
+  },
+  {
+    key: 'sop',
+    title: 'Standard Operating Procedures (SOP)',
+    description: 'Guidelines the AI follows when responding. E.g: Response format, step by step process.',
+    placeholder: 'E.g: Always greet users first. Provide clear steps. Ask clarifying questions when needed...',
+  },
+  {
+    key: 'company_info',
+    title: 'Company Information',
+    description: 'Company details the AI can reference when users ask.',
+    placeholder: 'E.g: SmartWills is a will planning platform in Malaysia. Founded in 2020...',
+  },
+  {
+    key: 'services',
+    title: 'Services / Products',
+    description: 'Services or products the company offers so the AI can inform users accurately.',
+    placeholder: 'E.g: 1. Will Writing Service - RM299, 2. Trust Setup - RM1,999...',
+  },
+  {
+    key: 'other',
+    title: 'Other Instructions',
+    description: 'Additional instructions or special cases not covered by other categories.',
+    placeholder: 'E.g: Special promotions, seasonal offers, important disclaimers...',
+  },
+];
 
 export function AIInstructionsForm() {
   const router = useRouter();
@@ -46,7 +86,7 @@ export function AIInstructionsForm() {
     try {
       const response = await fetch('/api/admin/ai-prompts');
       if (!response.ok) {
-        if (response.status === 401) {
+        if (response.status === 401 || response.status === 403) {
           router.push('/login');
           return;
         }
@@ -70,8 +110,8 @@ export function AIInstructionsForm() {
     }
   };
 
-  const handleSave = async (promptType: keyof PromptData) => {
-    setSaveStatus(prev => ({ ...prev, [promptType]: 'saving' }));
+  const handleSave = async (promptType: PromptType) => {
+    setSaveStatus((prev) => ({ ...prev, [promptType]: 'saving' }));
 
     try {
       const response = await fetch('/api/admin/ai-prompts', {
@@ -83,25 +123,36 @@ export function AIInstructionsForm() {
         }),
       });
 
+      if (response.status === 403) {
+        router.push('/chat');
+        return;
+      }
+
       if (!response.ok) {
         throw new Error('Failed to save prompt');
       }
 
-      setSaveStatus(prev => ({ ...prev, [promptType]: 'success' }));
+      setSaveStatus((prev) => ({ ...prev, [promptType]: 'success' }));
       setTimeout(() => {
-        setSaveStatus(prev => ({ ...prev, [promptType]: 'idle' }));
+        setSaveStatus((prev) => ({ ...prev, [promptType]: 'idle' }));
       }, 2000);
     } catch (error) {
       console.error('Error saving prompt:', error);
-      setSaveStatus(prev => ({ ...prev, [promptType]: 'error' }));
+      setSaveStatus((prev) => ({ ...prev, [promptType]: 'error' }));
       setTimeout(() => {
-        setSaveStatus(prev => ({ ...prev, [promptType]: 'idle' }));
+        setSaveStatus((prev) => ({ ...prev, [promptType]: 'idle' }));
       }, 3000);
     }
   };
 
-  const handleChange = (promptType: keyof PromptData, value: string) => {
-    setPrompts(prev => ({ ...prev, [promptType]: value }));
+  const handleChange = (promptType: PromptType, value: string) => {
+    setPrompts((prev) => ({ ...prev, [promptType]: value }));
+  };
+
+  const getButtonVariant = (status: string) => {
+    if (status === 'success') return 'outline' as const;
+    if (status === 'error') return 'destructive' as const;
+    return 'default' as const;
   };
 
   const getButtonText = (status: string) => {
@@ -109,9 +160,9 @@ export function AIInstructionsForm() {
       case 'saving':
         return 'Saving...';
       case 'success':
-        return '✓ Saved';
+        return 'Saved';
       case 'error':
-        return '✗ Error';
+        return 'Error — Retry';
       default:
         return 'Save';
     }
@@ -119,158 +170,60 @@ export function AIInstructionsForm() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <div className="text-muted-foreground">Loading...</div>
+      <div className="space-y-6">
+        {[1, 2, 3].map((i) => (
+          <Card key={i}>
+            <CardHeader>
+              <div className="h-5 w-48 bg-muted animate-pulse rounded" />
+              <div className="h-4 w-72 bg-muted animate-pulse rounded mt-2" />
+            </CardHeader>
+            <CardContent>
+              <div className="h-32 bg-muted animate-pulse rounded" />
+              <div className="h-9 w-20 bg-muted animate-pulse rounded mt-4" />
+            </CardContent>
+          </Card>
+        ))}
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      {/* Character Prompt */}
-      <Card>
-        <CardHeader>
-          <CardTitle>AI Character / Personality</CardTitle>
-          <CardDescription>
-            Define bagaimana AI akan behave dan personality dia. Contoh: Friendly, professional, empathetic, dll.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="character">Character Instructions</Label>
-            <Textarea
-              id="character"
-              value={prompts.character}
-              onChange={(e) => handleChange('character', e.target.value)}
-              placeholder="Contoh: You are friendly and professional. You speak in a warm, empathetic tone..."
-              className="min-h-32"
-            />
-          </div>
-          <Button
-            onClick={() => handleSave('character')}
-            disabled={saveStatus.character === 'saving'}
-            className="w-full sm:w-auto"
-          >
-            {getButtonText(saveStatus.character)}
-          </Button>
-        </CardContent>
-      </Card>
-
-      {/* SOP Prompt */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Standard Operating Procedures (SOP)</CardTitle>
-          <CardDescription>
-            Define SOP atau guidelines yang AI kena follow bila respond. Contoh: Format response, step by step process, dll.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="sop">SOP Instructions</Label>
-            <Textarea
-              id="sop"
-              value={prompts.sop}
-              onChange={(e) => handleChange('sop', e.target.value)}
-              placeholder="Contoh: Always greet users first. Provide clear steps. Ask clarifying questions when needed..."
-              className="min-h-32"
-            />
-          </div>
-          <Button
-            onClick={() => handleSave('sop')}
-            disabled={saveStatus.sop === 'saving'}
-            className="w-full sm:w-auto"
-          >
-            {getButtonText(saveStatus.sop)}
-          </Button>
-        </CardContent>
-      </Card>
-
-      {/* Company Info Prompt */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Company Information</CardTitle>
-          <CardDescription>
-            Maklumat tentang company supaya AI boleh refer dengan tepat bila user tanya.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="company_info">Company Information</Label>
-            <Textarea
-              id="company_info"
-              value={prompts.company_info}
-              onChange={(e) => handleChange('company_info', e.target.value)}
-              placeholder="Contoh: SmartWills adalah platform will planning di Malaysia. Ditubuhkan pada 2020..."
-              className="min-h-32"
-            />
-          </div>
-          <Button
-            onClick={() => handleSave('company_info')}
-            disabled={saveStatus.company_info === 'saving'}
-            className="w-full sm:w-auto"
-          >
-            {getButtonText(saveStatus.company_info)}
-          </Button>
-        </CardContent>
-      </Card>
-
-      {/* Services Prompt */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Services / Products</CardTitle>
-          <CardDescription>
-            List services atau products yang company offer supaya AI boleh inform users dengan betul.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="services">Services Information</Label>
-            <Textarea
-              id="services"
-              value={prompts.services}
-              onChange={(e) => handleChange('services', e.target.value)}
-              placeholder="Contoh: 1. Will Writing Service - RM299, 2. Trust Setup - RM1,999, 3. Estate Planning Consultation..."
-              className="min-h-32"
-            />
-          </div>
-          <Button
-            onClick={() => handleSave('services')}
-            disabled={saveStatus.services === 'saving'}
-            className="w-full sm:w-auto"
-          >
-            {getButtonText(saveStatus.services)}
-          </Button>
-        </CardContent>
-      </Card>
-
-      {/* Other Prompt */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Other Instructions</CardTitle>
-          <CardDescription>
-            Additional instructions atau special cases yang tak fit dalam categories lain.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="other">Other Instructions</Label>
-            <Textarea
-              id="other"
-              value={prompts.other}
-              onChange={(e) => handleChange('other', e.target.value)}
-              placeholder="Contoh: Special promotions, seasonal offers, important disclaimers..."
-              className="min-h-32"
-            />
-          </div>
-          <Button
-            onClick={() => handleSave('other')}
-            disabled={saveStatus.other === 'saving'}
-            className="w-full sm:w-auto"
-          >
-            {getButtonText(saveStatus.other)}
-          </Button>
-        </CardContent>
-      </Card>
+    <div className="space-y-4">
+      {PROMPT_CONFIGS.map((config) => (
+        <Card key={config.key}>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base">{config.title}</CardTitle>
+            <CardDescription className="text-xs">
+              {config.description}
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="space-y-1.5">
+              <Label htmlFor={config.key} className="sr-only">
+                {config.title}
+              </Label>
+              <Textarea
+                id={config.key}
+                value={prompts[config.key]}
+                onChange={(e) => handleChange(config.key, e.target.value)}
+                placeholder={config.placeholder}
+                className="min-h-32 text-sm"
+              />
+              <p className="text-[11px] text-muted-foreground text-right">
+                {prompts[config.key].length.toLocaleString()} characters
+              </p>
+            </div>
+            <Button
+              onClick={() => handleSave(config.key)}
+              disabled={saveStatus[config.key] === 'saving'}
+              variant={getButtonVariant(saveStatus[config.key])}
+              size="sm"
+            >
+              {getButtonText(saveStatus[config.key])}
+            </Button>
+          </CardContent>
+        </Card>
+      ))}
     </div>
   );
 }

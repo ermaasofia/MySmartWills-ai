@@ -40,7 +40,8 @@ export async function updateSession(request: NextRequest) {
   // Protected routes - redirect to login if not authenticated
   if (
     !user &&
-    request.nextUrl.pathname.startsWith('/chat')
+    (request.nextUrl.pathname.startsWith('/chat') ||
+     request.nextUrl.pathname.startsWith('/admin'))
   ) {
     const url = request.nextUrl.clone();
     url.pathname = '/login';
