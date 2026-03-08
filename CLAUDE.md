@@ -24,7 +24,7 @@ No test framework is configured.
 - **Styling:** Tailwind CSS 4 + shadcn/ui (New York style) + Framer Motion
 - **Auth:** Supabase Auth (email/password + Google OAuth), middleware-protected routes
 - **Database:** Supabase PostgreSQL with Row Level Security, pgvector for embeddings
-- **AI:** Vercel AI SDK v6 with Groq (primary, gpt-oss-120b model) , streaming responses
+- **AI:** Vercel AI SDK v6 with Groq (primary, gpt-oss-120b model), streaming responses
 - **Rate Limiting:** Upstash Redis (distributed) with in-memory fallback
 - **CAPTCHA:** Cloudflare Turnstile on signup
 - **Package Manager:** pnpm
@@ -37,18 +37,23 @@ No test framework is configured.
 ### App Router structure (`src/app/`)
 - `/` — Landing page
 - `/chat` — Protected chat interface (main feature)
+- `/admin` — Protected admin dashboard (admin role required)
+- `/admin/ai-instructions` — AI prompt configuration
 - `/login`, `/signup`, `/forgot-password`, `/reset-password` — Auth pages
 - `/api/chat/route.ts` — Streaming chat endpoint (auth + rate limit + Groq LLM)
 - `/api/chat/sessions/` — Session CRUD (GET/POST, DELETE by ID)
+- `/api/admin/ai-prompts/route.ts` — AI prompt management (admin only, GET/PUT/POST)
 - `/api/auth/oauth/route.ts` — Google OAuth URL generation (rate limited)
 - `/api/auth/verify-turnstile/` — CAPTCHA verification
-- `/auth/callback/route.ts` — OAuth callback handler
+- `/auth/callback/route.ts` — OAuth + password reset callback handler (PKCE code exchange)
 
 ### Key modules
 - `src/lib/supabase/client.ts` — Browser Supabase client
 - `src/lib/supabase/server.ts` — Server Supabase client (cookie-based SSR)
-- `src/lib/supabase/middleware.ts` — Auth session refresh middleware
+- `src/lib/supabase/middleware.ts` — Auth session refresh + route protection
+- `src/lib/admin.ts` — `isAdmin()` helper: checks `profiles.role` column, falls back to `ADMIN_EMAILS` env var
 - `src/lib/chat.ts` — Chat session & message database helpers
+- `src/lib/memory.ts` — AI memory system (cross-session fact extraction and retrieval)
 - `src/lib/rate-limit.ts` — Upstash + in-memory fallback rate limiter
 - `src/lib/constants.ts` — `COUNTRIES` array and `APP_NAME`
 - `src/types/index.ts` — Shared TypeScript interfaces
@@ -57,18 +62,29 @@ No test framework is configured.
 1. Client (`chat-interface.tsx`) sends message via fetch to `/api/chat/route.ts`
 2. Server validates auth, rate limits (20 req/60s per user), sanitizes input
 3. Country-specific legal context injected into system prompt (`COUNTRY_CONTEXTS` in route.ts)
-4. Groq LLM streams response via Vercel AI SDK
-5. Messages saved to Supabase; session ID returned via `X-Session-Id` header
-6. Client renders streaming markdown response
+4. Admin-configured prompts (character, SOP, company info, services) loaded from `ai_prompts` table
+5. Groq LLM streams response via Vercel AI SDK
+6. Messages saved to Supabase; session ID returned via `X-Session-Id` header
+7. Client renders streaming markdown response
 
 ### Auth flow
-- Middleware (`src/middleware.ts`) protects `/chat`; unauthenticated users → `/login`
+- Middleware (`src/lib/supabase/middleware.ts`) protects `/chat` and `/admin`; unauthenticated users → `/login`
 - Google OAuth: `/api/auth/oauth` generates PKCE URL → Google → `/auth/callback` → session cookie → `/chat`
+- Password reset: `/forgot-password` → email with link → `/auth/callback?next=/reset-password` → code exchange → `/reset-password`
 - Session stored in HTTP-only cookies via `@supabase/ssr`
+
+### Admin panel
+- Protected by 3 layers: middleware (auth gate), layout `isAdmin()` check, API route `isAdmin()` check
+- `src/app/admin/layout.tsx` — Server component: calls `isAdmin()`, redirects non-admins to `/chat`
+- `src/components/admin/admin-shell.tsx` — Client wrapper managing sidebar state
+- `src/components/admin/admin-sidebar.tsx` — Navigation sidebar (follows same pattern as `chat-sidebar.tsx`)
+- Admin role determined by `profiles.role` column OR `ADMIN_EMAILS` env var (comma-separated fallback)
+- RLS enforced via `public.is_admin()` Postgres function
 
 ### Component organization
 - `src/components/auth/` — Login, signup, OAuth, password reset, Turnstile
 - `src/components/chat/` — Chat interface, sidebar, messages, country selector
+- `src/components/admin/` — Admin shell, sidebar, header, AI instructions form
 - `src/components/ui/` — shadcn/ui primitives (do not edit manually, use `npx shadcn@latest add`)
 - `src/components/providers/theme-provider.tsx` — next-themes wrapper
 - `src/hooks/use-chat-sessions.ts` — Session list state management hook
@@ -77,9 +93,12 @@ No test framework is configured.
 
 Schema defined in `supabase/schema.sql`. All tables have RLS policies.
 
-- **profiles** — User profiles (auto-created via trigger on signup)
+- **profiles** — User profiles with `role` field (`'user'` | `'admin'`), auto-created via trigger on signup
 - **chat_sessions** — Conversations with country_code and title
 - **chat_messages** — Messages (role: user/assistant/system) within sessions
+- **ai_prompts** — Admin-configurable AI behavior (character, sop, company_info, services, other). Admins write via `is_admin()` RLS function
+- **user_memories** — Cross-session persistent facts (JSONB), per user
+- **conversation_summaries** — Rolling per-session summaries for context management
 - **documents** — Knowledge base with pgvector embeddings (384-dim, for future RAG)
 
 ## Environment Variables
@@ -89,6 +108,7 @@ See `.env.local` for the full template. Key variables:
 - `GROQ_API_KEY` — Primary AI provider (required)
 - `GOOGLE_GENERATIVE_AI_API_KEY` — Fallback AI provider (optional)
 - `NEXT_PUBLIC_APP_URL` — Production URL for OAuth callbacks
+- `ADMIN_EMAILS` — Comma-separated admin email allowlist (fallback when `profiles.role` not set)
 - `UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN` — Rate limiting (optional, falls back to in-memory)
 - `NEXT_PUBLIC_CLOUDFLARE_TURNSTILE_SITE_KEY` / `CLOUDFLARE_TURNSTILE_SECRET_KEY` — CAPTCHA
 
@@ -99,3 +119,4 @@ See `.env.local` for the full template. Key variables:
 - Rate limiting: chat (20/60s per user), OAuth (10/10min per IP)
 - Input sanitization: message length caps, control character removal
 - All database access goes through RLS — never bypass with service role key in client code
+- Admin routes protected at middleware, layout, and API levels; RLS enforces via `public.is_admin()`
