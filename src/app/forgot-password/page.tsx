@@ -15,7 +15,14 @@ export const metadata: Metadata = {
   },
 };
 
-export default function ForgotPasswordPage() {
+export default async function ForgotPasswordPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ error?: string }>;
+}) {
+  const params = await searchParams;
+  const errorMessage = params.error;
+
   return (
     <div className="min-h-screen flex flex-col">
       <script
@@ -43,6 +50,12 @@ export default function ForgotPasswordPage() {
               Enter your email and we&apos;ll send you a reset link
             </p>
           </div>
+
+          {errorMessage && (
+            <div className="mb-4 p-3 text-sm text-destructive bg-destructive/10 border border-destructive/20 rounded-lg">
+              {errorMessage}
+            </div>
+          )}
 
           <ForgotPasswordForm />
 

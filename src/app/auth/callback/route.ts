@@ -15,15 +15,22 @@ export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get('code');
   const next = getSafeRedirect(searchParams.get('next'));
+  const errorCode = searchParams.get('error_code');
 
-  // OAuth providers may pass an error directly (e.g. user denied access)
+  // Handle errors from Supabase (OAuth denied, OTP expired, etc.)
   const providerError = searchParams.get('error');
-  const providerErrorDescription = searchParams.get('error_description');
   if (providerError) {
+    // If this was a password reset attempt and the link expired
+    if (errorCode === 'otp_expired' && next === '/reset-password') {
+      return NextResponse.redirect(
+        `${origin}/forgot-password?error=${encodeURIComponent('Reset link has expired. Please request a new one.')}`
+      );
+    }
+
     const errorMsg =
       providerError === 'access_denied'
         ? 'Sign-in was cancelled'
-        : (providerErrorDescription ?? 'OAuth authentication failed');
+        : (searchParams.get('error_description') ?? 'OAuth authentication failed');
     return NextResponse.redirect(
       `${origin}/login?error=${encodeURIComponent(errorMsg)}`
     );
@@ -34,14 +41,19 @@ export async function GET(request: Request) {
     const { error } = await supabase.auth.exchangeCodeForSession(code);
 
     if (!error) {
-      // If next is /reset-password, go directly there
       return NextResponse.redirect(`${origin}${next}`);
     }
 
     console.error('[auth/callback] exchangeCodeForSession error:', error.message);
+
+    // If code exchange failed for a password reset, redirect back to forgot-password
+    if (next === '/reset-password') {
+      return NextResponse.redirect(
+        `${origin}/forgot-password?error=${encodeURIComponent('Reset link is invalid. Please request a new one.')}`
+      );
+    }
   }
 
   // Return the user to an error page with instructions
   return NextResponse.redirect(`${origin}/login?error=Could+not+authenticate+user`);
 }
-
