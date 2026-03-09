@@ -1,23 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { isAdmin } from '@/lib/admin';
+import { PROMPT_TYPES } from '@/lib/constants';
+
+const FORBIDDEN = NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+
+async function requireAdmin() {
+  const supabase = await createClient();
+  const { isAdmin: ok } = await isAdmin(supabase);
+  if (!ok) return { supabase: null as never, forbidden: true as const };
+  return { supabase, forbidden: false as const };
+}
 
 // GET: Fetch all AI prompts
 export async function GET() {
   try {
-    const supabase = await createClient();
+    const { supabase, forbidden } = await requireAdmin();
+    if (forbidden) return FORBIDDEN;
 
-    // Check admin authorization
-    const { isAdmin: adminStatus } = await isAdmin(supabase);
-
-    if (!adminStatus) {
-      return NextResponse.json(
-        { error: 'Forbidden' },
-        { status: 403 }
-      );
-    }
-
-    // Fetch all prompts
     const { data: prompts, error } = await supabase
       .from('ai_prompts')
       .select('*')
@@ -50,22 +50,12 @@ export async function GET() {
 // PUT: Update a specific AI prompt
 export async function PUT(req: NextRequest) {
   try {
-    const supabase = await createClient();
-
-    // Check admin authorization
-    const { isAdmin: adminStatus } = await isAdmin(supabase);
-
-    if (!adminStatus) {
-      return NextResponse.json(
-        { error: 'Forbidden' },
-        { status: 403 }
-      );
-    }
+    const { supabase, forbidden } = await requireAdmin();
+    if (forbidden) return FORBIDDEN;
 
     const body = await req.json();
     const { prompt_type, content } = body;
 
-    // Validate input
     if (!prompt_type || typeof content !== 'string') {
       return NextResponse.json(
         { error: 'Invalid input. prompt_type and content are required.' },
@@ -73,52 +63,31 @@ export async function PUT(req: NextRequest) {
       );
     }
 
-    // Validate prompt_type
-    const validTypes = ['character', 'sop', 'company_info', 'services', 'other'];
-    if (!validTypes.includes(prompt_type)) {
+    if (!PROMPT_TYPES.includes(prompt_type)) {
       return NextResponse.json(
-        { error: `Invalid prompt_type. Must be one of: ${validTypes.join(', ')}` },
+        { error: `Invalid prompt_type. Must be one of: ${PROMPT_TYPES.join(', ')}` },
         { status: 400 }
       );
     }
 
-    // Check if prompt exists
-    const { data: existing } = await supabase
+    const { data, error } = await supabase
       .from('ai_prompts')
-      .select('id')
-      .eq('prompt_type', prompt_type)
+      .upsert(
+        { prompt_type, content, is_active: true, updated_at: new Date().toISOString() },
+        { onConflict: 'prompt_type' }
+      )
+      .select()
       .single();
 
-    let result;
-    if (existing) {
-      // Update existing prompt
-      result = await supabase
-        .from('ai_prompts')
-        .update({ content, updated_at: new Date().toISOString() })
-        .eq('prompt_type', prompt_type)
-        .select()
-        .single();
-    } else {
-      // Insert new prompt
-      result = await supabase
-        .from('ai_prompts')
-        .insert({ prompt_type, content, is_active: true })
-        .select()
-        .single();
-    }
-
-    if (result.error) {
-      console.error('Error saving AI prompt:', result.error);
+    if (error) {
+      console.error('Error saving AI prompt:', error);
       return NextResponse.json(
         { error: 'Failed to save prompt' },
         { status: 500 }
       );
     }
 
-    return NextResponse.json({ 
-      success: true, 
-      prompt: result.data 
-    });
+    return NextResponse.json({ success: true, prompt: data });
   } catch (error) {
     console.error('Error in PUT /api/admin/ai-prompts:', error);
     return NextResponse.json(
@@ -131,17 +100,8 @@ export async function PUT(req: NextRequest) {
 // POST: Batch update multiple prompts
 export async function POST(req: NextRequest) {
   try {
-    const supabase = await createClient();
-
-    // Check admin authorization
-    const { isAdmin: adminStatus } = await isAdmin(supabase);
-
-    if (!adminStatus) {
-      return NextResponse.json(
-        { error: 'Forbidden' },
-        { status: 403 }
-      );
-    }
+    const { supabase, forbidden } = await requireAdmin();
+    if (forbidden) return FORBIDDEN;
 
     const body = await req.json();
     const { prompts } = body;
@@ -153,49 +113,31 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const validTypes = ['character', 'sop', 'company_info', 'services', 'other'];
-    
-    // Process each prompt
-    const results = [];
-    for (const prompt of prompts) {
-      const { prompt_type, content } = prompt;
-      
-      if (!validTypes.includes(prompt_type) || typeof content !== 'string') {
-        continue; // Skip invalid entries
-      }
+    const valid = prompts.filter(
+      (p: { prompt_type: string; content: unknown }) =>
+        PROMPT_TYPES.includes(p.prompt_type as typeof PROMPT_TYPES[number]) &&
+        typeof p.content === 'string'
+    );
 
-      // Check if exists
-      const { data: existing } = await supabase
-        .from('ai_prompts')
-        .select('id')
-        .eq('prompt_type', prompt_type)
-        .single();
-
-      let result;
-      if (existing) {
-        result = await supabase
+    const results = await Promise.all(
+      valid.map((p: { prompt_type: string; content: string }) =>
+        supabase
           .from('ai_prompts')
-          .update({ content, updated_at: new Date().toISOString() })
-          .eq('prompt_type', prompt_type)
+          .upsert(
+            { prompt_type: p.prompt_type, content: p.content, is_active: true, updated_at: new Date().toISOString() },
+            { onConflict: 'prompt_type' }
+          )
           .select()
-          .single();
-      } else {
-        result = await supabase
-          .from('ai_prompts')
-          .insert({ prompt_type, content, is_active: true })
-          .select()
-          .single();
-      }
+          .single()
+      )
+    );
 
-      if (!result.error) {
-        results.push(result.data);
-      }
-    }
+    const saved = results.filter((r) => !r.error).map((r) => r.data);
 
-    return NextResponse.json({ 
-      success: true, 
-      count: results.length,
-      prompts: results 
+    return NextResponse.json({
+      success: true,
+      count: saved.length,
+      prompts: saved,
     });
   } catch (error) {
     console.error('Error in POST /api/admin/ai-prompts:', error);

@@ -1,7 +1,8 @@
 import { Metadata } from 'next';
 import { createClient } from '@/lib/supabase/server';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Users, MessageSquare, Bot, Activity } from 'lucide-react';
+import { Users, MessageSquare, Bot } from 'lucide-react';
+import { PROMPT_TYPES } from '@/lib/constants';
 
 export const metadata: Metadata = {
   title: 'Dashboard - AI SmartWills Admin',
@@ -42,15 +43,9 @@ export default async function AdminDashboardPage() {
     },
     {
       title: 'AI Prompts',
-      value: `${stats.activePrompts}/5`,
+      value: `${stats.activePrompts}/${PROMPT_TYPES.length}`,
       icon: Bot,
       description: 'Active prompt configs',
-    },
-    {
-      title: 'System Status',
-      value: 'Healthy',
-      icon: Activity,
-      description: 'All services running',
     },
   ];
 
@@ -63,7 +58,7 @@ export default async function AdminDashboardPage() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {cards.map((card) => {
           const Icon = card.icon;
           return (

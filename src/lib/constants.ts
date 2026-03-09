@@ -99,5 +99,8 @@ export const COUNTRIES: Country[] = [
   },
 ];
 
+export const PROMPT_TYPES = ['character', 'sop', 'company_info', 'services', 'other'] as const;
+export type PromptType = (typeof PROMPT_TYPES)[number];
+
 export const APP_NAME = 'AI SmartWills';
 export const APP_DESCRIPTION = 'Your intelligent legal will planning assistant';

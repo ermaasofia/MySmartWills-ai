@@ -1,11 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useRouter } from 'next/navigation';
+import { type PromptType } from '@/lib/constants';
 
 interface PromptData {
   character: string;
@@ -14,8 +15,6 @@ interface PromptData {
   services: string;
   other: string;
 }
-
-type PromptType = keyof PromptData;
 
 interface SaveStatus {
   [key: string]: 'idle' | 'saving' | 'success' | 'error';
@@ -76,9 +75,14 @@ export function AIInstructionsForm() {
     other: 'idle',
   });
   const [isLoading, setIsLoading] = useState(true);
+  const timeoutsRef = useRef<Record<string, NodeJS.Timeout>>({});
 
   useEffect(() => {
     fetchPrompts();
+    const timeouts = timeoutsRef.current;
+    return () => {
+      Object.values(timeouts).forEach(clearTimeout);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -133,13 +137,15 @@ export function AIInstructionsForm() {
       }
 
       setSaveStatus((prev) => ({ ...prev, [promptType]: 'success' }));
-      setTimeout(() => {
+      clearTimeout(timeoutsRef.current[promptType]);
+      timeoutsRef.current[promptType] = setTimeout(() => {
         setSaveStatus((prev) => ({ ...prev, [promptType]: 'idle' }));
       }, 2000);
     } catch (error) {
       console.error('Error saving prompt:', error);
       setSaveStatus((prev) => ({ ...prev, [promptType]: 'error' }));
-      setTimeout(() => {
+      clearTimeout(timeoutsRef.current[promptType]);
+      timeoutsRef.current[promptType] = setTimeout(() => {
         setSaveStatus((prev) => ({ ...prev, [promptType]: 'idle' }));
       }, 3000);
     }
