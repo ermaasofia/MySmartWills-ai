@@ -2,12 +2,13 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { CountrySelector } from '@/components/chat/country-selector';
 import { EditableTitle } from '@/components/chat/editable-title';
 import { PromptBox } from '@/components/ui/chatgpt-prompt-input';
 import { COUNTRIES } from '@/lib/constants';
-import { Menu, RotateCcw } from 'lucide-react';
+import { Menu, RotateCcw, Settings } from 'lucide-react';
 import { MarkdownRenderer } from '@/components/chat/markdown-renderer';
 import { Country } from '@/types';
 import { SessionSummary } from '@/hooks/use-chat-sessions';
@@ -28,6 +29,8 @@ interface ChatInterfaceProps {
   onTitleChange?: (id: string, title: string) => void;
   /** Opens the mobile sidebar drawer */
   onOpenSidebar?: () => void;
+  /** Whether the user is an admin */
+  isAdmin?: boolean;
 }
 
 function TypingDots() {
@@ -90,6 +93,7 @@ export function ChatInterface({
   onSessionCreated,
   onTitleChange,
   onOpenSidebar,
+  isAdmin = false,
 }: ChatInterfaceProps) {
   const router = useRouter();
 
@@ -294,6 +298,22 @@ export function ChatInterface({
 
         {/* Jurisdiction selector */}
         <CountrySelector selectedCountry={selectedCountry} onSelect={setSelectedCountry} />
+
+        {/* Admin AI Settings button */}
+        {isAdmin && (
+          <Button
+            variant="ghost"
+            size="sm"
+            asChild
+            className="gap-1.5 shrink-0"
+            aria-label="AI Settings"
+          >
+            <Link href="/admin/ai-instructions">
+              <Settings className="h-4 w-4" />
+              <span className="hidden sm:inline text-xs">AI Settings</span>
+            </Link>
+          </Button>
+        )}
 
         {/* New chat button */}
         <Button

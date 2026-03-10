@@ -11,6 +11,7 @@ interface ChatShellProps {
   userName: string;
   userEmail: string;
   initialSessionId?: string;
+  isAdmin?: boolean;
 }
 
 /**
@@ -26,6 +27,7 @@ export function ChatShell({
   userName,
   userEmail,
   initialSessionId,
+  isAdmin = false,
 }: ChatShellProps) {
   const router = useRouter();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -101,6 +103,7 @@ export function ChatShell({
           onSessionCreated={handleSessionCreated}
           onTitleChange={handleTitleChange}
           onOpenSidebar={() => setIsSidebarOpen(true)}
+          isAdmin={isAdmin}
         />
       </main>
     </div>
