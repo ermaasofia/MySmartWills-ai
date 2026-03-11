@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useState, useEffect, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useInView } from "framer-motion";
 import {
   Sparkles,
   ShieldCheck,
@@ -187,12 +187,81 @@ const TRUST_METRICS = [
 
 /* ───────────────────── Helpers ───────────────────── */
 
-const sectionFade = {
-  initial: { opacity: 0, y: 32 },
-  whileInView: { opacity: 1, y: 0 },
-  viewport: { once: true, amount: 0.2 },
-  transition: { duration: 0.6, ease: "easeOut" as const },
-} as const;
+const ease = [0.25, 0.1, 0.25, 1] as const;
+
+const hidden = { opacity: 0, y: 40 };
+const visible = { opacity: 1, y: 0, scale: 1, x: 0 };
+
+/**
+ * Scroll-reveal component — smooth enter (with stagger delay) and
+ * smooth exit (no delay) so scrolling back up looks clean, not stuck.
+ * Repeatable: scrolling back to top & down again replays all animations.
+ */
+function ScrollReveal({
+  children,
+  index = 0,
+  className,
+  as: Tag = "div",
+  href,
+  target,
+  rel,
+}: {
+  children: React.ReactNode;
+  index?: number;
+  className?: string;
+  as?: "div" | "a" | "span";
+  href?: string;
+  target?: string;
+  rel?: string;
+}) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const ref = useRef<any>(null);
+  const isInView = useInView(ref, { once: false, amount: 0.15 });
+
+  const Component = Tag === "a" ? motion.a : Tag === "span" ? motion.span : motion.div;
+
+  return (
+    <Component
+      ref={ref}
+      initial={hidden}
+      animate={isInView ? visible : hidden}
+      transition={{
+        duration: 0.65,
+        delay: isInView ? index * 0.1 : 0,
+        ease,
+      }}
+      className={className}
+      {...(Tag === "a" ? { href, target, rel } : {})}
+    >
+      {children}
+    </Component>
+  );
+}
+
+/** Section heading — same smooth enter/exit */
+function SectionHeading({
+  children,
+  className,
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+  const isInView = useInView(ref, { once: false, amount: 0.3 });
+
+  return (
+    <motion.div
+      ref={ref}
+      initial={{ opacity: 0, y: 48 }}
+      animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 48 }}
+      transition={{ duration: 0.8, delay: isInView ? 0.1 : 0, ease }}
+      className={className}
+    >
+      {children}
+    </motion.div>
+  );
+}
+
 
 function useCountUp(target: number, duration: number = 2000, decimals: number = 0) {
   const [count, setCount] = useState(0);
@@ -421,8 +490,8 @@ export default function HomePage() {
 
       {/* ═══════════════ Features — Bento Grid ═══════════════ */}
       <section id="features" className="py-20 sm:py-28 px-4 sm:px-6">
-        <motion.div {...sectionFade} className="container mx-auto max-w-6xl">
-          <div className="text-center mb-16">
+        <div className="container mx-auto max-w-6xl">
+          <SectionHeading className="text-center mb-16">
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight mb-4">
               Why Choose AI SmartWills?
             </h2>
@@ -430,17 +499,14 @@ export default function HomePage() {
               We take the confusion out of will planning so you can focus on
               what matters most — your family.
             </p>
-          </div>
+          </SectionHeading>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {FEATURES.map((feature, i) => (
-              <motion.div
+              <ScrollReveal
                 key={feature.title}
-                initial={{ opacity: 0, y: 24 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.2 }}
-                transition={{ duration: 0.5, delay: i * 0.1 }}
-                className={`card-shine group relative p-8 rounded-2xl border border-border/50 dark:border-white/5 bg-neutral-50 dark:bg-neutral-950 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-black/5 hover:border-foreground/30 ${feature.span}`}
+                index={i}
+                className={`card-shine group relative p-8 rounded-2xl border border-border/50 dark:border-white/5 bg-neutral-50 dark:bg-neutral-950 transition-shadow transition-border duration-300 hover:shadow-xl hover:shadow-black/5 hover:border-foreground/30 ${feature.span}`}
               >
                 <div className="relative z-10">
                   <div className="inline-flex items-center justify-center h-12 w-12 rounded-xl bg-foreground/10 mb-5">
@@ -451,35 +517,29 @@ export default function HomePage() {
                     {feature.description}
                   </p>
                 </div>
-              </motion.div>
+              </ScrollReveal>
             ))}
           </div>
-        </motion.div>
+        </div>
       </section>
 
       {/* ═══════════════ How It Works ═══════════════ */}
-      <section
-        id="how-it-works"
-        className="py-20 sm:py-28 px-4 sm:px-6 border-t border-border bg-secondary/30"
-      >
-        <motion.div {...sectionFade} className="container mx-auto max-w-5xl">
-          <div className="text-center mb-16">
+      <section id="how-it-works" className="py-20 sm:py-28 px-4 sm:px-6">
+        <div className="container mx-auto max-w-5xl">
+          <SectionHeading className="text-center mb-16">
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight mb-4">
               How It Works
             </h2>
             <p className="text-base sm:text-lg text-muted-foreground max-w-xl mx-auto">
               Three simple steps to clarity and confidence in your will planning.
             </p>
-          </div>
+          </SectionHeading>
 
           <div className="grid md:grid-cols-3 gap-8">
             {HOW_IT_WORKS.map((h, i) => (
-              <motion.div
+              <ScrollReveal
                 key={h.step}
-                initial={{ opacity: 0, y: 24 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: i * 0.15 }}
+                index={i}
                 className="relative p-6 border border-border rounded-2xl bg-background/60 text-center"
               >
                 <span className="absolute -top-4 left-1/2 -translate-x-1/2 text-xs font-bold bg-foreground text-background rounded-full px-3 py-1">
@@ -492,16 +552,16 @@ export default function HomePage() {
                 <p className="text-sm text-muted-foreground leading-relaxed">
                   {h.description}
                 </p>
-              </motion.div>
+              </ScrollReveal>
             ))}
           </div>
-        </motion.div>
+        </div>
       </section>
 
       {/* ═══════════════ Social Proof ═══════════════ */}
-      <section className="py-20 sm:py-28 px-4 sm:px-6 border-t border-border">
-        <motion.div {...sectionFade} className="container mx-auto max-w-5xl">
-          <div className="text-center mb-16">
+      <section className="py-20 sm:py-28 px-4 sm:px-6">
+        <div className="container mx-auto max-w-5xl">
+          <SectionHeading className="text-center mb-16">
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight mb-4">
               What Our Users Say
             </h2>
@@ -509,17 +569,14 @@ export default function HomePage() {
               Thousands of families across Asia-Pacific trust AI SmartWills to guide
               them through estate planning.
             </p>
-          </div>
+          </SectionHeading>
 
           <div className="grid md:grid-cols-3 gap-6">
             {TESTIMONIALS.map((t, i) => (
-              <motion.div
+              <ScrollReveal
                 key={t.name}
-                initial={{ opacity: 0, y: 24 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: i * 0.1 }}
-                className="p-6 border border-border rounded-2xl bg-background/60"
+                index={i}
+                className="card-shine group relative p-6 rounded-2xl border border-border/50 dark:border-white/5 bg-neutral-50 dark:bg-neutral-950 transition-shadow transition-border duration-300 hover:shadow-xl hover:shadow-black/5 hover:border-foreground/30"
               >
                 <div className="flex gap-1 mb-3">
                   {Array.from({ length: t.rating }).map((_, j) => (
@@ -536,75 +593,68 @@ export default function HomePage() {
                     <p className="text-xs text-muted-foreground">{t.country}</p>
                   </div>
                 </div>
-              </motion.div>
+              </ScrollReveal>
             ))}
           </div>
-        </motion.div>
+        </div>
       </section>
 
       {/* ═══════════════ Countries ═══════════════ */}
-      <section
-        id="countries"
-        className="py-20 sm:py-28 px-4 sm:px-6 border-t border-border bg-secondary/30"
-      >
-        <motion.div {...sectionFade} className="container mx-auto max-w-5xl">
-          <div className="text-center mb-16">
+      <section id="countries" className="py-20 sm:py-28 px-4 sm:px-6">
+        <div className="container mx-auto max-w-5xl">
+          <SectionHeading className="text-center mb-16">
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight mb-4">
               12 Countries Supported
             </h2>
             <p className="text-base sm:text-lg text-muted-foreground max-w-xl mx-auto">
               Localized AI guidance for will planning across the Asia-Pacific region.
             </p>
-          </div>
+          </SectionHeading>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
             {COUNTRIES.map((c, i) => (
-              <motion.div
+              <ScrollReveal
                 key={c.code}
-                initial={{ opacity: 0, scale: 0.95 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.3, delay: i * 0.03 }}
-                className="flex items-center gap-3 p-3 sm:p-4 border border-border rounded-xl hover:bg-accent transition-colors bg-background/50"
+                index={i}
+                className="card-shine group relative flex items-center gap-3 p-3 sm:p-4 rounded-xl border border-border/50 dark:border-white/5 bg-neutral-50 dark:bg-neutral-950 transition-shadow transition-border duration-300 hover:shadow-xl hover:shadow-black/5 hover:border-foreground/30"
               >
                 <span className="text-2xl">{c.flag}</span>
                 <div>
                   <p className="text-sm sm:text-base font-semibold">{c.name}</p>
                   <p className="text-xs text-muted-foreground">{c.code}</p>
                 </div>
-              </motion.div>
+              </ScrollReveal>
             ))}
           </div>
-        </motion.div>
+        </div>
       </section>
 
       {/* ═══════════════ FAQ ═══════════════ */}
-      <section id="faq" className="py-20 sm:py-28 px-4 sm:px-6 border-t border-border">
-        <motion.div {...sectionFade} className="container mx-auto max-w-3xl">
-          <div className="text-center mb-16">
+      <section id="faq" className="py-20 sm:py-28 px-4 sm:px-6">
+        <div className="container mx-auto max-w-3xl">
+          <SectionHeading className="text-center mb-16">
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight mb-4">
               Frequently Asked Questions
             </h2>
             <p className="text-base sm:text-lg text-muted-foreground max-w-xl mx-auto">
               Everything you need to know before getting started.
             </p>
-          </div>
+          </SectionHeading>
 
           <div className="space-y-3">
-            {FAQ_ITEMS.map((f) => (
-              <FAQItem key={f.q} q={f.q} a={f.a} />
+            {FAQ_ITEMS.map((f, i) => (
+              <ScrollReveal key={f.q} index={i}>
+                <FAQItem q={f.q} a={f.a} />
+              </ScrollReveal>
             ))}
           </div>
-        </motion.div>
+        </div>
       </section>
 
       {/* ═══════════════ SmartWills Ecosystem ═══════════════ */}
-      <section
-        id="smartwills"
-        className="py-20 sm:py-28 px-4 sm:px-6 border-t border-border bg-secondary/30"
-      >
-        <motion.div {...sectionFade} className="container mx-auto max-w-5xl">
-          <div className="text-center mb-16">
+      <section id="smartwills" className="py-20 sm:py-28 px-4 sm:px-6">
+        <div className="container mx-auto max-w-5xl">
+          <SectionHeading className="text-center mb-16">
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight mb-4">
               The SmartWills Ecosystem
             </h2>
@@ -612,20 +662,18 @@ export default function HomePage() {
               AI SmartWills is part of the SmartWills family — online will
               writing services trusted across multiple countries.
             </p>
-          </div>
+          </SectionHeading>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             {ECOSYSTEM.map((site, i) => (
-              <motion.a
+              <ScrollReveal
                 key={site.domain}
+                index={i}
+                as="a"
                 href={`https://${site.domain}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                initial={{ opacity: 0, y: 16 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.4, delay: i * 0.08 }}
-                className="group block p-6 border border-border rounded-2xl hover:bg-accent transition-colors bg-background/50"
+                className="card-shine group relative block p-6 rounded-2xl border border-border/50 dark:border-white/5 bg-neutral-50 dark:bg-neutral-950 transition-shadow transition-border duration-300 hover:shadow-xl hover:shadow-black/5 hover:border-foreground/30"
               >
                 <h3 className="text-lg sm:text-xl font-semibold mb-2">
                   {site.name}
@@ -636,15 +684,15 @@ export default function HomePage() {
                 <span className="text-xs sm:text-sm underline underline-offset-4 text-muted-foreground group-hover:text-foreground transition-colors">
                   {site.domain}
                 </span>
-              </motion.a>
+              </ScrollReveal>
             ))}
           </div>
-        </motion.div>
+        </div>
       </section>
 
       {/* ═══════════════ Footer ═══════════════ */}
-      <footer className="border-t border-border py-12 sm:py-16 px-4 sm:px-6">
-        <div className="container mx-auto max-w-5xl">
+      <footer className="py-12 sm:py-16 px-4 sm:px-6">
+        <ScrollReveal className="container mx-auto max-w-5xl">
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-10">
             {/* Brand */}
             <div className="sm:col-span-2 lg:col-span-1">
@@ -743,11 +791,11 @@ export default function HomePage() {
           </div>
 
           {/* Bottom bar */}
-          <div className="pt-8 border-t border-border flex flex-col sm:flex-row justify-between items-center gap-4 text-sm text-muted-foreground">
+          <div className="pt-8 flex flex-col sm:flex-row justify-between items-center gap-4 text-sm text-muted-foreground">
             <p>&copy; 2026 AI SmartWills. Part of the SmartWills ecosystem.</p>
             <p className="text-xs">PDPA &amp; GDPR Compliant</p>
           </div>
-        </div>
+        </ScrollReveal>
       </footer>
     </main>
   );

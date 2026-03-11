@@ -147,30 +147,21 @@ html.lenis body {
 }
 
 .lenis.lenis-stopped {
-  overflow: hidden;
+  overflow-y: scroll;
 }
 
 .lenis.lenis-scrolling iframe {
   pointer-events: none;
 }
 
-/* Custom scrollbar */
+/* Hide scrollbar but keep scrolling */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  display: none;
 }
 
-::-webkit-scrollbar-track {
-  background: var(--muted);
-}
-
-::-webkit-scrollbar-thumb {
-  background: var(--muted-foreground);
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: var(--foreground);
+html {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
 /* Gradient mesh hero background */
