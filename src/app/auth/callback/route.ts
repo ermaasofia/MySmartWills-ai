@@ -30,7 +30,7 @@ export async function GET(request: Request) {
     const errorMsg =
       providerError === 'access_denied'
         ? 'Sign-in was cancelled'
-        : (searchParams.get('error_description') ?? 'OAuth authentication failed');
+        : 'Authentication failed. Please try again.';
     return NextResponse.redirect(
       `${origin}/login?error=${encodeURIComponent(errorMsg)}`
     );

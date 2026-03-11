@@ -345,9 +345,10 @@ export async function POST(req: Request) {
 
     // Use Groq
     if (!process.env.GROQ_API_KEY) {
+      console.error('GROQ_API_KEY is not configured');
       return new Response(
-        JSON.stringify({ 
-          error: 'No AI provider configured. Please set GROQ_API_KEY.' 
+        JSON.stringify({
+          error: 'Something went wrong. Please try again later.'
         }),
         { status: 500, headers: { 'Content-Type': 'application/json' } }
       );

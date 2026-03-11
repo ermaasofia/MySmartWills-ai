@@ -120,6 +120,16 @@ function buildExtractionPrompt(
 
 // ─── Extraction Logic ────────────────────────────────────────────────────────
 
+/** Whitelist of valid keys for UserMemoryFacts — reject anything else */
+const VALID_FACT_KEYS = new Set<keyof UserMemoryFacts>([
+  'name', 'age', 'nationality', 'country_of_residence', 'religion',
+  'marital_status', 'spouse_name', 'children', 'dependents', 'assets',
+  'has_existing_will', 'existing_will_details', 'preferred_executor',
+  'preferred_guardian', 'specific_bequests', 'charitable_wishes',
+  'islamic_faraid_applicable', 'primary_concerns', 'planning_goals',
+  'preferred_language',
+]);
+
 interface ExtractionResult {
   facts: Partial<UserMemoryFacts>;
   summary: string | null;
@@ -130,8 +140,20 @@ function parseExtractionResponse(text: string): ExtractionResult {
     // Strip markdown code fences if present
     const cleaned = text.replace(/^```(?:json)?\s*\n?/i, '').replace(/\n?```\s*$/i, '').trim();
     const parsed = JSON.parse(cleaned);
+    if (!parsed.facts || typeof parsed.facts !== 'object') {
+      return { facts: {}, summary: typeof parsed.summary === 'string' ? parsed.summary : null };
+    }
+
+    // Only accept keys in the whitelist
+    const safeFacts: Partial<UserMemoryFacts> = {};
+    for (const [key, value] of Object.entries(parsed.facts)) {
+      if (VALID_FACT_KEYS.has(key as keyof UserMemoryFacts) && value !== undefined && value !== null) {
+        (safeFacts as Record<string, unknown>)[key] = value;
+      }
+    }
+
     return {
-      facts: parsed.facts && typeof parsed.facts === 'object' ? parsed.facts : {},
+      facts: safeFacts,
       summary: typeof parsed.summary === 'string' ? parsed.summary : null,
     };
   } catch {
@@ -151,6 +173,8 @@ export function mergeFacts(
 
   for (const [key, value] of Object.entries(extracted)) {
     if (value === undefined || value === null) continue;
+    // Only merge keys that are in the valid whitelist
+    if (!VALID_FACT_KEYS.has(key as keyof UserMemoryFacts)) continue;
     (merged as Record<string, unknown>)[key] = value;
   }
 
@@ -210,6 +234,15 @@ export async function extractAndSaveMemory(
 
 // ─── Prompt Formatting ───────────────────────────────────────────────────────
 
+/** Sanitize a string value before inserting into a system prompt to prevent injection */
+function sanitizeForPrompt(value: string): string {
+  return value
+    .replace(/\n/g, ' ')      // collapse newlines (prevents injecting new prompt lines)
+    .replace(/\r/g, '')        // remove carriage returns
+    .replace(/[═─]/g, '-')    // prevent spoofing section delimiters
+    .slice(0, 500);           // cap length of any single value
+}
+
 export function formatMemoryForPrompt(
   facts: UserMemoryFacts | null,
   summary: string | null,
@@ -225,31 +258,31 @@ export function formatMemoryForPrompt(
   if (facts && Object.keys(facts).length > 0) {
     lines.push('The user has shared the following about themselves:');
 
-    if (facts.name) lines.push(`- Name: ${facts.name}`);
+    if (facts.name) lines.push(`- Name: ${sanitizeForPrompt(facts.name)}`);
     if (facts.age) lines.push(`- Age: ${facts.age}`);
-    if (facts.nationality) lines.push(`- Nationality: ${facts.nationality}`);
-    if (facts.country_of_residence) lines.push(`- Country of Residence: ${facts.country_of_residence}`);
-    if (facts.religion) lines.push(`- Religion: ${facts.religion}`);
-    if (facts.marital_status) lines.push(`- Marital Status: ${facts.marital_status}`);
-    if (facts.spouse_name) lines.push(`- Spouse: ${facts.spouse_name}`);
+    if (facts.nationality) lines.push(`- Nationality: ${sanitizeForPrompt(facts.nationality)}`);
+    if (facts.country_of_residence) lines.push(`- Country of Residence: ${sanitizeForPrompt(facts.country_of_residence)}`);
+    if (facts.religion) lines.push(`- Religion: ${sanitizeForPrompt(facts.religion)}`);
+    if (facts.marital_status) lines.push(`- Marital Status: ${sanitizeForPrompt(facts.marital_status)}`);
+    if (facts.spouse_name) lines.push(`- Spouse: ${sanitizeForPrompt(facts.spouse_name)}`);
 
     if (facts.children?.length) {
       const childList = facts.children
-        .map(c => `${c.name}${c.age ? ` (age ${c.age})` : ''}${c.notes ? ` - ${c.notes}` : ''}`)
+        .map(c => `${sanitizeForPrompt(c.name)}${c.age ? ` (age ${c.age})` : ''}${c.notes ? ` - ${sanitizeForPrompt(c.notes)}` : ''}`)
         .join(', ');
       lines.push(`- Children: ${childList}`);
     }
 
     if (facts.dependents?.length) {
       const depList = facts.dependents
-        .map(d => `${d.name} (${d.relationship})${d.notes ? ` - ${d.notes}` : ''}`)
+        .map(d => `${sanitizeForPrompt(d.name)} (${sanitizeForPrompt(d.relationship)})${d.notes ? ` - ${sanitizeForPrompt(d.notes)}` : ''}`)
         .join(', ');
       lines.push(`- Dependents: ${depList}`);
     }
 
     if (facts.assets?.length) {
       const assetList = facts.assets
-        .map(a => `${a.type}: ${a.description}${a.location ? ` (${a.location})` : ''}`)
+        .map(a => `${sanitizeForPrompt(a.type)}: ${sanitizeForPrompt(a.description)}${a.location ? ` (${sanitizeForPrompt(a.location)})` : ''}`)
         .join('; ');
       lines.push(`- Assets: ${assetList}`);
     }
@@ -257,33 +290,34 @@ export function formatMemoryForPrompt(
     if (facts.has_existing_will !== undefined) {
       lines.push(`- Has Existing Will: ${facts.has_existing_will ? 'Yes' : 'No'}`);
     }
-    if (facts.existing_will_details) lines.push(`- Existing Will Details: ${facts.existing_will_details}`);
-    if (facts.preferred_executor) lines.push(`- Preferred Executor: ${facts.preferred_executor}`);
-    if (facts.preferred_guardian) lines.push(`- Preferred Guardian: ${facts.preferred_guardian}`);
+    if (facts.existing_will_details) lines.push(`- Existing Will Details: ${sanitizeForPrompt(facts.existing_will_details)}`);
+    if (facts.preferred_executor) lines.push(`- Preferred Executor: ${sanitizeForPrompt(facts.preferred_executor)}`);
+    if (facts.preferred_guardian) lines.push(`- Preferred Guardian: ${sanitizeForPrompt(facts.preferred_guardian)}`);
 
     if (facts.specific_bequests?.length) {
       const bequestList = facts.specific_bequests
-        .map(b => `${b.asset} to ${b.beneficiary}`)
+        .map(b => `${sanitizeForPrompt(b.asset)} to ${sanitizeForPrompt(b.beneficiary)}`)
         .join('; ');
       lines.push(`- Specific Bequests: ${bequestList}`);
     }
 
-    if (facts.charitable_wishes) lines.push(`- Charitable Wishes: ${facts.charitable_wishes}`);
+    if (facts.charitable_wishes) lines.push(`- Charitable Wishes: ${sanitizeForPrompt(facts.charitable_wishes)}`);
     if (facts.islamic_faraid_applicable !== undefined) {
       lines.push(`- Islamic Faraid Applicable: ${facts.islamic_faraid_applicable ? 'Yes' : 'No'}`);
     }
 
     if (facts.primary_concerns?.length) {
-      lines.push(`- Primary Concerns: ${facts.primary_concerns.join(', ')}`);
+      lines.push(`- Primary Concerns: ${facts.primary_concerns.map(sanitizeForPrompt).join(', ')}`);
     }
-    if (facts.planning_goals) lines.push(`- Planning Goals: ${facts.planning_goals}`);
-    if (facts.preferred_language) lines.push(`- Preferred Language: ${facts.preferred_language}`);
+    if (facts.planning_goals) lines.push(`- Planning Goals: ${sanitizeForPrompt(facts.planning_goals)}`);
+    if (facts.preferred_language) lines.push(`- Preferred Language: ${sanitizeForPrompt(facts.preferred_language)}`);
   }
 
   if (summary) {
     lines.push('');
     lines.push('CONVERSATION SUMMARY (current session):');
-    lines.push(summary);
+    // Sanitize summary but allow newlines within the summary block (they can't escape the section)
+    lines.push(summary.replace(/[═─]/g, '-').slice(0, 2000));
   }
 
   lines.push('');
