@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { Header } from "@/components/layout/header";
+import { useLenis } from "@/components/providers/lenis-provider";
 import dynamic from "next/dynamic";
 
 const DarkVeil = dynamic(() => import("@/components/ui/DarkVeil"), {
@@ -287,6 +288,7 @@ function TrustMetric({ metric }: { metric: typeof TRUST_METRICS[number] }) {
 
 export default function HomePage() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const lenis = useLenis();
 
   useEffect(() => {
     const supabase = createClient();
@@ -386,7 +388,11 @@ export default function HomePage() {
                 href="#how-it-works"
                 onClick={(e) => {
                   e.preventDefault();
-                  document.getElementById("how-it-works")?.scrollIntoView({ behavior: "smooth" });
+                  if (lenis) {
+                    lenis.scrollTo("#how-it-works");
+                  } else {
+                    document.getElementById("how-it-works")?.scrollIntoView({ behavior: "smooth" });
+                  }
                 }}
               >
                 <button className="w-full sm:w-auto border border-white/20 hover:border-white/40 text-white rounded-full px-8 py-4 text-lg font-medium transition-all duration-300 hover:bg-white/5 flex items-center justify-center gap-2">

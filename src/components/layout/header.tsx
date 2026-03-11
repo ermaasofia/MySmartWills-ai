@@ -6,6 +6,7 @@ import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, ArrowRight } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { useLenis } from "@/components/providers/lenis-provider";
 
 const NAV_LINKS = [
   { label: "Features", href: "#features" },
@@ -29,6 +30,8 @@ export function Header({ isLoggedIn }: HeaderProps) {
   const heroMutedHover = !scrolled
     ? "text-white/60 hover:text-white"
     : "text-muted-foreground hover:text-foreground";
+
+  const lenis = useLenis();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -65,14 +68,15 @@ export function Header({ isLoggedIn }: HeaderProps) {
   const handleNavClick = useCallback(
     (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
       e.preventDefault();
-      const id = href.replace("#", "");
-      const el = document.getElementById(id);
-      if (el) {
-        el.scrollIntoView({ behavior: "smooth", block: "start" });
+      if (lenis) {
+        lenis.scrollTo(href);
+      } else {
+        const id = href.replace("#", "");
+        document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
       }
       setMobileMenuOpen(false);
     },
-    []
+    [lenis]
   );
 
   return (

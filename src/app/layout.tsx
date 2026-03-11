@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Crimson_Text, Inter } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/providers/theme-provider";
+import { LenisProvider } from "@/components/providers/lenis-provider";
 import { AuthHandler } from "@/components/auth/auth-handler";
 
 const crimsonText = Crimson_Text({
@@ -135,7 +136,9 @@ export default function RootLayout({
           disableTransitionOnChange={false}
         >
           <AuthHandler />
-          {children}
+          <LenisProvider>
+            {children}
+          </LenisProvider>
         </ThemeProvider>
       </body>
     </html>
