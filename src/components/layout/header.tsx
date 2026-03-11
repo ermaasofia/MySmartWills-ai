@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useState, useEffect, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useState, useEffect, useCallback, useRef } from "react";
+import { createPortal } from "react-dom";
+import { motion, AnimatePresence, useMotionValue, useTransform } from "framer-motion";
 import { Menu, X, ArrowRight } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { useLenis } from "@/components/providers/lenis-provider";
@@ -26,21 +27,86 @@ export function Header({ isLoggedIn }: HeaderProps) {
 
   // Hero is always dark (DarkVeil), so force light text when not scrolled
   const heroText = !scrolled ? "text-white" : "text-foreground";
-  const heroMuted = !scrolled ? "text-white/60" : "text-muted-foreground";
   const heroMutedHover = !scrolled
     ? "text-white/60 hover:text-white"
     : "text-muted-foreground hover:text-foreground";
 
   const lenis = useLenis();
 
+  /* ─── Scroll-progress linked to hero section ─── */
+  // 0 = at top of page (hero fully visible)
+  // 1 = hero fully scrolled off screen
+  // Navbar morphs in perfect sync with hero scroll progress.
+  const scrollProgress = useMotionValue(0);
+
+  // Store hero section height — measured from DOM
+  const heroHeightRef = useRef(0);
+
+  // Measure hero section height on mount + resize
   useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 20);
+    const measure = () => {
+      const heroEl = document.getElementById("hero");
+      if (heroEl) {
+        heroHeightRef.current = heroEl.offsetHeight;
+      }
     };
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    handleScroll();
-    return () => window.removeEventListener("scroll", handleScroll);
+    // Measure after layout paint
+    measure();
+    window.addEventListener("resize", measure, { passive: true });
+    return () => window.removeEventListener("resize", measure);
   }, []);
+
+  // Header geometry — all derived from scrollProgress (0→1)
+  // Morph window: starts at 30%, finishes at 80% of hero scroll.
+  // This means the navbar is fully morphed BEFORE the hero ends,
+  // so there's no snappy change at the section boundary.
+  //
+  // Multi-point eased curve: slow start → accelerate → slow finish
+  // Creates a natural ease-in-out feel instead of linear interpolation.
+  const points = [0, 0.3, 0.45, 0.55, 0.65, 0.8, 1];
+
+  const headerTop = useTransform(scrollProgress, points,
+    [0, 0, 2, 8, 13, 16, 16], { clamp: true });
+  const headerWidth = useTransform(scrollProgress, points,
+    ["100%", "100%", "98%", "94%", "90%", "88%", "88%"], { clamp: true });
+  const headerMaxWidth = useTransform(scrollProgress, points,
+    [9999, 9999, 5000, 2000, 1100, 896, 896], { clamp: true });
+  // Radius leads ahead — rounds corners early BEFORE width shrinks noticeably,
+  // so you never see a sharp-cornered shrinking rectangle.
+  const headerRadius = useTransform(scrollProgress, points,
+    [0, 0, 14, 18, 20, 20, 20], { clamp: true });
+  const headerPY = useTransform(scrollProgress, points,
+    [20, 20, 18, 14, 11, 10, 10], { clamp: true });
+  const glassOpacity = useTransform(scrollProgress, points,
+    [0, 0, 0.15, 0.5, 0.85, 1, 1], { clamp: true });
+  const logoScale = useTransform(scrollProgress, points,
+    [1, 1, 0.97, 0.92, 0.87, 0.85, 0.85], { clamp: true });
+
+  // Sync Lenis scroll position → scrollProgress (0→1 based on hero height)
+  useEffect(() => {
+    if (lenis) {
+      const onScroll = ({ scroll }: { scroll: number }) => {
+        const heroH = heroHeightRef.current || window.innerHeight;
+        // Clamp progress to 0–1 based on how far through the hero we've scrolled
+        const progress = Math.min(1, Math.max(0, scroll / heroH));
+        scrollProgress.set(progress);
+        setScrolled(progress > 0.1);
+      };
+      lenis.on("scroll", onScroll);
+      return () => lenis.off("scroll", onScroll);
+    } else {
+      // Fallback: native scroll before Lenis initializes
+      const handleScroll = () => {
+        const heroH = heroHeightRef.current || window.innerHeight;
+        const progress = Math.min(1, Math.max(0, window.scrollY / heroH));
+        scrollProgress.set(progress);
+        setScrolled(progress > 0.1);
+      };
+      window.addEventListener("scroll", handleScroll, { passive: true });
+      handleScroll();
+      return () => window.removeEventListener("scroll", handleScroll);
+    }
+  }, [lenis, scrollProgress]);
 
   // Active section detection via IntersectionObserver
   useEffect(() => {
@@ -80,19 +146,35 @@ export function Header({ isLoggedIn }: HeaderProps) {
   );
 
   return (
-    <header
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        scrolled
-          ? "bg-background/80 backdrop-blur-xl shadow-sm border-b border-border/50 py-3"
-          : "bg-transparent py-5"
-      }`}
+    <motion.header
+      style={{
+        position: "fixed",
+        left: "50%",
+        x: "-50%",
+        zIndex: 50,
+        top: headerTop,
+        width: headerWidth,
+        maxWidth: headerMaxWidth,
+        borderRadius: headerRadius,
+        paddingTop: headerPY,
+        paddingBottom: headerPY,
+      }}
     >
-      <div className="container mx-auto px-4 sm:px-6 flex items-center justify-between">
-        {/* Logo */}
+      {/* Glass background — fades in progressively as user scrolls */}
+      <motion.div
+        aria-hidden
+        className="absolute inset-0 bg-background/70 backdrop-blur-2xl border border-border/50 shadow-lg shadow-black/5 pointer-events-none"
+        style={{ opacity: glassOpacity, borderRadius: headerRadius }}
+      />
+
+      {/* Content */}
+      <div className="relative z-10 flex items-center justify-between max-w-6xl mx-auto px-4 sm:px-6">
+        {/* Logo — smoothly scales down when floating */}
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5 }}
+          style={{ scale: logoScale, transformOrigin: "left center" }}
         >
           <Link
             href="/"
@@ -111,7 +193,7 @@ export function Header({ isLoggedIn }: HeaderProps) {
         </motion.div>
 
         {/* Desktop Nav — Center */}
-        <nav className="hidden lg:flex items-center gap-1 absolute left-1/2 -translate-x-1/2">
+        <nav className="hidden lg:flex items-center gap-0.5 absolute left-1/2 -translate-x-1/2">
           {NAV_LINKS.map((link, i) => (
             <motion.div
               key={link.label}
@@ -122,7 +204,7 @@ export function Header({ isLoggedIn }: HeaderProps) {
               <a
                 href={link.href}
                 onClick={(e) => handleNavClick(e, link.href)}
-                className={`nav-link-underline relative px-4 py-2 text-sm font-medium transition-colors rounded-lg ${
+                className={`nav-link-underline relative px-3 py-1.5 text-sm font-medium transition-colors rounded-lg ${
                   activeSection === link.href.replace("#", "")
                     ? `${heroText} active`
                     : heroMutedHover
@@ -136,7 +218,7 @@ export function Header({ isLoggedIn }: HeaderProps) {
 
         {/* Desktop Right — CTA + Theme Toggle */}
         <motion.div
-          className="hidden lg:flex items-center gap-3"
+          className="hidden lg:flex items-center gap-2.5"
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5, delay: 0.3 }}
@@ -144,7 +226,7 @@ export function Header({ isLoggedIn }: HeaderProps) {
           <ThemeToggle variant={scrolled ? 'default' : 'hero'} />
           {isLoggedIn ? (
             <Link href="/chat">
-              <button className={`rounded-full px-5 py-2.5 text-sm font-medium transition-all duration-300 hover:scale-105 hover:shadow-lg flex items-center gap-2 ${
+              <button className={`rounded-full px-4 py-2 text-sm font-medium transition-all duration-300 hover:scale-105 hover:shadow-lg flex items-center gap-2 ${
                 scrolled
                   ? "bg-foreground text-background hover:bg-foreground/90"
                   : "bg-white text-black hover:bg-white/90"
@@ -157,12 +239,12 @@ export function Header({ isLoggedIn }: HeaderProps) {
             <>
               <Link
                 href="/login"
-                className={`text-sm font-medium transition-colors px-4 py-2 ${heroMutedHover}`}
+                className={`text-sm font-medium transition-colors px-3 py-1.5 ${heroMutedHover}`}
               >
                 Sign In
               </Link>
               <Link href="/signup">
-                <button className={`rounded-full px-5 py-2.5 text-sm font-medium transition-all duration-300 hover:scale-105 hover:shadow-lg ${
+                <button className={`rounded-full px-4 py-2 text-sm font-medium transition-all duration-300 hover:scale-105 hover:shadow-lg ${
                   scrolled
                     ? "bg-foreground text-background hover:bg-foreground/90"
                     : "bg-white text-black hover:bg-white/90"
@@ -191,97 +273,101 @@ export function Header({ isLoggedIn }: HeaderProps) {
         </div>
       </div>
 
-      {/* Mobile Menu — Slide from right */}
-      <AnimatePresence>
-        {mobileMenuOpen && (
-          <>
-            {/* Backdrop */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 lg:hidden"
-              onClick={() => setMobileMenuOpen(false)}
-            />
-            {/* Panel */}
-            <motion.div
-              initial={{ x: "100%" }}
-              animate={{ x: 0 }}
-              exit={{ x: "100%" }}
-              transition={{ type: "spring", stiffness: 300, damping: 30 }}
-              className="fixed top-0 right-0 bottom-0 w-72 bg-background border-l border-border z-50 lg:hidden flex flex-col"
-            >
-              <div className="flex items-center justify-between p-4 border-b border-border">
-                <span className="font-semibold">Menu</span>
-                <button
+      {/* Mobile Menu — Portaled to body to escape header transforms */}
+      {typeof document !== "undefined" &&
+        createPortal(
+          <AnimatePresence>
+            {mobileMenuOpen && (
+              <>
+                {/* Backdrop */}
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.2 }}
+                  className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[60] lg:hidden"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="p-2 rounded-lg hover:bg-accent transition-colors"
-                  aria-label="Close menu"
+                />
+                {/* Panel */}
+                <motion.div
+                  initial={{ x: "100%" }}
+                  animate={{ x: 0 }}
+                  exit={{ x: "100%" }}
+                  transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                  className="fixed top-0 right-0 bottom-0 w-72 bg-background border-l border-border z-[70] lg:hidden flex flex-col"
                 >
-                  <X className="h-5 w-5" />
-                </button>
-              </div>
-              <nav className="flex flex-col p-4 gap-1">
-                {NAV_LINKS.map((link, i) => (
-                  <motion.div
-                    key={link.label}
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.1 + i * 0.05 }}
-                  >
-                    <a
-                      href={link.href}
-                      onClick={(e) => handleNavClick(e, link.href)}
-                      className={`block px-4 py-3 text-sm font-medium rounded-lg transition-colors ${
-                        activeSection === link.href.replace("#", "")
-                          ? "bg-accent text-foreground"
-                          : "text-muted-foreground hover:bg-accent hover:text-foreground"
-                      }`}
+                  <div className="flex items-center justify-between p-4 border-b border-border">
+                    <span className="font-semibold">Menu</span>
+                    <button
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="p-2 rounded-lg hover:bg-accent transition-colors"
+                      aria-label="Close menu"
                     >
-                      {link.label}
-                    </a>
-                  </motion.div>
-                ))}
-              </nav>
-              <div className="mt-auto p-4 border-t border-border flex flex-col gap-3">
-                {isLoggedIn ? (
-                  <Link
-                    href="/chat"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="block"
-                  >
-                    <button className="w-full bg-foreground text-background rounded-full px-5 py-3 text-sm font-medium">
-                      Chat with AI
+                      <X className="h-5 w-5" />
                     </button>
-                  </Link>
-                ) : (
-                  <>
-                    <Link
-                      href="/login"
-                      onClick={() => setMobileMenuOpen(false)}
-                      className="block"
-                    >
-                      <button className="w-full border border-border rounded-full px-5 py-3 text-sm font-medium hover:bg-accent transition-colors">
-                        Sign In
-                      </button>
-                    </Link>
-                    <Link
-                      href="/signup"
-                      onClick={() => setMobileMenuOpen(false)}
-                      className="block"
-                    >
-                      <button className="w-full bg-foreground text-background rounded-full px-5 py-3 text-sm font-medium">
-                        Get Started Free
-                      </button>
-                    </Link>
-                  </>
-                )}
-              </div>
-            </motion.div>
-          </>
+                  </div>
+                  <nav className="flex flex-col p-4 gap-1">
+                    {NAV_LINKS.map((link, i) => (
+                      <motion.div
+                        key={link.label}
+                        initial={{ opacity: 0, x: 20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 0.1 + i * 0.05 }}
+                      >
+                        <a
+                          href={link.href}
+                          onClick={(e) => handleNavClick(e, link.href)}
+                          className={`block px-4 py-3 text-sm font-medium rounded-lg transition-colors ${
+                            activeSection === link.href.replace("#", "")
+                              ? "bg-accent text-foreground"
+                              : "text-muted-foreground hover:bg-accent hover:text-foreground"
+                          }`}
+                        >
+                          {link.label}
+                        </a>
+                      </motion.div>
+                    ))}
+                  </nav>
+                  <div className="mt-auto p-4 border-t border-border flex flex-col gap-3">
+                    {isLoggedIn ? (
+                      <Link
+                        href="/chat"
+                        onClick={() => setMobileMenuOpen(false)}
+                        className="block"
+                      >
+                        <button className="w-full bg-foreground text-background rounded-full px-5 py-3 text-sm font-medium">
+                          Chat with AI
+                        </button>
+                      </Link>
+                    ) : (
+                      <>
+                        <Link
+                          href="/login"
+                          onClick={() => setMobileMenuOpen(false)}
+                          className="block"
+                        >
+                          <button className="w-full border border-border rounded-full px-5 py-3 text-sm font-medium hover:bg-accent transition-colors">
+                            Sign In
+                          </button>
+                        </Link>
+                        <Link
+                          href="/signup"
+                          onClick={() => setMobileMenuOpen(false)}
+                          className="block"
+                        >
+                          <button className="w-full bg-foreground text-background rounded-full px-5 py-3 text-sm font-medium">
+                            Get Started Free
+                          </button>
+                        </Link>
+                      </>
+                    )}
+                  </div>
+                </motion.div>
+              </>
+            )}
+          </AnimatePresence>,
+          document.body
         )}
-      </AnimatePresence>
-    </header>
+    </motion.header>
   );
 }

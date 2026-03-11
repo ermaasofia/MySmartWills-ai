@@ -387,7 +387,7 @@ export default function HomePage() {
       <Header isLoggedIn={isLoggedIn} />
 
       {/* ═══════════════ Hero ═══════════════ */}
-      <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
+      <section id="hero" className="relative min-h-screen flex items-center justify-center overflow-hidden">
         {/* DarkVeil WebGL Background */}
         <div className="absolute inset-0">
           <DarkVeil
