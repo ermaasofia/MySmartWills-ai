@@ -81,12 +81,19 @@ No test framework is configured.
 - Admin role determined by `profiles.role` column OR `ADMIN_EMAILS` env var (comma-separated fallback)
 - RLS enforced via `public.is_admin()` Postgres function
 
+### Scroll management
+- **Landing page** uses Lenis smooth scroll (`src/components/providers/lenis-provider.tsx`), activated only on `/` via pathname check
+- **Chat & Admin** use app-shell layouts (`h-screen overflow-hidden` root + `overflow-y-auto` on `<main>`). Both shells add `overflow-locked` class to `<html>` and `<body>` via `useEffect` to prevent double-scroll
+- **Auth/legal pages** use standard body scroll (`min-h-screen` wrappers)
+- Lenis CSS in `globals.css` sets `html.lenis body { height: auto }` — do not remove, it's needed for the landing page scroll
+
 ### Component organization
 - `src/components/auth/` — Login, signup, OAuth, password reset, Turnstile
 - `src/components/chat/` — Chat interface, sidebar, messages, country selector
 - `src/components/admin/` — Admin shell, sidebar, header, AI instructions form
-- `src/components/ui/` — shadcn/ui primitives (do not edit manually, use `npx shadcn@latest add`)
+- `src/components/ui/` — shadcn/ui primitives (do not edit manually, use `pnpm dlx shadcn@latest add`)
 - `src/components/providers/theme-provider.tsx` — next-themes wrapper
+- `src/components/providers/lenis-provider.tsx` — Smooth scroll (landing page only)
 - `src/hooks/use-chat-sessions.ts` — Session list state management hook
 
 ## Database Schema (Supabase)
