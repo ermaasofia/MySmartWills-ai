@@ -132,7 +132,7 @@ html {
   transition: background-color 0.2s ease, color 0.2s ease;
 }
 
-/* Lenis smooth scroll */
+/* Lenis smooth scroll — only affects landing page */
 html.lenis,
 html.lenis body {
   height: auto;
@@ -152,6 +152,12 @@ html.lenis body {
 
 .lenis.lenis-scrolling iframe {
   pointer-events: none;
+}
+
+/* Prevent double-scroll on app-shell pages (admin, chat) that manage their own scroll containers */
+.overflow-locked {
+  height: 100%;
+  overflow: hidden;
 }
 
 /* Hide scrollbar but keep scrolling */

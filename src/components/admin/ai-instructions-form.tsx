@@ -176,16 +176,16 @@ export function AIInstructionsForm() {
 
   if (isLoading) {
     return (
-      <div className="space-y-6">
+      <div className="space-y-4">
         {[1, 2, 3].map((i) => (
           <Card key={i}>
-            <CardHeader>
-              <div className="h-5 w-48 bg-muted animate-pulse rounded" />
-              <div className="h-4 w-72 bg-muted animate-pulse rounded mt-2" />
+            <CardHeader className="p-4 md:p-6">
+              <div className="h-5 w-3/4 max-w-48 bg-muted animate-pulse rounded" />
+              <div className="h-4 w-full max-w-72 bg-muted animate-pulse rounded mt-2" />
             </CardHeader>
-            <CardContent>
-              <div className="h-32 bg-muted animate-pulse rounded" />
-              <div className="h-9 w-20 bg-muted animate-pulse rounded mt-4" />
+            <CardContent className="p-4 pt-0 md:p-6 md:pt-0">
+              <div className="h-24 md:h-32 bg-muted animate-pulse rounded" />
+              <div className="h-9 w-20 bg-muted animate-pulse rounded mt-3" />
             </CardContent>
           </Card>
         ))}
@@ -197,13 +197,13 @@ export function AIInstructionsForm() {
     <div className="space-y-4">
       {PROMPT_CONFIGS.map((config) => (
         <Card key={config.key}>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base">{config.title}</CardTitle>
+          <CardHeader className="p-4 pb-2 md:p-6 md:pb-3">
+            <CardTitle className="text-sm md:text-base">{config.title}</CardTitle>
             <CardDescription className="text-xs">
               {config.description}
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-3">
+          <CardContent className="p-4 pt-0 md:p-6 md:pt-0 space-y-3">
             <div className="space-y-1.5">
               <Label htmlFor={config.key} className="sr-only">
                 {config.title}
@@ -213,7 +213,7 @@ export function AIInstructionsForm() {
                 value={prompts[config.key]}
                 onChange={(e) => handleChange(config.key, e.target.value)}
                 placeholder={config.placeholder}
-                className="min-h-32 text-sm"
+                className="min-h-24 md:min-h-32 text-sm"
               />
               <p className="text-[11px] text-muted-foreground text-right">
                 {prompts[config.key].length.toLocaleString()} characters
@@ -224,6 +224,7 @@ export function AIInstructionsForm() {
               disabled={saveStatus[config.key] === 'saving'}
               variant={getButtonVariant(saveStatus[config.key])}
               size="sm"
+              className="w-full sm:w-auto"
             >
               {getButtonText(saveStatus[config.key])}
             </Button>

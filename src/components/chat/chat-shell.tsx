@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { ChatSidebar } from '@/components/chat/chat-sidebar';
 import { ChatInterface } from '@/components/chat/chat-interface';
@@ -37,6 +37,15 @@ export function ChatShell({
 
   const { sessions, addSession, updateSessionTitle, removeSession } =
     useChatSessions();
+
+  useEffect(() => {
+    document.documentElement.classList.add('overflow-locked');
+    document.body.classList.add('overflow-locked');
+    return () => {
+      document.documentElement.classList.remove('overflow-locked');
+      document.body.classList.remove('overflow-locked');
+    };
+  }, []);
 
   // ── Sidebar callbacks ──────────────────────────────────────────────────────
   const handleNewChat = useCallback(() => {

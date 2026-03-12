@@ -50,10 +50,10 @@ export default async function AdminDashboardPage() {
   ];
 
   return (
-    <div className="max-w-5xl">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold mb-1">Dashboard</h1>
-        <p className="text-sm text-muted-foreground">
+    <div className="max-w-5xl mx-auto">
+      <div className="mb-4 md:mb-6">
+        <h1 className="text-xl md:text-2xl font-bold mb-1">Dashboard</h1>
+        <p className="text-xs md:text-sm text-muted-foreground">
           Overview of your AI SmartWills platform.
         </p>
       </div>

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { AdminSidebar } from '@/components/admin/admin-sidebar';
 import { AdminHeader } from '@/components/admin/admin-header';
 
@@ -11,6 +11,15 @@ interface AdminShellProps {
 
 export function AdminShell({ userEmail, children }: AdminShellProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  useEffect(() => {
+    document.documentElement.classList.add('overflow-locked');
+    document.body.classList.add('overflow-locked');
+    return () => {
+      document.documentElement.classList.remove('overflow-locked');
+      document.body.classList.remove('overflow-locked');
+    };
+  }, []);
 
   return (
     <div className="flex h-screen overflow-hidden bg-background">
