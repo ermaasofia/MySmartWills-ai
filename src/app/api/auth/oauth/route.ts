@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import { rateLimitAsync } from '@/lib/rate-limit';
+import { getClientIp } from '@/lib/ip';
 import { NextResponse } from 'next/server';
 import { headers } from 'next/headers';
 
@@ -18,11 +19,7 @@ const ALLOWED_PROVIDERS: OAuthProvider[] = ['google'];
 export async function POST(request: Request) {
   // ── Rate limiting ─────────────────────────────────────────────────
   const headersList = await headers();
-  const ip =
-    headersList.get('cf-connecting-ip') ??    // Cloudflare
-    headersList.get('x-real-ip') ??           // Nginx / proxy
-    headersList.get('x-forwarded-for')?.split(',')[0].trim() ??
-    'unknown';
+  const ip = getClientIp(headersList);
 
   const rateLimitResult = await rateLimitAsync(`oauth:${ip}`, {
     maxRequests: 10,

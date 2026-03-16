@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useRef } from 'react';
-import { createClient } from '@/lib/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -28,15 +27,23 @@ export function ForgotPasswordForm() {
     setLoading(true);
 
     try {
-      const supabase = createClient();
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/auth/callback?next=/reset-password`,
-        captchaToken: turnstileToken ?? undefined,
+      // Use server-side endpoint for rate limiting
+      const res = await fetch('/api/auth/forgot-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email,
+          captchaToken: turnstileToken ?? undefined,
+          redirectTo: `${window.location.origin}/auth/callback?next=/reset-password`,
+        }),
       });
 
-      if (error) {
-        // Don't reveal whether the email exists - always show success
-        console.error('Password reset error:', error.message);
+      if (!res.ok) {
+        const data = await res.json();
+        setError(data.error || 'An unexpected error occurred. Please try again.');
+        setTurnstileToken(null);
+        turnstileRef.current?.reset();
+        return;
       }
 
       // Always show success to prevent email enumeration

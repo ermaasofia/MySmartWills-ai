@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
+import { rateLimitAsync } from '@/lib/rate-limit';
 import { createChatSession, getUserSessions } from '@/lib/chat';
 
 // GET /api/chat/sessions — list all sessions for the authenticated user
@@ -27,6 +28,19 @@ export async function POST(req: Request) {
 
     if (authError || !user) {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    // Rate limit session creation: 10 sessions per hour per user
+    const { success: rateLimitOk } = await rateLimitAsync(`session-create:${user.id}`, {
+      maxRequests: 10,
+      windowMs: 60 * 60 * 1000, // 1 hour
+    });
+
+    if (!rateLimitOk) {
+      return Response.json(
+        { error: 'Too many sessions created. Please wait before creating more.' },
+        { status: 429 }
+      );
     }
 
     const body = await req.json();

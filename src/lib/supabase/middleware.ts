@@ -49,6 +49,30 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
+  // Admin routes - verify admin role (defense-in-depth: middleware + layout + API)
+  if (user && request.nextUrl.pathname.startsWith('/admin')) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .single();
+
+    const isAdminByRole = profile?.role === 'admin';
+
+    // Fallback: check ADMIN_EMAILS environment variable
+    const adminEmails = (process.env.ADMIN_EMAILS ?? '')
+      .split(',')
+      .map((e) => e.trim().toLowerCase())
+      .filter(Boolean);
+    const isAdminByEmail = user.email ? adminEmails.includes(user.email.toLowerCase()) : false;
+
+    if (!isAdminByRole && !isAdminByEmail) {
+      const url = request.nextUrl.clone();
+      url.pathname = '/chat';
+      return NextResponse.redirect(url);
+    }
+  }
+
   // Redirect authenticated users away from auth pages
   if (
     user &&

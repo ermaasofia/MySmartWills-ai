@@ -304,5 +304,33 @@ BEGIN
 END;
 $$;
 
+-- ─── Admin Audit Logs ──────────────────────────────────────────────────────
+
+-- Tracks admin actions for security auditing
+CREATE TABLE IF NOT EXISTS public.admin_audit_logs (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  admin_id UUID REFERENCES auth.users(id) ON DELETE SET NULL,
+  action TEXT NOT NULL,
+  details JSONB DEFAULT '{}',
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_admin_audit_logs_admin_id ON public.admin_audit_logs(admin_id);
+CREATE INDEX IF NOT EXISTS idx_admin_audit_logs_created_at ON public.admin_audit_logs(created_at DESC);
+
+ALTER TABLE public.admin_audit_logs ENABLE ROW LEVEL SECURITY;
+
+-- Only admins can view audit logs
+CREATE POLICY "Admins can view audit logs"
+  ON public.admin_audit_logs FOR SELECT
+  TO authenticated
+  USING (public.is_admin());
+
+-- Admins can insert their own audit logs
+CREATE POLICY "Admins can insert audit logs"
+  ON public.admin_audit_logs FOR INSERT
+  TO authenticated
+  WITH CHECK (auth.uid() = admin_id AND public.is_admin());
+
 -- Bootstrap: run this manually in Supabase SQL Editor to grant yourself admin
 -- UPDATE public.profiles SET role = 'admin' WHERE email = '<your-email>';

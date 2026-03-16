@@ -135,6 +135,97 @@ interface ExtractionResult {
   summary: string | null;
 }
 
+/** Validate and sanitize individual fact values by type */
+function validateFactValue(key: keyof UserMemoryFacts, value: unknown): unknown {
+  switch (key) {
+    // String fields
+    case 'name':
+    case 'nationality':
+    case 'country_of_residence':
+    case 'religion':
+    case 'marital_status':
+    case 'spouse_name':
+    case 'existing_will_details':
+    case 'preferred_executor':
+    case 'preferred_guardian':
+    case 'charitable_wishes':
+    case 'planning_goals':
+    case 'preferred_language':
+      return typeof value === 'string' ? value.slice(0, 500) : undefined;
+
+    // Number fields
+    case 'age':
+      return typeof value === 'number' && Number.isFinite(value) && value > 0 && value < 200
+        ? value : undefined;
+
+    // Boolean fields
+    case 'has_existing_will':
+    case 'islamic_faraid_applicable':
+      return typeof value === 'boolean' ? value : undefined;
+
+    // String array
+    case 'primary_concerns':
+      if (!Array.isArray(value)) return undefined;
+      return value
+        .filter((v): v is string => typeof v === 'string')
+        .map(v => v.slice(0, 500))
+        .slice(0, 20);
+
+    // children: Array<{ name: string; age?: number; notes?: string }>
+    case 'children':
+      if (!Array.isArray(value)) return undefined;
+      return value
+        .filter((v): v is Record<string, unknown> => typeof v === 'object' && v !== null && typeof v.name === 'string')
+        .map(v => ({
+          name: String(v.name).slice(0, 200),
+          age: typeof v.age === 'number' && Number.isFinite(v.age) ? v.age : undefined,
+          notes: typeof v.notes === 'string' ? v.notes.slice(0, 500) : undefined,
+        }))
+        .slice(0, 30);
+
+    // dependents: Array<{ name: string; relationship: string; notes?: string }>
+    case 'dependents':
+      if (!Array.isArray(value)) return undefined;
+      return value
+        .filter((v): v is Record<string, unknown> =>
+          typeof v === 'object' && v !== null && typeof v.name === 'string' && typeof v.relationship === 'string')
+        .map(v => ({
+          name: String(v.name).slice(0, 200),
+          relationship: String(v.relationship).slice(0, 200),
+          notes: typeof v.notes === 'string' ? v.notes.slice(0, 500) : undefined,
+        }))
+        .slice(0, 30);
+
+    // assets: Array<{ type: string; description: string; location?: string }>
+    case 'assets':
+      if (!Array.isArray(value)) return undefined;
+      return value
+        .filter((v): v is Record<string, unknown> =>
+          typeof v === 'object' && v !== null && typeof v.type === 'string' && typeof v.description === 'string')
+        .map(v => ({
+          type: String(v.type).slice(0, 200),
+          description: String(v.description).slice(0, 500),
+          location: typeof v.location === 'string' ? v.location.slice(0, 200) : undefined,
+        }))
+        .slice(0, 50);
+
+    // specific_bequests: Array<{ beneficiary: string; asset: string }>
+    case 'specific_bequests':
+      if (!Array.isArray(value)) return undefined;
+      return value
+        .filter((v): v is Record<string, unknown> =>
+          typeof v === 'object' && v !== null && typeof v.beneficiary === 'string' && typeof v.asset === 'string')
+        .map(v => ({
+          beneficiary: String(v.beneficiary).slice(0, 200),
+          asset: String(v.asset).slice(0, 500),
+        }))
+        .slice(0, 50);
+
+    default:
+      return undefined;
+  }
+}
+
 function parseExtractionResponse(text: string): ExtractionResult {
   try {
     // Strip markdown code fences if present
@@ -144,17 +235,21 @@ function parseExtractionResponse(text: string): ExtractionResult {
       return { facts: {}, summary: typeof parsed.summary === 'string' ? parsed.summary : null };
     }
 
-    // Only accept keys in the whitelist
+    // Only accept keys in the whitelist, with type validation
     const safeFacts: Partial<UserMemoryFacts> = {};
     for (const [key, value] of Object.entries(parsed.facts)) {
-      if (VALID_FACT_KEYS.has(key as keyof UserMemoryFacts) && value !== undefined && value !== null) {
-        (safeFacts as Record<string, unknown>)[key] = value;
+      if (!VALID_FACT_KEYS.has(key as keyof UserMemoryFacts) || value === undefined || value === null) {
+        continue;
+      }
+      const validated = validateFactValue(key as keyof UserMemoryFacts, value);
+      if (validated !== undefined) {
+        (safeFacts as Record<string, unknown>)[key] = validated;
       }
     }
 
     return {
       facts: safeFacts,
-      summary: typeof parsed.summary === 'string' ? parsed.summary : null,
+      summary: typeof parsed.summary === 'string' ? parsed.summary.slice(0, 2000) : null,
     };
   } catch {
     console.warn('Failed to parse memory extraction response');

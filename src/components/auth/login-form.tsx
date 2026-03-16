@@ -3,7 +3,6 @@
 import { useState, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { createClient } from '@/lib/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -45,17 +44,20 @@ export function LoginForm() {
     setLoading(true);
 
     try {
-      const supabase = createClient();
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-        options: {
+      // Use server-side endpoint for rate limiting and generic error messages
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email,
+          password,
           captchaToken: turnstileToken ?? undefined,
-        },
+        }),
       });
 
-      if (error) {
-        setError(error.message);
+      if (!res.ok) {
+        const data = await res.json();
+        setError(data.error || 'Invalid email or password');
         // Reset Turnstile to get a new token for next attempt
         setTurnstileToken(null);
         turnstileRef.current?.reset();

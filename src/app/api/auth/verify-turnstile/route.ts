@@ -1,4 +1,5 @@
 import { verifyTurnstileToken } from '@/lib/turnstile';
+import { getClientIp } from '@/lib/ip';
 import { NextResponse } from 'next/server';
 
 // Rate limit for Turnstile verification to prevent abuse
@@ -22,8 +23,7 @@ export async function POST(req: Request) {
     }
 
     // Basic IP-based rate limiting for this endpoint
-    const forwarded = req.headers.get('x-forwarded-for');
-    const ip = forwarded?.split(',')[0]?.trim() || 'unknown';
+    const ip = getClientIp(req.headers);
     const now = Date.now();
     const attempt = verifyAttempts.get(ip);
 

@@ -338,6 +338,15 @@ export async function POST(req: Request) {
       }))
       .filter((m: { content: string }) => m.content.length > 0);
 
+    // Reject if total payload is too large (prevent LLM API abuse)
+    const totalContentLength = sanitizedMessages.reduce((sum, m) => sum + m.content.length, 0);
+    if (totalContentLength > 20_000) {
+      return new Response(
+        JSON.stringify({ error: 'Message payload too large. Please start a new conversation.' }),
+        { status: 413, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+
     // Validate country code
     const validCodes = COUNTRIES.map((c) => c.code);
     const safeCountryCode = validCodes.includes(countryCode) ? countryCode : 'MY';

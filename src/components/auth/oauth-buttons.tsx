@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { createClient } from '@/lib/supabase/client';
 import { Button } from '@/components/ui/button';
 
 interface OAuthButtonsProps {
@@ -51,30 +50,25 @@ export function OAuthButtons({ redirectTo = '/chat', mode = 'login' }: OAuthButt
     setLoadingProvider(provider);
 
     try {
-      // Build callback URL from the browser's own origin — always correct
-      const callbackUrl = `${window.location.origin}/auth/callback?next=${encodeURIComponent(redirectTo)}`;
-
-      console.log('[OAuth] callbackUrl being sent to Supabase:', callbackUrl);
-
-      const supabase = createClient();
-      const { data, error: oauthError } = await supabase.auth.signInWithOAuth({
-        provider,
-        options: {
-          redirectTo: callbackUrl,
-          queryParams: {
-            access_type: 'offline',
-            prompt: 'select_account',
-          },
-        },
+      // Use server-side endpoint for rate limiting and PKCE security
+      const res = await fetch('/api/auth/oauth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          provider,
+          redirectTo,
+        }),
       });
 
-      if (oauthError || !data.url) {
-        setError(oauthError?.message ?? 'Failed to start Google sign-in. Please try again.');
+      const data = await res.json();
+
+      if (!res.ok || !data.url) {
+        setError(data.error ?? 'Failed to start Google sign-in. Please try again.');
         setLoadingProvider(null);
         return;
       }
 
-      // Supabase returns the provider URL — redirect to it
+      // Server returns the provider URL — redirect to it
       window.location.href = data.url;
     } catch {
       setError('Network error. Please check your connection and try again.');

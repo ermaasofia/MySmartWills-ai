@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -15,6 +15,45 @@ export function ResetPasswordForm() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [validSession, setValidSession] = useState<boolean | null>(null);
+
+  // Verify the user has a valid recovery session before showing the form
+  useEffect(() => {
+    const checkSession = async () => {
+      const supabase = createClient();
+      const { data: { session } } = await supabase.auth.getSession();
+      // A valid recovery session is set by Supabase after the user clicks the reset link
+      if (!session) {
+        setValidSession(false);
+        return;
+      }
+      setValidSession(true);
+    };
+    checkSession();
+  }, []);
+
+  if (validSession === null) {
+    return (
+      <div className="text-center p-6">
+        <span className="h-6 w-6 border-2 border-current border-t-transparent rounded-full animate-spin inline-block" />
+        <p className="mt-2 text-muted-foreground">Validating reset session...</p>
+      </div>
+    );
+  }
+
+  if (!validSession) {
+    return (
+      <div className="text-center p-6 border border-border rounded-lg">
+        <h2 className="text-xl font-semibold mb-2">Invalid or Expired Link</h2>
+        <p className="text-muted-foreground mb-4">
+          This password reset link is invalid or has expired. Please request a new one.
+        </p>
+        <Button variant="outline" onClick={() => router.push('/forgot-password')}>
+          Request New Link
+        </Button>
+      </div>
+    );
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,7 +79,7 @@ export function ResetPasswordForm() {
       });
 
       if (error) {
-        setError(error.message);
+        setError('Failed to update password. The reset link may have expired.');
         return;
       }
 

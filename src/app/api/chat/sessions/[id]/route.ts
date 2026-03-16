@@ -16,10 +16,10 @@ export async function GET(
 
     const { id: sessionId } = await params;
 
-    // Verify the session belongs to the authenticated user (RLS also enforces this)
+    // Verify the session belongs to the authenticated user (defense-in-depth: explicit check + RLS)
     const { data: session, error: sessionError } = await supabase
       .from('chat_sessions')
-      .select('id, title, country_code, created_at')
+      .select('id, title, country_code, created_at, user_id')
       .eq('id', sessionId)
       .single();
 
@@ -27,8 +27,14 @@ export async function GET(
       return Response.json({ error: 'Session not found' }, { status: 404 });
     }
 
+    if (session.user_id !== user.id) {
+      return Response.json({ error: 'Forbidden' }, { status: 403 });
+    }
+
     const messages = await getSessionMessages(supabase, sessionId);
-    return Response.json({ session, messages });
+    // Strip user_id from response — client doesn't need it
+    const { user_id: _, ...safeSession } = session;
+    return Response.json({ session: safeSession, messages });
   } catch (error) {
     console.error('GET /api/chat/sessions/[id] error:', error);
     return Response.json({ error: 'Failed to fetch session' }, { status: 500 });
@@ -56,7 +62,21 @@ export async function PATCH(
       return Response.json({ error: 'Title is required' }, { status: 400 });
     }
 
-    // RLS ensures only the owner can update
+    // Defense-in-depth: explicit ownership check + RLS
+    const { data: session } = await supabase
+      .from('chat_sessions')
+      .select('id, user_id')
+      .eq('id', sessionId)
+      .single();
+
+    if (!session) {
+      return Response.json({ error: 'Session not found' }, { status: 404 });
+    }
+
+    if (session.user_id !== user.id) {
+      return Response.json({ error: 'Forbidden' }, { status: 403 });
+    }
+
     await updateSessionTitle(supabase, sessionId, title);
     return Response.json({ success: true, title });
   } catch (error) {
@@ -80,15 +100,19 @@ export async function DELETE(
 
     const { id: sessionId } = await params;
 
-    // Confirm ownership before deletion (RLS also enforces this)
+    // Confirm ownership before deletion (defense-in-depth: explicit check + RLS)
     const { data: session } = await supabase
       .from('chat_sessions')
-      .select('id')
+      .select('id, user_id')
       .eq('id', sessionId)
       .single();
 
     if (!session) {
       return Response.json({ error: 'Session not found' }, { status: 404 });
+    }
+
+    if (session.user_id !== user.id) {
+      return Response.json({ error: 'Forbidden' }, { status: 403 });
     }
 
     await deleteSession(supabase, sessionId);
