@@ -43,6 +43,7 @@ No test framework is configured.
 - `/api/chat/route.ts` — Streaming chat endpoint (auth + rate limit + Groq LLM)
 - `/api/chat/sessions/` — Session CRUD (GET/POST, DELETE by ID)
 - `/api/admin/ai-prompts/route.ts` — AI prompt management (admin only, GET/PUT/POST)
+- `/api/auth/login/route.ts` — Email/password login (rate limited: 5/5min per IP, generic errors to prevent enumeration)
 - `/api/auth/oauth/route.ts` — Google OAuth URL generation (rate limited)
 - `/api/auth/verify-turnstile/` — CAPTCHA verification
 - `/auth/callback/route.ts` — OAuth + password reset callback handler (PKCE code exchange)
@@ -123,7 +124,7 @@ See `.env.local` for the full template. Key variables:
 
 - Security headers configured in `next.config.ts` (CSP, HSTS, X-Frame-Options)
 - Origin validation on chat API endpoint
-- Rate limiting: chat (20/60s per user), OAuth (10/10min per IP)
+- Rate limiting: chat (20/60s per user), login (5/5min per IP), OAuth (10/10min per IP)
 - Input sanitization: message length caps, control character removal
 - All database access goes through RLS — never bypass with service role key in client code
 - Admin routes protected at middleware, layout, and API levels; RLS enforces via `public.is_admin()`
