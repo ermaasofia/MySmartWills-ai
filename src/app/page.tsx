@@ -33,37 +33,37 @@ const DarkVeil = dynamic(() => import("@/components/ui/DarkVeil"), {
 const FEATURES = [
   {
     icon: Sparkles,
-    title: "AI-Powered Generation",
+    title: "Knows your jurisdiction",
     description:
-      "Advanced AI creates personalized legal wills in minutes, not months. Get instant clarity on complex estate matters.",
+      "Our AI is trained on the inheritance laws of all 12 supported countries. The guidance you receive is grounded in where you actually live — not generic legal boilerplate.",
     span: "lg:col-span-2",
   },
   {
     icon: ShieldCheck,
-    title: "Legally Compliant",
+    title: "From Faraid to probate",
     description:
-      "Every document follows your jurisdiction's legal requirements across 12 Asia-Pacific countries.",
+      "Whether you're dealing with Malaysia's Faraid rules, Singapore's Wills Act, or Australian probate — every answer is specific to your country's legal framework.",
     span: "lg:col-span-2",
   },
   {
     icon: Lock,
-    title: "Bank-Level Security",
+    title: "Your data stays private",
     description:
-      "256-bit encryption protects your sensitive information at every step.",
+      "Conversations are encrypted end-to-end. We never sell your data or share it with third parties.",
     span: "lg:col-span-1",
   },
   {
     icon: MessageSquareText,
-    title: "24/7 AI Assistant",
+    title: "Ask anything, get clarity",
     description:
-      "Get instant answers to your estate planning questions anytime.",
+      "No appointment needed. Ask about executors, beneficiaries, or inheritance disputes — and get a clear, specific answer within seconds.",
     span: "lg:col-span-2",
   },
   {
     icon: RefreshCw,
-    title: "Easy Updates",
+    title: "Plans change. So should your will.",
     description:
-      "Modify your will anytime as your life changes — no extra cost.",
+      "Got married? Had a child? Your circumstances change. Come back and revisit without starting from scratch.",
     span: "lg:col-span-1",
   },
 ];
@@ -73,21 +73,21 @@ const HOW_IT_WORKS = [
     step: "01",
     title: "Select Your Country",
     description:
-      "Choose your jurisdiction and the AI instantly adapts to your local inheritance and will laws.",
+      "Pick your country. The AI immediately switches to your local inheritance laws, legal requirements, and jurisdiction-specific edge cases.",
     icon: MapPin,
   },
   {
     step: "02",
     title: "Ask Your Questions",
     description:
-      "Chat naturally about wills, executors, beneficiaries, religious considerations and more.",
+      "Type exactly what's on your mind — in plain English. No legal background required.",
     icon: MessageSquareText,
   },
   {
     step: "03",
     title: "Get Step-by-Step Guidance",
     description:
-      "Receive clear, actionable answers so you know exactly what to prepare and what steps to take next.",
+      "Get a concrete breakdown of what to prepare, who to involve, and what to do next — no more guessing.",
     icon: CheckCircle2,
   },
 ];
@@ -96,19 +96,19 @@ const TESTIMONIALS = [
   {
     name: "Sarah L.",
     country: "Malaysia",
-    text: "AI SmartWills made the whole will planning process so much less intimidating. I finally understood what I needed to do.",
+    text: "I'd been putting off my will for years because I didn't know where to start. This answered every question I had in one afternoon — no legal fees, no confusion.",
     rating: 5,
   },
   {
     name: "David T.",
     country: "Singapore",
-    text: "The country-specific guidance was incredibly helpful. It saved me hours of research and gave me confidence to proceed.",
+    text: "I came in knowing nothing about executors or beneficiaries. The AI walked me through everything specific to Singapore law. I actually understood what I needed to do when I left.",
     rating: 5,
   },
   {
     name: "Mei Yin C.",
     country: "Hong Kong",
-    text: "I love that it understands both English and Chinese. The answers were clear and I could consult a lawyer much more prepared.",
+    text: "The answers were specific to Hong Kong — not generic advice. When I eventually met with a solicitor, I already knew the right questions to ask.",
     rating: 5,
   },
 ];
@@ -116,7 +116,7 @@ const TESTIMONIALS = [
 const FAQ_ITEMS = [
   {
     q: "Is the guidance provided by AI SmartWills considered legal advice?",
-    a: "No. AI SmartWills provides general educational information to help you understand the will planning process. We always recommend consulting a qualified legal professional for your specific situation.",
+    a: "No. AI SmartWills provides educational guidance to help you understand the will planning process — not a substitute for legal advice. For your specific situation, we recommend consulting a qualified solicitor or estate planning professional.",
   },
   {
     q: "Which countries are supported?",
@@ -128,7 +128,7 @@ const FAQ_ITEMS = [
   },
   {
     q: "Can I use AI SmartWills for Islamic wills (Wasiat)?",
-    a: "Absolutely. Our AI understands Syariah law, Faraid distribution and Islamic estate requirements — especially for Malaysia and Brunei.",
+    a: "Yes. The AI covers Syariah principles, Faraid distribution, and Wasiat requirements in depth — particularly for Malaysia and Brunei.",
   },
   {
     q: "Is AI SmartWills free to use?",
@@ -155,22 +155,22 @@ const ECOSYSTEM = [
   {
     name: "SmartWills Malaysia",
     domain: "smartwills.com.my",
-    description: "Professional online will writing for Malaysians",
+    description: "Online will writing for Malaysian residents",
   },
   {
     name: "SmartWills Singapore",
     domain: "smartwills.com.sg",
-    description: "Estate planning solutions for Singapore residents",
+    description: "Online will writing for Singapore residents",
   },
   {
     name: "SmartWills Hong Kong",
     domain: "smartwills.com.hk",
-    description: "Will preparation services for Hong Kong",
+    description: "Online will writing for Hong Kong residents",
   },
   {
     name: "MySmartwills",
     domain: "mysmartwills.com",
-    description: "Global platform for will management",
+    description: "International will management platform",
   },
   {
     name: "WasiatKu",
@@ -180,9 +180,9 @@ const ECOSYSTEM = [
 ];
 
 const TRUST_METRICS = [
-  { value: 10000, suffix: "+", label: "Wills Created", countUp: true, decimals: 0 },
+  { value: 10000, suffix: "+", label: "Sessions", countUp: true, decimals: 0 },
   { value: 4.9, suffix: "★", label: "Rating", countUp: true, decimals: 1 },
-  { value: 0, suffix: "", label: "Security", countUp: false, decimals: 0, staticText: "Bank-Level" },
+  { value: 0, suffix: "", label: "Encrypted", countUp: false, decimals: 0, staticText: "End-to-End" },
 ];
 
 /* ───────────────────── Helpers ───────────────────── */
@@ -411,7 +411,7 @@ export default function HomePage() {
               className="inline-flex items-center gap-2 border border-white/10 rounded-full px-4 py-1.5 mb-8 text-xs sm:text-sm font-medium text-white/70 bg-white/5 backdrop-blur-sm"
             >
               <ShieldCheck className="h-4 w-4 text-white/70" />
-              Trusted by thousands across Asia-Pacific
+              Used by families across 12 countries
             </motion.div>
 
             {/* Headline */}
@@ -421,11 +421,10 @@ export default function HomePage() {
               transition={{ duration: 0.6, delay: 0.35 }}
               className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight mb-6 text-white leading-[1.1]"
             >
-              Create Your Legal Will
+              Estate planning clarity,
               <br />
-              with AI —{" "}
               <span className="text-white/80">
-                In Minutes
+                built for Asia-Pacific.
               </span>
             </motion.h1>
 
@@ -436,8 +435,9 @@ export default function HomePage() {
               transition={{ duration: 0.6, delay: 0.5 }}
               className="text-base sm:text-lg md:text-xl text-white/60 mb-10 max-w-2xl mx-auto leading-relaxed"
             >
-              AI SmartWills uses advanced AI to generate legally-compliant wills
-              tailored to your country&apos;s laws. No lawyers needed.
+              Will laws vary dramatically across the region. AI SmartWills gives
+              you country-specific guidance on wills, inheritance, and estate
+              planning — in plain language, not legal jargon.
             </motion.p>
 
             {/* CTAs */}
@@ -449,7 +449,7 @@ export default function HomePage() {
             >
               <Link href={isLoggedIn ? "/chat" : "/signup"}>
                 <button className="w-full sm:w-auto bg-white text-black hover:bg-white/90 rounded-full px-8 py-4 text-lg font-medium transition-all duration-300 hover:scale-105 hover:shadow-xl flex items-center justify-center gap-2">
-                  Start Free Now
+                  Start for Free
                   <ArrowRight className="h-5 w-5" />
                 </button>
               </Link>
@@ -493,11 +493,11 @@ export default function HomePage() {
         <div className="container mx-auto max-w-6xl">
           <SectionHeading className="text-center mb-16">
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight mb-4">
-              Why Choose AI SmartWills?
+              Built for the complexity of Asia-Pacific
             </h2>
             <p className="text-base sm:text-lg text-muted-foreground max-w-xl mx-auto">
-              We take the confusion out of will planning so you can focus on
-              what matters most — your family.
+              Inheritance law differs country by country, and the details matter.
+              We handle that complexity so you don&apos;t have to.
             </p>
           </SectionHeading>
 
@@ -531,7 +531,7 @@ export default function HomePage() {
               How It Works
             </h2>
             <p className="text-base sm:text-lg text-muted-foreground max-w-xl mx-auto">
-              Three simple steps to clarity and confidence in your will planning.
+              One conversation. Full clarity on what your family needs.
             </p>
           </SectionHeading>
 
@@ -563,11 +563,11 @@ export default function HomePage() {
         <div className="container mx-auto max-w-5xl">
           <SectionHeading className="text-center mb-16">
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight mb-4">
-              What Our Users Say
+              Real families. Real plans.
             </h2>
             <p className="text-base sm:text-lg text-muted-foreground max-w-xl mx-auto">
-              Thousands of families across Asia-Pacific trust AI SmartWills to guide
-              them through estate planning.
+              From first-timers to those revisiting an outdated will — here&apos;s
+              what they found.
             </p>
           </SectionHeading>
 
@@ -637,7 +637,7 @@ export default function HomePage() {
               Frequently Asked Questions
             </h2>
             <p className="text-base sm:text-lg text-muted-foreground max-w-xl mx-auto">
-              Everything you need to know before getting started.
+              Honest answers before you begin.
             </p>
           </SectionHeading>
 
@@ -659,8 +659,8 @@ export default function HomePage() {
               The SmartWills Ecosystem
             </h2>
             <p className="text-base sm:text-lg text-muted-foreground max-w-xl mx-auto">
-              AI SmartWills is part of the SmartWills family — online will
-              writing services trusted across multiple countries.
+              AI SmartWills is part of the SmartWills group — a network of
+              online will writing platforms serving families across the region.
             </p>
           </SectionHeading>
 
@@ -707,8 +707,8 @@ export default function HomePage() {
                 <span className="font-bold text-lg">AI SmartWills</span>
               </div>
               <p className="text-sm text-muted-foreground leading-relaxed">
-                Your intelligent will planning assistant — powered by AI,
-                built on the trusted SmartWills ecosystem.
+                Intelligent will planning guidance, built on the SmartWills
+                ecosystem.
               </p>
             </div>
 
