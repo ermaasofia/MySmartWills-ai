@@ -6,26 +6,26 @@ import { NextResponse } from 'next/server';
 import { headers } from 'next/headers';
 
 /**
- * POST /api/auth/login
+ * POST /api/auth/signup
  *
- * Server-side login with rate limiting.
- * - Rate limited per IP: 5 attempts / 5 minutes
- * - Validates input before forwarding to Supabase
- * - Returns generic error messages to prevent user enumeration
+ * Server-side signup with rate limiting and CAPTCHA verification.
+ * - Rate limited per IP: 5 attempts / 15 minutes
+ * - Verifies Turnstile CAPTCHA server-side before creating account
+ * - Returns generic errors to prevent enumeration
  */
 export async function POST(request: Request) {
   // ── Rate limiting ─────────────────────────────────────────────────
   const headersList = await headers();
   const ip = getClientIp(headersList);
 
-  const rateLimitResult = await rateLimitAsync(`auth-login:${ip}`, {
+  const rateLimitResult = await rateLimitAsync(`auth-signup:${ip}`, {
     maxRequests: 5,
-    windowMs: 5 * 60 * 1000, // 5 minutes
+    windowMs: 15 * 60 * 1000, // 15 minutes
   });
 
   if (!rateLimitResult.success) {
     return NextResponse.json(
-      { error: 'Too many login attempts. Please wait a few minutes.' },
+      { error: 'Too many signup attempts. Please wait before trying again.' },
       {
         status: 429,
         headers: {
@@ -38,7 +38,12 @@ export async function POST(request: Request) {
   }
 
   // ── Parse & validate body ─────────────────────────────────────────
-  let body: { email?: unknown; password?: unknown; captchaToken?: unknown };
+  let body: {
+    email?: unknown;
+    password?: unknown;
+    fullName?: unknown;
+    captchaToken?: unknown;
+  };
   try {
     body = await request.json();
   } catch {
@@ -47,6 +52,7 @@ export async function POST(request: Request) {
 
   const email = typeof body.email === 'string' ? body.email.trim().slice(0, 320) : '';
   const password = typeof body.password === 'string' ? body.password.slice(0, 1000) : '';
+  const fullName = typeof body.fullName === 'string' ? body.fullName.trim().slice(0, 200) : '';
   const captchaToken = typeof body.captchaToken === 'string' ? body.captchaToken : '';
 
   if (!email || !password) {
@@ -57,28 +63,38 @@ export async function POST(request: Request) {
   }
 
   // ── Verify Turnstile CAPTCHA server-side ──────────────────────────
-  if (captchaToken) {
-    const turnstileResult = await verifyTurnstileToken(captchaToken, ip);
-    if (!turnstileResult.success) {
-      return NextResponse.json(
-        { error: 'CAPTCHA verification failed. Please try again.' },
-        { status: 403 }
-      );
-    }
+  if (!captchaToken) {
+    return NextResponse.json(
+      { error: 'CAPTCHA verification is required' },
+      { status: 400 }
+    );
   }
 
-  // ── Authenticate via Supabase ───────────────────────────────────
+  const turnstileResult = await verifyTurnstileToken(captchaToken, ip);
+  if (!turnstileResult.success) {
+    return NextResponse.json(
+      { error: turnstileResult.error || 'CAPTCHA verification failed. Please try again.' },
+      { status: 403 }
+    );
+  }
+
+  // ── Create account via Supabase ───────────────────────────────────
   const supabase = await createClient();
-  const { error } = await supabase.auth.signInWithPassword({
+  const { error } = await supabase.auth.signUp({
     email,
     password,
+    options: {
+      data: {
+        full_name: fullName,
+      },
+    },
   });
 
   if (error) {
-    // Generic message to prevent user enumeration
+    // Return generic message to prevent enumeration
     return NextResponse.json(
-      { error: 'Invalid email or password' },
-      { status: 401 }
+      { error: 'Unable to create account. Please try again.' },
+      { status: 400 }
     );
   }
 

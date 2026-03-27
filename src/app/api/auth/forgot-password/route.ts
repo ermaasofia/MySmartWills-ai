@@ -36,7 +36,13 @@ export async function POST(request: Request) {
 
   const email = typeof body.email === 'string' ? body.email.trim() : '';
   const captchaToken = typeof body.captchaToken === 'string' ? body.captchaToken : undefined;
-  const redirectTo = typeof body.redirectTo === 'string' ? body.redirectTo : undefined;
+
+  // Validate redirectTo — only allow safe relative paths (same pattern as OAuth route)
+  const rawRedirect = typeof body.redirectTo === 'string' ? body.redirectTo : null;
+  const redirectTo =
+    rawRedirect && rawRedirect.startsWith('/') && !rawRedirect.startsWith('//')
+      ? rawRedirect
+      : undefined;
 
   if (!email) {
     return NextResponse.json(

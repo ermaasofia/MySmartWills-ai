@@ -82,7 +82,8 @@ RETURNS BOOLEAN AS $$
     SELECT 1 FROM public.profiles
     WHERE id = auth.uid() AND role = 'admin'
   );
-$$ LANGUAGE sql SECURITY DEFINER STABLE;
+$$ LANGUAGE sql SECURITY DEFINER STABLE
+SET search_path = public;
 
 -- Profiles policies
 CREATE POLICY "Users can view their own profile"
@@ -91,7 +92,11 @@ CREATE POLICY "Users can view their own profile"
 
 CREATE POLICY "Users can update their own profile"
   ON public.profiles FOR UPDATE
-  USING (auth.uid() = id);
+  USING (auth.uid() = id)
+  WITH CHECK (
+    -- Prevent users from changing their own role (only superadmin/SQL can change roles)
+    role = (SELECT p.role FROM public.profiles p WHERE p.id = auth.uid())
+  );
 
 CREATE POLICY "Users can insert their own profile"
   ON public.profiles FOR INSERT
@@ -168,7 +173,8 @@ BEGIN
   );
   RETURN NEW;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER
+SET search_path = public;
 
 -- Trigger to create profile on user signup
 DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
