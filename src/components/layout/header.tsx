@@ -70,7 +70,7 @@ export function Header({ isLoggedIn }: HeaderProps) {
   const headerWidth = useTransform(scrollProgress, points,
     ["100%", "100%", "98%", "94%", "90%", "88%", "88%"], { clamp: true });
   const headerMaxWidth = useTransform(scrollProgress, points,
-    [9999, 9999, 5000, 2000, 1100, 896, 896], { clamp: true });
+    [9999, 9999, 5000, 2000, 1100, 1024, 1024], { clamp: true });
   // Radius leads ahead — rounds corners early BEFORE width shrinks noticeably,
   // so you never see a sharp-cornered shrinking rectangle.
   const headerRadius = useTransform(scrollProgress, points,
@@ -193,7 +193,7 @@ export function Header({ isLoggedIn }: HeaderProps) {
         </motion.div>
 
         {/* Desktop Nav — Center */}
-        <nav className="hidden lg:flex items-center gap-0.5 absolute left-1/2 -translate-x-1/2">
+        <nav className="hidden lg:flex items-center gap-0 absolute left-1/2 -translate-x-1/2">
           {NAV_LINKS.map((link, i) => (
             <motion.div
               key={link.label}
