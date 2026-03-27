@@ -12,9 +12,19 @@ import {
   LogOut,
   X,
   Sparkles,
+  Settings,
+  Crown,
+  ChevronUp,
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { ThemeToggle } from '@/components/theme-toggle';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { SessionSummary } from '@/hooks/use-chat-sessions';
 import { cn } from '@/lib/utils';
 
@@ -179,20 +189,43 @@ export function ChatSidebar({
           <ThemeToggle />
         </div>
 
-        {/* User info + sign out */}
-        <button
-          onClick={handleSignOut}
-          className="w-full flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm
-            hover:bg-destructive/10 hover:text-destructive transition-colors group"
-        >
-          <div className="h-7 w-7 rounded-full bg-primary/15 flex items-center justify-center shrink-0 text-xs font-bold text-primary">
-            {(userName[0] ?? userEmail[0] ?? '?').toUpperCase()}
-          </div>
-          <div className="flex-1 text-left min-w-0">
-            <p className="text-xs font-medium truncate">{userName || 'User'}</p>
-          </div>
-          <LogOut className="h-3.5 w-3.5 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" />
-        </button>
+        {/* User menu */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button
+              className="w-full flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm
+                hover:bg-muted transition-colors group"
+            >
+              <div className="h-7 w-7 rounded-full bg-primary/15 flex items-center justify-center shrink-0 text-xs font-bold text-primary">
+                {(userName[0] ?? userEmail[0] ?? '?').toUpperCase()}
+              </div>
+              <div className="flex-1 text-left min-w-0">
+                <p className="text-xs font-medium truncate">{userName || 'User'}</p>
+              </div>
+              <ChevronUp className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent side="top" align="start" className="w-[var(--radix-dropdown-menu-trigger-width)]">
+            <div className="px-2 py-1.5">
+              <p className="text-sm font-medium">{userName || 'User'}</p>
+              <p className="text-xs text-muted-foreground">{userEmail}</p>
+            </div>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem className="cursor-pointer" onClick={() => router.push('/upgrade')}>
+              <Crown className="h-4 w-4 mr-2 text-amber-500" />
+              Upgrade Plan
+            </DropdownMenuItem>
+            <DropdownMenuItem className="cursor-pointer" onClick={() => router.push('/settings')}>
+              <Settings className="h-4 w-4 mr-2" />
+              Settings
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem className="text-destructive cursor-pointer" onClick={handleSignOut}>
+              <LogOut className="h-4 w-4 mr-2" />
+              Sign Out
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </div>
   );
