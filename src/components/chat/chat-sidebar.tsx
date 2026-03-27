@@ -190,7 +190,6 @@ export function ChatSidebar({
           </div>
           <div className="flex-1 text-left min-w-0">
             <p className="text-xs font-medium truncate">{userName || 'User'}</p>
-            <p className="text-[10px] text-muted-foreground truncate">{userEmail}</p>
           </div>
           <LogOut className="h-3.5 w-3.5 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" />
         </button>

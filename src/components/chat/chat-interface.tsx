@@ -336,8 +336,8 @@ export function ChatInterface({
       >
         {/* Ambient gradients */}
         <div className="pointer-events-none absolute inset-0 overflow-hidden">
-          <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/5 rounded-full filter blur-[128px] animate-pulse" />
-          <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-primary/5 rounded-full filter blur-[128px] animate-pulse delay-700" />
+          <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/5 rounded-full filter blur-[128px]" />
+          <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-primary/5 rounded-full filter blur-[128px]" />
         </div>
 
         <div className="relative container mx-auto max-w-3xl py-4 sm:py-8 space-y-4 sm:space-y-6">

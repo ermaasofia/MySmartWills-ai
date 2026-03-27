@@ -62,7 +62,6 @@ export function ChatHeader({ user }: ChatHeaderProps) {
               <DropdownMenuContent align="end" className="w-56">
                 <div className="px-2 py-1.5">
                   <p className="text-sm font-medium">{user.user_metadata?.full_name || 'User'}</p>
-                  <p className="text-xs text-muted-foreground">{user.email}</p>
                 </div>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleSignOut} className="text-destructive cursor-pointer">
