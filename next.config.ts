@@ -53,8 +53,7 @@ const nextConfig: NextConfig = {
             key: 'Content-Security-Policy',
             value: [
               "default-src 'self'",
-              // 'unsafe-inline' is a fallback for older browsers; modern browsers ignore it when 'strict-dynamic' is present
-              "script-src 'self' 'unsafe-inline' 'strict-dynamic' https://challenges.cloudflare.com https://static.cloudflareinsights.com",
+              "script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com https://static.cloudflareinsights.com",
               "style-src 'self' 'unsafe-inline'",
               "font-src 'self'",
               "img-src 'self' data: blob: https://lh3.googleusercontent.com",
