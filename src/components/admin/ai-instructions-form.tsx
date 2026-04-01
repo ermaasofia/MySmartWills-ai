@@ -1,12 +1,19 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { useRouter } from 'next/navigation';
-import { type PromptType } from '@/lib/constants';
+import { type PromptType, AI_INSTRUCTION_COUNTRIES } from '@/lib/constants';
 
 interface PromptData {
   character: string;
@@ -19,6 +26,14 @@ interface PromptData {
 interface SaveStatus {
   [key: string]: 'idle' | 'saving' | 'success' | 'error';
 }
+
+const EMPTY_PROMPTS: PromptData = {
+  character: '',
+  sop: '',
+  company_info: '',
+  services: '',
+  other: '',
+};
 
 const PROMPT_CONFIGS: {
   key: PromptType;
@@ -60,13 +75,8 @@ const PROMPT_CONFIGS: {
 
 export function AIInstructionsForm() {
   const router = useRouter();
-  const [prompts, setPrompts] = useState<PromptData>({
-    character: '',
-    sop: '',
-    company_info: '',
-    services: '',
-    other: '',
-  });
+  const [selectedCountry, setSelectedCountry] = useState('MY');
+  const [prompts, setPrompts] = useState<PromptData>({ ...EMPTY_PROMPTS });
   const [saveStatus, setSaveStatus] = useState<SaveStatus>({
     character: 'idle',
     sop: 'idle',
@@ -77,18 +87,10 @@ export function AIInstructionsForm() {
   const [isLoading, setIsLoading] = useState(true);
   const timeoutsRef = useRef<Record<string, NodeJS.Timeout>>({});
 
-  useEffect(() => {
-    fetchPrompts();
-    const timeouts = timeoutsRef.current;
-    return () => {
-      Object.values(timeouts).forEach(clearTimeout);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const fetchPrompts = async () => {
+  const fetchPrompts = useCallback(async (countryCode: string) => {
+    setIsLoading(true);
     try {
-      const response = await fetch('/api/admin/ai-prompts');
+      const response = await fetch(`/api/admin/ai-prompts?country_code=${countryCode}`);
       if (!response.ok) {
         if (response.status === 401 || response.status === 403) {
           router.push('/login');
@@ -109,9 +111,29 @@ export function AIInstructionsForm() {
       });
     } catch (error) {
       console.error('Error fetching prompts:', error);
+      setPrompts({ ...EMPTY_PROMPTS });
     } finally {
       setIsLoading(false);
     }
+  }, [router]);
+
+  useEffect(() => {
+    fetchPrompts(selectedCountry);
+    const timeouts = timeoutsRef.current;
+    return () => {
+      Object.values(timeouts).forEach(clearTimeout);
+    };
+  }, [selectedCountry, fetchPrompts]);
+
+  const handleCountryChange = (countryCode: string) => {
+    setSelectedCountry(countryCode);
+    setSaveStatus({
+      character: 'idle',
+      sop: 'idle',
+      company_info: 'idle',
+      services: 'idle',
+      other: 'idle',
+    });
   };
 
   const handleSave = async (promptType: PromptType) => {
@@ -124,6 +146,7 @@ export function AIInstructionsForm() {
         body: JSON.stringify({
           prompt_type: promptType,
           content: prompts[promptType],
+          country_code: selectedCountry,
         }),
       });
 
@@ -174,63 +197,86 @@ export function AIInstructionsForm() {
     }
   };
 
-  if (isLoading) {
-    return (
-      <div className="space-y-4">
-        {[1, 2, 3].map((i) => (
-          <Card key={i}>
-            <CardHeader className="p-4 md:p-6">
-              <div className="h-5 w-3/4 max-w-48 bg-muted animate-pulse rounded" />
-              <div className="h-4 w-full max-w-72 bg-muted animate-pulse rounded mt-2" />
-            </CardHeader>
-            <CardContent className="p-4 pt-0 md:p-6 md:pt-0">
-              <div className="h-24 md:h-32 bg-muted animate-pulse rounded" />
-              <div className="h-9 w-20 bg-muted animate-pulse rounded mt-3" />
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-    );
-  }
+  const selectedCountryName = AI_INSTRUCTION_COUNTRIES.find(
+    (c) => c.code === selectedCountry
+  )?.name || selectedCountry;
 
   return (
     <div className="space-y-4">
-      {PROMPT_CONFIGS.map((config) => (
-        <Card key={config.key}>
-          <CardHeader className="p-4 pb-2 md:p-6 md:pb-3">
-            <CardTitle className="text-sm md:text-base">{config.title}</CardTitle>
-            <CardDescription className="text-xs">
-              {config.description}
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="p-4 pt-0 md:p-6 md:pt-0 space-y-3">
-            <div className="space-y-1.5">
-              <Label htmlFor={config.key} className="sr-only">
-                {config.title}
-              </Label>
-              <Textarea
-                id={config.key}
-                value={prompts[config.key]}
-                onChange={(e) => handleChange(config.key, e.target.value)}
-                placeholder={config.placeholder}
-                className="min-h-24 md:min-h-32 text-sm"
-              />
-              <p className="text-[11px] text-muted-foreground text-right">
-                {prompts[config.key].length.toLocaleString()} characters
-              </p>
-            </div>
-            <Button
-              onClick={() => handleSave(config.key)}
-              disabled={saveStatus[config.key] === 'saving'}
-              variant={getButtonVariant(saveStatus[config.key])}
-              size="sm"
-              className="w-full sm:w-auto"
-            >
-              {getButtonText(saveStatus[config.key])}
-            </Button>
-          </CardContent>
-        </Card>
-      ))}
+      <div className="flex items-center gap-3">
+        <Label className="text-sm font-medium whitespace-nowrap">Country</Label>
+        <Select value={selectedCountry} onValueChange={handleCountryChange}>
+          <SelectTrigger className="w-[260px]">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {AI_INSTRUCTION_COUNTRIES.map((c) => (
+              <SelectItem key={c.code} value={c.code}>
+                {c.flag} {c.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      {isLoading ? (
+        <div className="space-y-4">
+          {[1, 2, 3].map((i) => (
+            <Card key={i}>
+              <CardHeader className="p-4 md:p-6">
+                <div className="h-5 w-3/4 max-w-48 bg-muted animate-pulse rounded" />
+                <div className="h-4 w-full max-w-72 bg-muted animate-pulse rounded mt-2" />
+              </CardHeader>
+              <CardContent className="p-4 pt-0 md:p-6 md:pt-0">
+                <div className="h-24 md:h-32 bg-muted animate-pulse rounded" />
+                <div className="h-9 w-20 bg-muted animate-pulse rounded mt-3" />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      ) : (
+        <div className="space-y-4">
+          <p className="text-xs text-muted-foreground">
+            Editing instructions for <span className="font-medium">{selectedCountryName}</span>. These prompts will be used when users chat with this country selected.
+          </p>
+          {PROMPT_CONFIGS.map((config) => (
+            <Card key={config.key}>
+              <CardHeader className="p-4 pb-2 md:p-6 md:pb-3">
+                <CardTitle className="text-sm md:text-base">{config.title}</CardTitle>
+                <CardDescription className="text-xs">
+                  {config.description}
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="p-4 pt-0 md:p-6 md:pt-0 space-y-3">
+                <div className="space-y-1.5">
+                  <Label htmlFor={`${selectedCountry}-${config.key}`} className="sr-only">
+                    {config.title}
+                  </Label>
+                  <Textarea
+                    id={`${selectedCountry}-${config.key}`}
+                    value={prompts[config.key]}
+                    onChange={(e) => handleChange(config.key, e.target.value)}
+                    placeholder={config.placeholder}
+                    className="min-h-24 md:min-h-32 text-sm"
+                  />
+                  <p className="text-[11px] text-muted-foreground text-right">
+                    {prompts[config.key].length.toLocaleString()} characters
+                  </p>
+                </div>
+                <Button
+                  onClick={() => handleSave(config.key)}
+                  disabled={saveStatus[config.key] === 'saving'}
+                  variant={getButtonVariant(saveStatus[config.key])}
+                  size="sm"
+                  className="w-full sm:w-auto"
+                >
+                  {getButtonText(saveStatus[config.key])}
+                </Button>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

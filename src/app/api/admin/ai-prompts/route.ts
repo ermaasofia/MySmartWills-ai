@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { isAdmin } from '@/lib/admin';
-import { PROMPT_TYPES } from '@/lib/constants';
+import { PROMPT_TYPES, AI_INSTRUCTION_COUNTRIES } from '@/lib/constants';
 import { SupabaseClient } from '@supabase/supabase-js';
+
+const VALID_COUNTRY_CODES = AI_INSTRUCTION_COUNTRIES.map((c) => c.code);
 
 /** Log admin action for audit trail */
 async function logAdminAction(
@@ -32,15 +34,29 @@ async function requireAdmin() {
   return { supabase, user, forbidden: false as const };
 }
 
-// GET: Fetch all AI prompts
-export async function GET() {
+function isValidCountryCode(code: string): boolean {
+  return VALID_COUNTRY_CODES.includes(code as typeof VALID_COUNTRY_CODES[number]);
+}
+
+// GET: Fetch AI prompts for a specific country
+export async function GET(req: NextRequest) {
   try {
     const { supabase, forbidden } = await requireAdmin();
     if (forbidden) return FORBIDDEN;
 
+    const countryCode = req.nextUrl.searchParams.get('country_code') || 'MY';
+
+    if (!isValidCountryCode(countryCode)) {
+      return NextResponse.json(
+        { error: `Invalid country_code. Must be one of: ${VALID_COUNTRY_CODES.join(', ')}` },
+        { status: 400 }
+      );
+    }
+
     const { data: prompts, error } = await supabase
       .from('ai_prompts')
       .select('*')
+      .eq('country_code', countryCode)
       .order('prompt_type');
 
     if (error) {
@@ -55,7 +71,7 @@ export async function GET() {
     const promptsMap = prompts?.reduce((acc, prompt) => {
       acc[prompt.prompt_type] = prompt;
       return acc;
-    }, {} as Record<string, { id: string; prompt_type: string; content: string; is_active: boolean; created_at: string; updated_at: string }>) || {};
+    }, {} as Record<string, { id: string; country_code: string; prompt_type: string; content: string; is_active: boolean; created_at: string; updated_at: string }>) || {};
 
     return NextResponse.json({ prompts: promptsMap });
   } catch (error) {
@@ -67,14 +83,14 @@ export async function GET() {
   }
 }
 
-// PUT: Update a specific AI prompt
+// PUT: Update a specific AI prompt for a country
 export async function PUT(req: NextRequest) {
   try {
     const { supabase, user, forbidden } = await requireAdmin();
     if (forbidden) return FORBIDDEN;
 
     const body = await req.json();
-    const { prompt_type, content } = body;
+    const { prompt_type, content, country_code = 'MY' } = body;
 
     if (!prompt_type || typeof content !== 'string') {
       return NextResponse.json(
@@ -98,11 +114,24 @@ export async function PUT(req: NextRequest) {
       );
     }
 
+    if (!isValidCountryCode(country_code)) {
+      return NextResponse.json(
+        { error: `Invalid country_code. Must be one of: ${VALID_COUNTRY_CODES.join(', ')}` },
+        { status: 400 }
+      );
+    }
+
     const { data, error } = await supabase
       .from('ai_prompts')
       .upsert(
-        { prompt_type, content, is_active: true, updated_at: new Date().toISOString() },
-        { onConflict: 'prompt_type' }
+        {
+          country_code,
+          prompt_type,
+          content,
+          is_active: true,
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: 'country_code,prompt_type' }
       )
       .select()
       .single();
@@ -117,6 +146,7 @@ export async function PUT(req: NextRequest) {
 
     // Audit log
     await logAdminAction(supabase, user.id, 'update_ai_prompt', {
+      country_code,
       prompt_type,
       content_length: content.length,
     });
@@ -131,18 +161,25 @@ export async function PUT(req: NextRequest) {
   }
 }
 
-// POST: Batch update multiple prompts
+// POST: Batch update multiple prompts for a country
 export async function POST(req: NextRequest) {
   try {
     const { supabase, user, forbidden } = await requireAdmin();
     if (forbidden) return FORBIDDEN;
 
     const body = await req.json();
-    const { prompts } = body;
+    const { prompts, country_code = 'MY' } = body;
 
     if (!Array.isArray(prompts)) {
       return NextResponse.json(
         { error: 'Invalid input. prompts must be an array.' },
+        { status: 400 }
+      );
+    }
+
+    if (!isValidCountryCode(country_code)) {
+      return NextResponse.json(
+        { error: `Invalid country_code. Must be one of: ${VALID_COUNTRY_CODES.join(', ')}` },
         { status: 400 }
       );
     }
@@ -159,8 +196,14 @@ export async function POST(req: NextRequest) {
         supabase
           .from('ai_prompts')
           .upsert(
-            { prompt_type: p.prompt_type, content: p.content, is_active: true, updated_at: new Date().toISOString() },
-            { onConflict: 'prompt_type' }
+            {
+              country_code,
+              prompt_type: p.prompt_type,
+              content: p.content,
+              is_active: true,
+              updated_at: new Date().toISOString(),
+            },
+            { onConflict: 'country_code,prompt_type' }
           )
           .select()
           .single()
@@ -171,6 +214,7 @@ export async function POST(req: NextRequest) {
 
     // Audit log
     await logAdminAction(supabase, user.id, 'batch_update_ai_prompts', {
+      country_code,
       prompt_types: valid.map((p: { prompt_type: string }) => p.prompt_type),
       count: saved.length,
     });

@@ -12,7 +12,7 @@ export default function AIInstructionsPage() {
       <div className="mb-4 md:mb-6">
         <h1 className="text-xl md:text-2xl font-bold mb-1">AI Instructions</h1>
         <p className="text-xs md:text-sm text-muted-foreground">
-          Configure how the AI assistant responds to users. All prompts are used in chat.
+          Configure AI instructions per country. Select a country to edit its prompts.
         </p>
       </div>
 

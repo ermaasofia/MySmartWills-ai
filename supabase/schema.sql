@@ -47,14 +47,16 @@ CREATE TABLE IF NOT EXISTS public.documents (
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- AI Prompts/Instructions table (admin-configurable AI behavior)
+-- AI Prompts/Instructions table (admin-configurable AI behavior, per-country)
 CREATE TABLE IF NOT EXISTS public.ai_prompts (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  prompt_type TEXT NOT NULL UNIQUE CHECK (prompt_type IN ('character', 'sop', 'company_info', 'services', 'other')),
+  country_code TEXT NOT NULL DEFAULT 'MY',
+  prompt_type TEXT NOT NULL CHECK (prompt_type IN ('character', 'sop', 'company_info', 'services', 'other')),
   content TEXT NOT NULL DEFAULT '',
   is_active BOOLEAN DEFAULT true,
   created_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ DEFAULT NOW()
+  updated_at TIMESTAMPTZ DEFAULT NOW(),
+  CONSTRAINT ai_prompts_country_prompt_unique UNIQUE (country_code, prompt_type)
 );
 
 -- Create indexes for better query performance
@@ -62,6 +64,7 @@ CREATE INDEX IF NOT EXISTS idx_chat_sessions_user_id ON public.chat_sessions(use
 CREATE INDEX IF NOT EXISTS idx_chat_messages_session_id ON public.chat_messages(session_id);
 CREATE INDEX IF NOT EXISTS idx_documents_country ON public.documents(country_code);
 CREATE INDEX IF NOT EXISTS idx_ai_prompts_type ON public.ai_prompts(prompt_type);
+CREATE INDEX IF NOT EXISTS idx_ai_prompts_country_code ON public.ai_prompts(country_code);
 
 -- Create index for vector similarity search
 CREATE INDEX IF NOT EXISTS idx_documents_embedding ON public.documents 
@@ -340,3 +343,11 @@ CREATE POLICY "Admins can insert audit logs"
 
 -- Bootstrap: run this manually in Supabase SQL Editor to grant yourself admin
 -- UPDATE public.profiles SET role = 'admin' WHERE email = '<your-email>';
+
+-- ─── Migration: Country-specific AI prompts ──────────────────────────────────
+-- Run this in Supabase SQL Editor if the ai_prompts table already exists:
+--
+-- ALTER TABLE public.ai_prompts ADD COLUMN country_code TEXT NOT NULL DEFAULT 'MY';
+-- ALTER TABLE public.ai_prompts DROP CONSTRAINT ai_prompts_prompt_type_key;
+-- ALTER TABLE public.ai_prompts ADD CONSTRAINT ai_prompts_country_prompt_unique UNIQUE (country_code, prompt_type);
+-- CREATE INDEX IF NOT EXISTS idx_ai_prompts_country_code ON public.ai_prompts(country_code);

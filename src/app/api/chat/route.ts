@@ -116,91 +116,120 @@ const COUNTRY_CONTEXTS: Record<string, string> = {
 - Holographic wills must be entirely handwritten
 - Estate tax applies to estates over PHP 5 million
 - Foreign ownership restrictions on land`,
+
+  MY_WK: `Malaysian Islamic will (Wasiat) law under WasiatKu. Key points:
+- Muslims in Malaysia are subject to Syariah law for estate distribution (Faraid)
+- A wasiat (Islamic will) can only distribute up to 1/3 of the estate to non-heirs
+- The remaining 2/3 is distributed according to Faraid (Islamic inheritance law)
+- Faraid prescribes fixed shares for spouse, children, parents, and other relatives
+- Wasiat must comply with Syariah requirements and be witnessed
+- Hibah (gift inter vivos) can be made during lifetime as an alternative
+- EPF nominations, insurance, and jointly-held property have separate rules
+- Each state in Malaysia has its own Syariah court jurisdiction
+- Executor (wasi) must be Muslim and appointed in the wasiat
+- Registration with relevant state Islamic authority is recommended`,
 };
 
-// Fetch custom AI prompts from database
-async function getCustomPrompts(supabase: Awaited<ReturnType<typeof createClient>>): Promise<{
+type CustomPrompts = {
   character: string;
   sop: string;
   company_info: string;
   services: string;
   other: string;
-}> {
+};
+
+const EMPTY_PROMPTS: CustomPrompts = {
+  character: '',
+  sop: '',
+  company_info: '',
+  services: '',
+  other: '',
+};
+
+// Fetch custom AI prompts from database for a specific country.
+// For Malaysia (MY), also fetches MY_WK (WasiatKu) prompts and merges both sets.
+async function getCustomPrompts(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  countryCode: string
+): Promise<{ main: CustomPrompts; wasiatku: CustomPrompts | null }> {
   try {
+    // For Malaysia, fetch both MY and MY_WK prompts
+    const codes = countryCode === 'MY' ? ['MY', 'MY_WK'] : [countryCode];
+
     const { data: prompts, error } = await supabase
       .from('ai_prompts')
-      .select('prompt_type, content, is_active')
-      .eq('is_active', true);
+      .select('country_code, prompt_type, content, is_active')
+      .eq('is_active', true)
+      .in('country_code', codes);
 
     if (error || !prompts) {
-      return {
-        character: '',
-        sop: '',
-        company_info: '',
-        services: '',
-        other: '',
-      };
+      return { main: { ...EMPTY_PROMPTS }, wasiatku: countryCode === 'MY' ? { ...EMPTY_PROMPTS } : null };
     }
 
-    const result = prompts.reduce((acc: Record<string, string>, prompt: { prompt_type: string; content: string; is_active: boolean }) => {
-      acc[prompt.prompt_type] = prompt.content || '';
-      return acc;
-    }, {
-      character: '',
-      sop: '',
-      company_info: '',
-      services: '',
-      other: '',
-    } as Record<string, string>);
+    const main = { ...EMPTY_PROMPTS };
+    const wasiatku = { ...EMPTY_PROMPTS };
 
-    return result as {
-      character: string;
-      sop: string;
-      company_info: string;
-      services: string;
-      other: string;
-    };
+    for (const prompt of prompts) {
+      const key = prompt.prompt_type as keyof CustomPrompts;
+      if (key in main) {
+        if (prompt.country_code === 'MY_WK') {
+          wasiatku[key] = prompt.content || '';
+        } else {
+          main[key] = prompt.content || '';
+        }
+      }
+    }
+
+    return { main, wasiatku: countryCode === 'MY' ? wasiatku : null };
   } catch (error) {
     console.error('Error fetching custom prompts:', error);
-    return {
-      character: '',
-      sop: '',
-      company_info: '',
-      services: '',
-      other: '',
-    };
+    return { main: { ...EMPTY_PROMPTS }, wasiatku: countryCode === 'MY' ? { ...EMPTY_PROMPTS } : null };
   }
 }
 
+function buildPromptsSection(prompts: CustomPrompts, prefix: string = ''): string {
+  let section = '';
+  const label = prefix ? `${prefix} — ` : '';
+
+  if (prompts.character) {
+    section += `\n═══════════════════════════════════════════\n${label}AI CHARACTER & PERSONALITY\n═══════════════════════════════════════════\n${prompts.character}\n`;
+  }
+  if (prompts.sop) {
+    section += `\n═══════════════════════════════════════════\n${label}STANDARD OPERATING PROCEDURES\n═══════════════════════════════════════════\n${prompts.sop}\n`;
+  }
+  if (prompts.company_info) {
+    section += `\n═══════════════════════════════════════════\n${label}COMPANY INFORMATION\n═══════════════════════════════════════════\n${prompts.company_info}\n`;
+  }
+  if (prompts.services) {
+    section += `\n═══════════════════════════════════════════\n${label}SERVICES & PRODUCTS\n═══════════════════════════════════════════\n${prompts.services}\n`;
+  }
+  if (prompts.other) {
+    section += `\n═══════════════════════════════════════════\n${label}ADDITIONAL INSTRUCTIONS\n═══════════════════════════════════════════\n${prompts.other}\n`;
+  }
+  return section;
+}
+
 function getSystemPrompt(
-  countryCode: string, 
-  countryName: string, 
+  countryCode: string,
+  countryName: string,
   memoryContext: string = '',
-  customPrompts: { character: string; sop: string; company_info: string; services: string; other: string }
+  customPromptsData: { main: CustomPrompts; wasiatku: CustomPrompts | null }
 ): string {
   const countryContext = COUNTRY_CONTEXTS[countryCode] || '';
 
-  // Build custom prompts section if any exist
+  // Build custom prompts section
   let customPromptsSection = '';
-  
-  if (customPrompts.character) {
-    customPromptsSection += `\n═══════════════════════════════════════════\nAI CHARACTER & PERSONALITY\n═══════════════════════════════════════════\n${customPrompts.character}\n`;
-  }
-  
-  if (customPrompts.sop) {
-    customPromptsSection += `\n═══════════════════════════════════════════\nSTANDARD OPERATING PROCEDURES\n═══════════════════════════════════════════\n${customPrompts.sop}\n`;
-  }
-  
-  if (customPrompts.company_info) {
-    customPromptsSection += `\n═══════════════════════════════════════════\nCOMPANY INFORMATION\n═══════════════════════════════════════════\n${customPrompts.company_info}\n`;
-  }
-  
-  if (customPrompts.services) {
-    customPromptsSection += `\n═══════════════════════════════════════════\nSERVICES & PRODUCTS\n═══════════════════════════════════════════\n${customPrompts.services}\n`;
-  }
-  
-  if (customPrompts.other) {
-    customPromptsSection += `\n═══════════════════════════════════════════\nADDITIONAL INSTRUCTIONS\n═══════════════════════════════════════════\n${customPrompts.other}\n`;
+
+  if (customPromptsData.wasiatku) {
+    // Malaysia: show both conventional will and WasiatKu instructions
+    customPromptsSection += buildPromptsSection(customPromptsData.main, 'CONVENTIONAL WILL (NON-MUSLIM)');
+    const wasiatkuContext = COUNTRY_CONTEXTS['MY_WK'] || '';
+    customPromptsSection += buildPromptsSection(customPromptsData.wasiatku, 'WASIATKU / ISLAMIC WILL (MUSLIM)');
+    if (wasiatkuContext) {
+      customPromptsSection += `\n═══════════════════════════════════════════\nWASIATKU — ISLAMIC WILL LEGAL CONTEXT\n═══════════════════════════════════════════\n${wasiatkuContext}\n`;
+    }
+  } else {
+    customPromptsSection += buildPromptsSection(customPromptsData.main);
   }
 
   return `You are AI SmartWills, an intelligent legal will planning assistant specializing in ${countryName}. Your role is to help users understand the will planning process in their jurisdiction.
@@ -414,7 +443,7 @@ export async function POST(req: Request) {
     const [memory, summaryData, customPrompts] = await Promise.all([
       getUserMemory(supabase, user.id),
       getSessionSummary(supabase, sessionId),
-      getCustomPrompts(supabase),
+      getCustomPrompts(supabase, safeCountryCode),
     ]);
 
     const memoryContext = formatMemoryForPrompt(memory, summaryData?.summary ?? null);
