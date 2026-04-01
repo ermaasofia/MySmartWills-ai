@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
+import { verifyTurnstileToken } from '@/lib/turnstile';
 import { rateLimitAsync } from '@/lib/rate-limit';
 import { getClientIp } from '@/lib/ip';
 import { NextResponse } from 'next/server';
@@ -34,8 +35,8 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Invalid request body' }, { status: 400 });
   }
 
-  const email = typeof body.email === 'string' ? body.email.trim() : '';
-  const captchaToken = typeof body.captchaToken === 'string' ? body.captchaToken : undefined;
+  const email = typeof body.email === 'string' ? body.email.trim().slice(0, 320) : '';
+  const captchaToken = typeof body.captchaToken === 'string' ? body.captchaToken : '';
 
   // Validate redirectTo — only allow safe relative paths (same pattern as OAuth route)
   const rawRedirect = typeof body.redirectTo === 'string' ? body.redirectTo : null;
@@ -51,11 +52,22 @@ export async function POST(request: Request) {
     );
   }
 
+  // ── Verify Turnstile CAPTCHA server-side ─────────────────────────
+  if (captchaToken) {
+    const turnstileResult = await verifyTurnstileToken(captchaToken, ip);
+    if (!turnstileResult.success) {
+      return NextResponse.json(
+        { error: 'CAPTCHA verification failed. Please try again.' },
+        { status: 403 }
+      );
+    }
+  }
+
   // ── Send reset email via Supabase ───────────────────────────────
   const supabase = await createClient();
   await supabase.auth.resetPasswordForEmail(email, {
     redirectTo,
-    captchaToken,
+    captchaToken: captchaToken || undefined,
   });
 
   // Always return success to prevent email enumeration

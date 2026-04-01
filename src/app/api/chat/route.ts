@@ -277,7 +277,7 @@ export async function POST(req: Request) {
   try {
     // SECURITY: Reject non-POST or suspicious origins
     const origin = req.headers.get('origin');
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://aismartwills.me';
+    const appUrl = (process.env.NEXT_PUBLIC_APP_URL || 'https://aismartwills.me').replace(/\/+$/, '');
     const allowedOrigins = [
       appUrl,
       appUrl.replace('://', '://www.'),
@@ -369,11 +369,12 @@ export async function POST(req: Request) {
     const isNewSession = !incomingSessionId;
 
     if (incomingSessionId && typeof incomingSessionId === 'string') {
-      // Verify ownership (RLS will reject if not theirs)
+      // Verify ownership explicitly (defense-in-depth: explicit check + RLS)
       const { data: existingSession } = await supabase
         .from('chat_sessions')
         .select('id')
         .eq('id', incomingSessionId)
+        .eq('user_id', user.id)
         .single();
 
       if (existingSession) {

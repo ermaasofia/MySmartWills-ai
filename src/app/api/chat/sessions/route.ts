@@ -12,6 +12,19 @@ export async function GET() {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    // Rate limit session listing: 30 requests per minute per user
+    const { success: rateLimitOk } = await rateLimitAsync(`session-list:${user.id}`, {
+      maxRequests: 30,
+      windowMs: 60 * 1000,
+    });
+
+    if (!rateLimitOk) {
+      return Response.json(
+        { error: 'Too many requests. Please wait a moment.' },
+        { status: 429 }
+      );
+    }
+
     const sessions = await getUserSessions(supabase);
     return Response.json({ sessions });
   } catch (error) {

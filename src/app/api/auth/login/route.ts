@@ -56,15 +56,19 @@ export async function POST(request: Request) {
     );
   }
 
-  // ── Verify Turnstile CAPTCHA server-side ──────────────────────────
-  if (captchaToken) {
-    const turnstileResult = await verifyTurnstileToken(captchaToken, ip);
-    if (!turnstileResult.success) {
-      return NextResponse.json(
-        { error: 'CAPTCHA verification failed. Please try again.' },
-        { status: 403 }
-      );
-    }
+  // ── Verify Turnstile CAPTCHA server-side (mandatory) ──────────────
+  if (!captchaToken) {
+    return NextResponse.json(
+      { error: 'CAPTCHA verification is required' },
+      { status: 400 }
+    );
+  }
+  const turnstileResult = await verifyTurnstileToken(captchaToken, ip);
+  if (!turnstileResult.success) {
+    return NextResponse.json(
+      { error: 'CAPTCHA verification failed. Please try again.' },
+      { status: 403 }
+    );
   }
 
   // ── Authenticate via Supabase ───────────────────────────────────

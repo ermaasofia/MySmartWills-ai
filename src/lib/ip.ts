@@ -1,12 +1,16 @@
 /**
  * Extract the client IP address from request headers.
- * Priority: Cloudflare > Nginx/proxy > X-Forwarded-For > unknown
+ * Priority: Vercel (trusted) > Cloudflare > unknown
+ *
+ * SECURITY: x-forwarded-for is client-controllable and MUST NOT be trusted.
+ * Vercel sets x-vercel-forwarded-for from the actual socket — it cannot be spoofed.
+ * Cloudflare sets cf-connecting-ip from the actual connection.
  */
 export function getClientIp(headers: Headers): string {
   return (
+    headers.get('x-vercel-forwarded-for')?.split(',')[0].trim() ??
     headers.get('cf-connecting-ip') ??
     headers.get('x-real-ip') ??
-    headers.get('x-forwarded-for')?.split(',')[0].trim() ??
     'unknown'
   );
 }
