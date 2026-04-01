@@ -34,6 +34,14 @@ No test framework is configured.
 ### Path alias
 `@/*` maps to `./src/*`
 
+### Middleware entry point
+Next.js middleware lives at `src/proxy.ts` (not the conventional `middleware.ts`). It exports a `proxy()` function that calls `updateSession()` from `src/lib/supabase/middleware.ts` for auth session refresh and route protection. The matcher excludes static assets.
+
+### Design system
+- Fonts: **Crimson Text** (headings/brand, `--font-crimson`) + **Inter** (body, `--font-inter`), loaded via `next/font/google` in root layout
+- Color scheme: minimal black & white, dark/light mode via `next-themes`
+- shadcn/ui configured with `new-york` style, `gray` base color, CSS variables (see `components.json`)
+
 ### App Router structure (`src/app/`)
 - `/` — Landing page
 - `/chat` — Protected chat interface (main feature)
@@ -123,8 +131,10 @@ See `.env.local` for the full template. Key variables:
 ## Security Notes
 
 - Security headers configured in `next.config.ts` (CSP, HSTS, X-Frame-Options)
+- **CSP gotcha:** When adding a new external service (API, CDN, font, script), you must update the Content-Security-Policy in `next.config.ts` or requests will be silently blocked
 - Origin validation on chat API endpoint
 - Rate limiting: chat (20/60s per user), login (5/5min per IP), OAuth (10/10min per IP)
 - Input sanitization: message length caps, control character removal
 - All database access goes through RLS — never bypass with service role key in client code
 - Admin routes protected at middleware, layout, and API levels; RLS enforces via `public.is_admin()`
+- `src/instrumentation.ts` validates required env vars at startup and warns on missing keys
