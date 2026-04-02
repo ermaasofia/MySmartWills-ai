@@ -51,6 +51,7 @@ CREATE TABLE IF NOT EXISTS public.documents (
 CREATE TABLE IF NOT EXISTS public.ai_prompts (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   country_code TEXT NOT NULL DEFAULT 'MY',
+  country_name TEXT NOT NULL DEFAULT 'Malaysia (Conventional Will)',
   prompt_type TEXT NOT NULL CHECK (prompt_type IN ('character', 'sop', 'company_info', 'services', 'other')),
   content TEXT NOT NULL DEFAULT '',
   is_active BOOLEAN DEFAULT true,
@@ -351,3 +352,24 @@ CREATE POLICY "Admins can insert audit logs"
 -- ALTER TABLE public.ai_prompts DROP CONSTRAINT ai_prompts_prompt_type_key;
 -- ALTER TABLE public.ai_prompts ADD CONSTRAINT ai_prompts_country_prompt_unique UNIQUE (country_code, prompt_type);
 -- CREATE INDEX IF NOT EXISTS idx_ai_prompts_country_code ON public.ai_prompts(country_code);
+
+-- ─── Migration: Add country_name column to ai_prompts ────────────────────────
+-- Run this in Supabase SQL Editor if the ai_prompts table already exists:
+--
+-- ALTER TABLE public.ai_prompts ADD COLUMN country_name TEXT NOT NULL DEFAULT 'Malaysia (Conventional Will)';
+-- UPDATE public.ai_prompts SET country_name = CASE country_code
+--   WHEN 'MY' THEN 'Malaysia (Conventional Will)'
+--   WHEN 'MY_WK' THEN 'Malaysia / WasiatKu (Islamic Will)'
+--   WHEN 'SG' THEN 'Singapore'
+--   WHEN 'HK' THEN 'Hong Kong'
+--   WHEN 'CN' THEN 'China'
+--   WHEN 'TW' THEN 'Taiwan'
+--   WHEN 'ID' THEN 'Indonesia'
+--   WHEN 'TH' THEN 'Thailand'
+--   WHEN 'AU' THEN 'Australia'
+--   WHEN 'NZ' THEN 'New Zealand'
+--   WHEN 'BN' THEN 'Brunei'
+--   WHEN 'VN' THEN 'Vietnam'
+--   WHEN 'PH' THEN 'Philippines'
+--   ELSE country_code
+-- END;

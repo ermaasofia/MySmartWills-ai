@@ -38,6 +38,10 @@ function isValidCountryCode(code: string): boolean {
   return VALID_COUNTRY_CODES.includes(code as typeof VALID_COUNTRY_CODES[number]);
 }
 
+function getCountryName(code: string): string {
+  return AI_INSTRUCTION_COUNTRIES.find((c) => c.code === code)?.name || code;
+}
+
 // GET: Fetch AI prompts for a specific country
 export async function GET(req: NextRequest) {
   try {
@@ -126,6 +130,7 @@ export async function PUT(req: NextRequest) {
       .upsert(
         {
           country_code,
+          country_name: getCountryName(country_code),
           prompt_type,
           content,
           is_active: true,
@@ -198,6 +203,7 @@ export async function POST(req: NextRequest) {
           .upsert(
             {
               country_code,
+              country_name: getCountryName(country_code),
               prompt_type: p.prompt_type,
               content: p.content,
               is_active: true,
