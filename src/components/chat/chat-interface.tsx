@@ -4,13 +4,11 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { CountrySelector } from '@/components/chat/country-selector';
 import { EditableTitle } from '@/components/chat/editable-title';
 import { PromptBox } from '@/components/ui/chatgpt-prompt-input';
-import { COUNTRIES } from '@/lib/constants';
+import { SAVY_COUNTRIES, type SavyCountry } from '@/lib/constants';
 import { Menu, RotateCcw, Settings } from 'lucide-react';
 import { MarkdownRenderer } from '@/components/chat/markdown-renderer';
-import { Country } from '@/types';
 import { SessionSummary } from '@/hooks/use-chat-sessions';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -23,6 +21,8 @@ interface Message {
 interface ChatInterfaceProps {
   userId: string;
   initialSessionId?: string;
+  /** Pre-selected Savy country from the selector screen */
+  selectedSavy?: SavyCountry;
   /** Called when a brand-new session is created so the sidebar list updates */
   onSessionCreated?: (session: SessionSummary) => void;
   /** Called when the session title is renamed so the sidebar list updates */
@@ -90,6 +90,7 @@ function ChatMessage({ message, isLatest }: { message: Message; isLatest: boolea
 export function ChatInterface({
   userId,
   initialSessionId,
+  selectedSavy,
   onSessionCreated,
   onTitleChange,
   onOpenSidebar,
@@ -97,7 +98,9 @@ export function ChatInterface({
 }: ChatInterfaceProps) {
   const router = useRouter();
 
-  const [selectedCountry, setSelectedCountry] = useState<Country>(COUNTRIES[0]);
+  // Country comes from the Savy selector (prop) or from loading a session
+  const fallbackCountry = SAVY_COUNTRIES[0]; // Malaysia
+  const [activeSavy, setActiveSavy] = useState<SavyCountry>(selectedSavy ?? fallbackCountry);
   const [messages, setMessages] = useState<Message[]>([]);
   const [sessionTitle, setSessionTitle] = useState('New Chat');
   const [isLoading, setIsLoading] = useState(false);
@@ -131,8 +134,8 @@ export function ChatInterface({
         if (!res.ok) return;
         const { session, messages: dbMessages } = await res.json();
 
-        const match = COUNTRIES.find((c) => c.code === session.country_code);
-        if (match) setSelectedCountry(match);
+        const match = SAVY_COUNTRIES.find((c) => c.code === session.country_code);
+        if (match) setActiveSavy(match);
         setSessionTitle(session.title);
         setCurrentSessionId(initialSessionId);
 
@@ -198,8 +201,8 @@ export function ChatInterface({
               role: m.role,
               content: m.content,
             })),
-            countryCode: selectedCountry.code,
-            countryName: selectedCountry.name,
+            countryCode: activeSavy.code,
+            countryName: activeSavy.name,
             sessionId: currentSessionId ?? undefined,
           }),
         });
@@ -218,7 +221,7 @@ export function ChatInterface({
           onSessionCreated?.({
             id: returnedSessionId,
             title: autoTitle,
-            country_code: selectedCountry.code,
+            country_code: activeSavy.code,
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
           });
@@ -263,7 +266,7 @@ export function ChatInterface({
         setIsLoading(false);
       }
     },
-    [isLoading, messages, selectedCountry, currentSessionId, router, onSessionCreated, userId],
+    [isLoading, messages, activeSavy, currentSessionId, router, onSessionCreated, userId],
   );
 
   // New chat 
@@ -296,8 +299,12 @@ export function ChatInterface({
           )}
         </div>
 
-        {/* Jurisdiction selector */}
-        <CountrySelector selectedCountry={selectedCountry} onSelect={setSelectedCountry} />
+        {/* Country badge (read-only) */}
+        <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-muted text-xs font-medium shrink-0">
+          <span>{activeSavy.flag}</span>
+          <span className="hidden sm:inline">{activeSavy.savyName}</span>
+          <span className="sm:hidden">{activeSavy.code}</span>
+        </div>
 
         {/* Admin AI Settings button */}
         {isAdmin && (
@@ -352,9 +359,9 @@ export function ChatInterface({
               transition={{ duration: 0.5, ease: 'easeOut' }}
               className="flex flex-col items-center justify-center text-center py-20 sm:py-28 gap-3"
             >
-              <h2 className="text-2xl sm:text-3xl font-bold">Hi, Welcome to AI SmartWills!</h2>
+              <h2 className="text-2xl sm:text-3xl font-bold">Hi, I&apos;m {activeSavy.savyName}!</h2>
               <p className="text-sm text-muted-foreground max-w-sm">
-                Ask me anything about will planning in <strong>{selectedCountry.name}</strong>.
+                Ask me anything about will planning in <strong>{activeSavy.name}</strong>.
               </p>
             </motion.div>
           ) : null}
@@ -392,7 +399,7 @@ export function ChatInterface({
       <div className="shrink-0 px-3 sm:px-6 py-3 sm:py-4 bg-background/90 backdrop-blur-md border-t border-border/40 z-10">
         <div className="container mx-auto max-w-3xl">
           <PromptBox
-            placeholder={`Ask about will planning in ${selectedCountry.name}...`}
+            placeholder={`Ask about will planning in ${activeSavy.name}...`}
             onSend={handleSend}
             isLoading={isLoading}
           />

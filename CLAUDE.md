@@ -67,10 +67,10 @@ Next.js middleware lives at `src/proxy.ts` (not the conventional `middleware.ts`
 - `src/lib/chat.ts` — Chat session & message database helpers
 - `src/lib/memory.ts` — AI memory system (cross-session fact extraction and retrieval)
 - `src/lib/rate-limit.ts` — Upstash + in-memory fallback rate limiter
-- `src/lib/constants.ts` — `COUNTRIES` array and `APP_NAME`
+- `src/lib/constants.ts` — `COUNTRIES`, `AI_INSTRUCTION_COUNTRIES`, `EMPTY_PROMPTS`, `PROMPT_TYPES`, `APP_NAME`
 - `src/lib/validation.ts` — Input validation helpers
 - `src/lib/ip.ts` — Client IP extraction for rate limiting
-- `src/types/index.ts` — Shared TypeScript interfaces
+- `src/types/index.ts` — Shared TypeScript interfaces (`Country`, `PromptData`, `Message`, `ChatSession`, `UserProfile`)
 
 ### Chat flow
 1. Client (`chat-interface.tsx`) sends message via fetch to `/api/chat/route.ts`
@@ -117,7 +117,7 @@ Schema defined in `supabase/schema.sql`. All tables have RLS policies.
 - **profiles** — User profiles with `role` field (`'user'` | `'admin'`), auto-created via trigger on signup
 - **chat_sessions** — Conversations with country_code and title
 - **chat_messages** — Messages (role: user/assistant/system) within sessions
-- **ai_prompts** — Admin-configurable AI behavior (character, sop, company_info, services, other). Admins write via `is_admin()` RLS function
+- **ai_prompts** — Admin-configurable AI behavior per country (`country_code` + `prompt_type` composite unique). Prompt types: character, sop, company_info, services, other. Includes `country_name` for dashboard readability. Admins write via `is_admin()` RLS function
 - **user_memories** — Cross-session persistent facts (JSONB), per user
 - **conversation_summaries** — Rolling per-session summaries for context management
 - **documents** — Knowledge base with pgvector embeddings (384-dim, for future RAG)

@@ -362,8 +362,8 @@ export async function POST(req: Request) {
       );
     }
 
-    // Validate country code
-    const validCodes = COUNTRIES.map((c) => c.code);
+    // Validate country code (includes MY_WK for WasiatKu)
+    const validCodes = [...COUNTRIES.map((c) => c.code), 'MY_WK'];
     const safeCountryCode = validCodes.includes(countryCode) ? countryCode : 'MY';
     const safeCountryName = typeof countryName === 'string' ? countryName.slice(0, 50) : 'Malaysia';
 

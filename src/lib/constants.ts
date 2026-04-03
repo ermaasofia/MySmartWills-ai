@@ -122,5 +122,29 @@ export const AI_INSTRUCTION_COUNTRIES = [
 
 export type AIInstructionCountryCode = (typeof AI_INSTRUCTION_COUNTRIES)[number]['code'];
 
+export type SavyCountry = {
+  code: string;
+  savyName: string;
+  name: string;
+  flag: string;
+  isActive: boolean;
+};
+
+const ACTIVE_CODES = ['MY', 'SG', 'HK'];
+
+export const SAVY_COUNTRIES: SavyCountry[] = [
+  { code: 'MY', savyName: 'Savy MY', name: 'Malaysia', flag: '🇲🇾', isActive: true },
+  { code: 'MY_WK', savyName: 'Savy WasiatKu', name: 'Malaysia (Islamic Will)', flag: '🇲🇾', isActive: true },
+  { code: 'SG', savyName: 'Savy SG', name: 'Singapore', flag: '🇸🇬', isActive: true },
+  { code: 'HK', savyName: 'Savy HK', name: 'Hong Kong', flag: '🇭🇰', isActive: true },
+  ...COUNTRIES.filter((c) => !ACTIVE_CODES.includes(c.code)).map((c) => ({
+    code: c.code,
+    savyName: `Savy ${c.code}`,
+    name: c.name,
+    flag: c.flag,
+    isActive: false,
+  })),
+];
+
 export const APP_NAME = 'AI SmartWills';
 export const APP_DESCRIPTION = 'Your intelligent legal will planning assistant';
