@@ -53,8 +53,11 @@ Next.js middleware lives at `src/proxy.ts` (not the conventional `middleware.ts`
 - `/api/admin/ai-prompts/route.ts` — AI prompt management (admin only, GET/PUT/POST)
 - `/api/auth/login/route.ts` — Email/password login (rate limited: 5/5min per IP, generic errors to prevent enumeration)
 - `/api/auth/oauth/route.ts` — Google OAuth URL generation (rate limited)
+- `/api/auth/signup/route.ts` — User registration (rate limited, Turnstile-verified)
+- `/api/auth/forgot-password/route.ts` — Password reset email trigger
 - `/api/auth/verify-turnstile/` — CAPTCHA verification
 - `/auth/callback/route.ts` — OAuth + password reset callback handler (PKCE code exchange)
+- `/privacy`, `/terms` — Static legal pages
 
 ### Key modules
 - `src/lib/supabase/client.ts` — Browser Supabase client
@@ -65,6 +68,8 @@ Next.js middleware lives at `src/proxy.ts` (not the conventional `middleware.ts`
 - `src/lib/memory.ts` — AI memory system (cross-session fact extraction and retrieval)
 - `src/lib/rate-limit.ts` — Upstash + in-memory fallback rate limiter
 - `src/lib/constants.ts` — `COUNTRIES` array and `APP_NAME`
+- `src/lib/validation.ts` — Input validation helpers
+- `src/lib/ip.ts` — Client IP extraction for rate limiting
 - `src/types/index.ts` — Shared TypeScript interfaces
 
 ### Chat flow
