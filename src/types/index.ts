@@ -23,6 +23,14 @@ export type ChatSession = {
   updatedAt: Date;
 };
 
+export type PromptData = {
+  character: string;
+  sop: string;
+  company_info: string;
+  services: string;
+  other: string;
+};
+
 export type UserProfile = {
   id: string;
   email: string;

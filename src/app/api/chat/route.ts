@@ -3,7 +3,8 @@ import { createGroq } from '@ai-sdk/groq';
 import { createClient } from '@/lib/supabase/server';
 import { rateLimitAsync } from '@/lib/rate-limit';
 import { createChatSession, saveChatMessage, updateSessionTitle } from '@/lib/chat';
-import { COUNTRIES } from '@/lib/constants';
+import { COUNTRIES, EMPTY_PROMPTS } from '@/lib/constants';
+import { PromptData } from '@/types';
 import {
   getUserMemory,
   getSessionSummary,
@@ -130,28 +131,13 @@ const COUNTRY_CONTEXTS: Record<string, string> = {
 - Registration with relevant state Islamic authority is recommended`,
 };
 
-type CustomPrompts = {
-  character: string;
-  sop: string;
-  company_info: string;
-  services: string;
-  other: string;
-};
-
-const EMPTY_PROMPTS: CustomPrompts = {
-  character: '',
-  sop: '',
-  company_info: '',
-  services: '',
-  other: '',
-};
 
 // Fetch custom AI prompts from database for a specific country.
 // For Malaysia (MY), also fetches MY_WK (WasiatKu) prompts and merges both sets.
-async function getCustomPrompts(
+async function getPromptData(
   supabase: Awaited<ReturnType<typeof createClient>>,
   countryCode: string
-): Promise<{ main: CustomPrompts; wasiatku: CustomPrompts | null }> {
+): Promise<{ main: PromptData; wasiatku: PromptData | null }> {
   try {
     // For Malaysia, fetch both MY and MY_WK prompts
     const codes = countryCode === 'MY' ? ['MY', 'MY_WK'] : [countryCode];
@@ -170,7 +156,7 @@ async function getCustomPrompts(
     const wasiatku = { ...EMPTY_PROMPTS };
 
     for (const prompt of prompts) {
-      const key = prompt.prompt_type as keyof CustomPrompts;
+      const key = prompt.prompt_type as keyof PromptData;
       if (key in main) {
         if (prompt.country_code === 'MY_WK') {
           wasiatku[key] = prompt.content || '';
@@ -187,7 +173,7 @@ async function getCustomPrompts(
   }
 }
 
-function buildPromptsSection(prompts: CustomPrompts, prefix: string = ''): string {
+function buildPromptsSection(prompts: PromptData, prefix: string = ''): string {
   let section = '';
   const label = prefix ? `${prefix} — ` : '';
 
@@ -213,7 +199,7 @@ function getSystemPrompt(
   countryCode: string,
   countryName: string,
   memoryContext: string = '',
-  customPromptsData: { main: CustomPrompts; wasiatku: CustomPrompts | null }
+  customPromptsData: { main: PromptData; wasiatku: PromptData | null }
 ): string {
   const countryContext = COUNTRY_CONTEXTS[countryCode] || '';
 
@@ -443,7 +429,7 @@ export async function POST(req: Request) {
     const [memory, summaryData, customPrompts] = await Promise.all([
       getUserMemory(supabase, user.id),
       getSessionSummary(supabase, sessionId),
-      getCustomPrompts(supabase, safeCountryCode),
+      getPromptData(supabase, safeCountryCode),
     ]);
 
     const memoryContext = formatMemoryForPrompt(memory, summaryData?.summary ?? null);

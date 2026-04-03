@@ -13,27 +13,12 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useRouter } from 'next/navigation';
-import { type PromptType, AI_INSTRUCTION_COUNTRIES } from '@/lib/constants';
-
-interface PromptData {
-  character: string;
-  sop: string;
-  company_info: string;
-  services: string;
-  other: string;
-}
+import { type PromptType, AI_INSTRUCTION_COUNTRIES, EMPTY_PROMPTS } from '@/lib/constants';
+import { PromptData } from '@/types';
 
 interface SaveStatus {
   [key: string]: 'idle' | 'saving' | 'success' | 'error';
 }
-
-const EMPTY_PROMPTS: PromptData = {
-  character: '',
-  sop: '',
-  company_info: '',
-  services: '',
-  other: '',
-};
 
 const PROMPT_CONFIGS: {
   key: PromptType;

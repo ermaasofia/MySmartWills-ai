@@ -38,6 +38,13 @@ function isValidCountryCode(code: string): boolean {
   return VALID_COUNTRY_CODES.includes(code as typeof VALID_COUNTRY_CODES[number]);
 }
 
+function invalidCountryResponse() {
+  return NextResponse.json(
+    { error: `Invalid country_code. Must be one of: ${VALID_COUNTRY_CODES.join(', ')}` },
+    { status: 400 }
+  );
+}
+
 function getCountryName(code: string): string {
   return AI_INSTRUCTION_COUNTRIES.find((c) => c.code === code)?.name || code;
 }
@@ -51,10 +58,7 @@ export async function GET(req: NextRequest) {
     const countryCode = req.nextUrl.searchParams.get('country_code') || 'MY';
 
     if (!isValidCountryCode(countryCode)) {
-      return NextResponse.json(
-        { error: `Invalid country_code. Must be one of: ${VALID_COUNTRY_CODES.join(', ')}` },
-        { status: 400 }
-      );
+      return invalidCountryResponse();
     }
 
     const { data: prompts, error } = await supabase
@@ -119,10 +123,7 @@ export async function PUT(req: NextRequest) {
     }
 
     if (!isValidCountryCode(country_code)) {
-      return NextResponse.json(
-        { error: `Invalid country_code. Must be one of: ${VALID_COUNTRY_CODES.join(', ')}` },
-        { status: 400 }
-      );
+      return invalidCountryResponse();
     }
 
     const { data, error } = await supabase
@@ -183,10 +184,7 @@ export async function POST(req: NextRequest) {
     }
 
     if (!isValidCountryCode(country_code)) {
-      return NextResponse.json(
-        { error: `Invalid country_code. Must be one of: ${VALID_COUNTRY_CODES.join(', ')}` },
-        { status: 400 }
-      );
+      return invalidCountryResponse();
     }
 
     const valid = prompts.filter(
@@ -196,39 +194,41 @@ export async function POST(req: NextRequest) {
         (p.content as string).length <= 10_000
     );
 
-    const results = await Promise.all(
-      valid.map((p: { prompt_type: string; content: string }) =>
-        supabase
-          .from('ai_prompts')
-          .upsert(
-            {
-              country_code,
-              country_name: getCountryName(country_code),
-              prompt_type: p.prompt_type,
-              content: p.content,
-              is_active: true,
-              updated_at: new Date().toISOString(),
-            },
-            { onConflict: 'country_code,prompt_type' }
-          )
-          .select()
-          .single()
-      )
-    );
+    const now = new Date().toISOString();
+    const countryName = getCountryName(country_code);
+    const upsertData = valid.map((p: { prompt_type: string; content: string }) => ({
+      country_code,
+      country_name: countryName,
+      prompt_type: p.prompt_type,
+      content: p.content,
+      is_active: true,
+      updated_at: now,
+    }));
 
-    const saved = results.filter((r) => !r.error).map((r) => r.data);
+    const { data: saved, error } = await supabase
+      .from('ai_prompts')
+      .upsert(upsertData, { onConflict: 'country_code,prompt_type' })
+      .select();
+
+    if (error) {
+      console.error('Error batch saving AI prompts:', error);
+      return NextResponse.json(
+        { error: 'Failed to save prompts' },
+        { status: 500 }
+      );
+    }
 
     // Audit log
     await logAdminAction(supabase, user.id, 'batch_update_ai_prompts', {
       country_code,
       prompt_types: valid.map((p: { prompt_type: string }) => p.prompt_type),
-      count: saved.length,
+      count: saved?.length ?? 0,
     });
 
     return NextResponse.json({
       success: true,
-      count: saved.length,
-      prompts: saved,
+      count: saved?.length ?? 0,
+      prompts: saved ?? [],
     });
   } catch (error) {
     console.error('Error in POST /api/admin/ai-prompts:', error);
