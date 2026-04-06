@@ -46,38 +46,31 @@ const COUNTRY_CONTEXTS: Record<string, string> = {
 async function getPromptData(
   supabase: Awaited<ReturnType<typeof createClient>>,
   countryCode: string
-): Promise<{ main: PromptData; wasiatku: PromptData | null }> {
+): Promise<PromptData> {
   try {
-    const codes = countryCode === 'MY' ? ['MY', 'MY_WK'] : [countryCode];
-
+    // Each Savy loads only its own prompts (MY and MY_WK are separate Savys)
     const { data: prompts, error } = await supabase
       .from('ai_prompts')
-      .select('country_code, prompt_type, content, is_active')
+      .select('prompt_type, content, is_active')
       .eq('is_active', true)
-      .in('country_code', codes);
+      .eq('country_code', countryCode);
 
     if (error || !prompts) {
-      return { main: { ...EMPTY_PROMPTS }, wasiatku: countryCode === 'MY' ? { ...EMPTY_PROMPTS } : null };
+      return { ...EMPTY_PROMPTS };
     }
 
-    const main = { ...EMPTY_PROMPTS };
-    const wasiatku = { ...EMPTY_PROMPTS };
-
+    const result = { ...EMPTY_PROMPTS };
     for (const prompt of prompts) {
       const key = prompt.prompt_type as keyof PromptData;
-      if (key in main) {
-        if (prompt.country_code === 'MY_WK') {
-          wasiatku[key] = prompt.content || '';
-        } else {
-          main[key] = prompt.content || '';
-        }
+      if (key in result) {
+        result[key] = prompt.content || '';
       }
     }
 
-    return { main, wasiatku: countryCode === 'MY' ? wasiatku : null };
+    return result;
   } catch (error) {
     console.error('Error fetching custom prompts:', error);
-    return { main: { ...EMPTY_PROMPTS }, wasiatku: countryCode === 'MY' ? { ...EMPTY_PROMPTS } : null };
+    return { ...EMPTY_PROMPTS };
   }
 }
 
@@ -106,25 +99,21 @@ function getSystemPrompt(
   countryCode: string,
   countryName: string,
   memoryContext: string = '',
-  customPromptsData: { main: PromptData; wasiatku: PromptData | null }
+  customPrompts: PromptData
 ): string {
   const countryContext = COUNTRY_CONTEXTS[countryCode] || '';
 
-  let customPromptsSection = '';
-  if (customPromptsData.wasiatku) {
-    customPromptsSection += buildPromptsSection(customPromptsData.main, 'CONVENTIONAL WILL');
-    customPromptsSection += '\n\n';
-    customPromptsSection += buildPromptsSection(customPromptsData.wasiatku, 'WASIATKU / ISLAMIC WILL');
-    const wkContext = COUNTRY_CONTEXTS['MY_WK'] || '';
-    if (wkContext) customPromptsSection += `\n\nISLAMIC WILL LEGAL CONTEXT: ${wkContext}`;
-  } else {
-    customPromptsSection += buildPromptsSection(customPromptsData.main);
-  }
+  let customPromptsSection = buildPromptsSection(customPrompts);
 
   // Truncate if custom prompts are too long for TPM budget
   if (customPromptsSection.length > MAX_CUSTOM_PROMPTS_CHARS) {
     customPromptsSection = customPromptsSection.slice(0, MAX_CUSTOM_PROMPTS_CHARS) + '\n[...truncated for token limit]';
   }
+
+  // For Malaysia (non-Muslim), add redirect rule for Muslim users
+  const redirectRule = countryCode === 'MY'
+    ? '\n7. IMPORTANT: This Savy is for NON-MUSLIM conventional wills ONLY. If the user mentions they are Muslim, or asks about Faraid/Islamic wills/wasiat Islam, DO NOT provide Islamic will guidance. Instead, politely redirect them: "Untuk wasiat Islam dan Faraid, sila gunakan Savy WasiatKu yang disediakan khas untuk pengguna Muslim. Anda boleh pilih WasiatKu dari senarai Savy di halaman utama chat." Do not discuss Faraid or Islamic inheritance in this Savy.'
+    : '';
 
   return `You are AI SmartWills, a will planning assistant for ${countryName}.
 ${customPromptsSection}
@@ -135,7 +124,7 @@ RULES:
 3. Respond in the user's language (BM/EN/CN etc). Keep responses 150-400 words. Use bold, bullets, headings. No markdown tables.
 4. You provide general will planning info, NOT legal advice. Recommend qualified professionals for specific cases.
 5. Never invent URLs, phone numbers, prices, or legal facts. Use data from COMPANY INFO/SERVICES sections if provided. If unsure, say so.
-6. Be culturally sensitive. Consider religious factors (Faraid, Chinese customs etc).
+6. Be culturally sensitive.${redirectRule}
 
 LEGAL CONTEXT (${countryName}): ${countryContext}
 ${memoryContext}
