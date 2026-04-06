@@ -24,7 +24,7 @@ No test framework is configured.
 - **Styling:** Tailwind CSS 4 + shadcn/ui (New York style) + Framer Motion
 - **Auth:** Supabase Auth (email/password + Google OAuth), middleware-protected routes
 - **Database:** Supabase PostgreSQL with Row Level Security, pgvector for embeddings
-- **AI:** Vercel AI SDK v6 with Groq (primary, gpt-oss-120b model), streaming responses
+- **AI:** Vercel AI SDK v6 with Groq — `gpt-oss-120b` (chat, reasoning model) + `llama-3.1-8b-instant` (memory extraction), streaming responses
 - **Rate Limiting:** Upstash Redis (distributed) with in-memory fallback
 - **CAPTCHA:** Cloudflare Turnstile on signup
 - **Package Manager:** pnpm
@@ -74,12 +74,21 @@ Next.js middleware lives at `src/proxy.ts` (not the conventional `middleware.ts`
 
 ### Chat flow
 1. Client (`chat-interface.tsx`) sends message via fetch to `/api/chat/route.ts`
-2. Server validates auth, rate limits (20 req/60s per user), sanitizes input
+2. Server validates auth, rate limits (20 req/60s per user), sanitizes input (max 8 messages, 1500 chars/msg)
 3. Country-specific legal context injected into system prompt (`COUNTRY_CONTEXTS` in route.ts)
-4. Admin-configured prompts (character, SOP, company info, services) loaded from `ai_prompts` table
-5. Groq LLM streams response via Vercel AI SDK
-6. Messages saved to Supabase; session ID returned via `X-Session-Id` header
-7. Client renders streaming markdown response
+4. Admin-configured prompts (character, SOP, company info, services) loaded from `ai_prompts` table, auto-truncated at 6,000 chars if too long
+5. Groq `gpt-oss-120b` (reasoning model) streams response via Vercel AI SDK with `maxOutputTokens: 2048`
+6. Memory extraction runs in background using lightweight `llama-3.1-8b-instant` to save TPM quota
+7. Messages saved to Supabase; session ID returned via `X-Session-Id` header
+8. Client renders streaming markdown response
+
+### Token budget (Groq free tier)
+- Groq free tier: **8,000 TPM** (tokens per minute) for `gpt-oss-120b`
+- `gpt-oss-120b` is a reasoning model — uses tokens for internal thinking before generating content
+- System prompt + AI instructions must stay compact; `MAX_CUSTOM_PROMPTS_CHARS = 6000` enforces this
+- Memory extraction uses `llama-3.1-8b-instant` (separate, higher TPM limit) to avoid burning chat quota
+- `maxDuration = 60` set on chat route for Vercel serverless timeout
+- If upgrading to Groq Dev tier, these constraints can be relaxed
 
 ### Auth flow
 - Middleware (`src/lib/supabase/middleware.ts`) protects `/chat` and `/admin`; unauthenticated users → `/login`
