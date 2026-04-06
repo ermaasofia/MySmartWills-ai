@@ -12,6 +12,9 @@ import {
   formatMemoryForPrompt,
 } from '@/lib/memory';
 
+// Allow up to 60s for reasoning model responses (Vercel serverless default is 10s)
+export const maxDuration = 60;
+
 // Initialize Groq
 const groq = createGroq({
   apiKey: process.env.GROQ_API_KEY,
@@ -443,7 +446,7 @@ export async function POST(req: Request) {
       model,
       system: getSystemPrompt(safeCountryCode, safeCountryName, memoryContext, customPrompts),
       messages: messagesForAI,
-      maxOutputTokens: 3072,
+      maxOutputTokens: 8192,
       onFinish: async ({ text }) => {
         // Persist the full assistant response after the stream completes
         try {
