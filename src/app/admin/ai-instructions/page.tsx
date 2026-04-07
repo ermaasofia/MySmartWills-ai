@@ -1,4 +1,5 @@
 import { Metadata } from 'next';
+import { Suspense } from 'react';
 import { AIInstructionsForm } from '@/components/admin/ai-instructions-form';
 
 export const metadata: Metadata = {
@@ -16,7 +17,9 @@ export default function AIInstructionsPage() {
         </p>
       </div>
 
-      <AIInstructionsForm />
+      <Suspense>
+        <AIInstructionsForm />
+      </Suspense>
     </div>
   );
 }

@@ -315,7 +315,7 @@ export function ChatInterface({
             className="gap-1.5 shrink-0"
             aria-label="AI Settings"
           >
-            <Link href="/admin/ai-instructions">
+            <Link href={`/admin/ai-instructions?country=${activeSavy.code}`}>
               <Settings className="h-4 w-4" />
               <span className="hidden sm:inline text-xs">AI Settings</span>
             </Link>

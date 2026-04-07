@@ -12,12 +12,32 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { useRouter } from 'next/navigation';
-import { type PromptType, AI_INSTRUCTION_COUNTRIES, EMPTY_PROMPTS } from '@/lib/constants';
-import { PromptData } from '@/types';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { type PromptType, AI_INSTRUCTION_COUNTRIES, PROMPT_TYPES } from '@/lib/constants';
+import { Plus, Trash2 } from 'lucide-react';
 
 interface SaveStatus {
   [key: string]: 'idle' | 'saving' | 'success' | 'error';
+}
+
+const BLOCK_SEPARATOR = '\n---\n';
+
+function splitIntoBlocks(content: string): string[] {
+  if (!content) return [''];
+  const parts = content.split(BLOCK_SEPARATOR);
+  return parts.length > 0 ? parts : [''];
+}
+
+function joinBlocks(blockArray: string[]): string {
+  // Filter out empty trailing blocks but keep at least content from non-empty ones
+  const filtered = blockArray.filter((b, i) => b.trim() !== '' || i === 0);
+  // If only the first block and it's empty, return empty string
+  if (filtered.length === 1 && filtered[0].trim() === '') return '';
+  return filtered.join(BLOCK_SEPARATOR);
+}
+
+function createEmptyBlocks(): Record<PromptType, string[]> {
+  return Object.fromEntries(PROMPT_TYPES.map((t) => [t, ['']])) as Record<PromptType, string[]>;
 }
 
 const PROMPT_CONFIGS: {
@@ -60,8 +80,17 @@ const PROMPT_CONFIGS: {
 
 export function AIInstructionsForm() {
   const router = useRouter();
-  const [selectedCountry, setSelectedCountry] = useState('MY');
-  const [prompts, setPrompts] = useState<PromptData>({ ...EMPTY_PROMPTS });
+  const searchParams = useSearchParams();
+
+  const [selectedCountry, setSelectedCountry] = useState(() => {
+    const paramCountry = searchParams.get('country');
+    if (paramCountry && AI_INSTRUCTION_COUNTRIES.some((c) => c.code === paramCountry)) {
+      return paramCountry;
+    }
+    return 'MY';
+  });
+
+  const [blocks, setBlocks] = useState<Record<PromptType, string[]>>(createEmptyBlocks);
   const [saveStatus, setSaveStatus] = useState<SaveStatus>({
     character: 'idle',
     sop: 'idle',
@@ -87,16 +116,14 @@ export function AIInstructionsForm() {
       const data = await response.json();
       const fetchedPrompts = data.prompts || {};
 
-      setPrompts({
-        character: fetchedPrompts.character?.content || '',
-        sop: fetchedPrompts.sop?.content || '',
-        company_info: fetchedPrompts.company_info?.content || '',
-        services: fetchedPrompts.services?.content || '',
-        other: fetchedPrompts.other?.content || '',
-      });
+      const newBlocks = createEmptyBlocks();
+      for (const type of PROMPT_TYPES) {
+        newBlocks[type] = splitIntoBlocks(fetchedPrompts[type]?.content || '');
+      }
+      setBlocks(newBlocks);
     } catch (error) {
       console.error('Error fetching prompts:', error);
-      setPrompts({ ...EMPTY_PROMPTS });
+      setBlocks(createEmptyBlocks());
     } finally {
       setIsLoading(false);
     }
@@ -121,8 +148,32 @@ export function AIInstructionsForm() {
     });
   };
 
+  const handleBlockChange = (promptType: PromptType, index: number, value: string) => {
+    setBlocks((prev) => {
+      const updated = [...prev[promptType]];
+      updated[index] = value;
+      return { ...prev, [promptType]: updated };
+    });
+  };
+
+  const handleAddBlock = (promptType: PromptType) => {
+    setBlocks((prev) => ({
+      ...prev,
+      [promptType]: [...prev[promptType], ''],
+    }));
+  };
+
+  const handleRemoveBlock = (promptType: PromptType, index: number) => {
+    setBlocks((prev) => {
+      const updated = prev[promptType].filter((_, i) => i !== index);
+      return { ...prev, [promptType]: updated.length > 0 ? updated : [''] };
+    });
+  };
+
   const handleSave = async (promptType: PromptType) => {
     setSaveStatus((prev) => ({ ...prev, [promptType]: 'saving' }));
+
+    const content = joinBlocks(blocks[promptType]);
 
     try {
       const response = await fetch('/api/admin/ai-prompts', {
@@ -130,7 +181,7 @@ export function AIInstructionsForm() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           prompt_type: promptType,
-          content: prompts[promptType],
+          content,
           country_code: selectedCountry,
         }),
       });
@@ -141,7 +192,8 @@ export function AIInstructionsForm() {
       }
 
       if (!response.ok) {
-        throw new Error('Failed to save prompt');
+        const err = await response.json().catch(() => null);
+        throw new Error(err?.error || 'Failed to save prompt');
       }
 
       setSaveStatus((prev) => ({ ...prev, [promptType]: 'success' }));
@@ -157,10 +209,6 @@ export function AIInstructionsForm() {
         setSaveStatus((prev) => ({ ...prev, [promptType]: 'idle' }));
       }, 3000);
     }
-  };
-
-  const handleChange = (promptType: PromptType, value: string) => {
-    setPrompts((prev) => ({ ...prev, [promptType]: value }));
   };
 
   const getButtonVariant = (status: string) => {
@@ -224,42 +272,78 @@ export function AIInstructionsForm() {
           <p className="text-xs text-muted-foreground">
             Editing instructions for <span className="font-medium">{selectedCountryName}</span>. These prompts will be used when users chat with this country selected.
           </p>
-          {PROMPT_CONFIGS.map((config) => (
-            <Card key={config.key}>
-              <CardHeader className="p-4 pb-2 md:p-6 md:pb-3">
-                <CardTitle className="text-sm md:text-base">{config.title}</CardTitle>
-                <CardDescription className="text-xs">
-                  {config.description}
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="p-4 pt-0 md:p-6 md:pt-0 space-y-3">
-                <div className="space-y-1.5">
-                  <Label htmlFor={`${selectedCountry}-${config.key}`} className="sr-only">
-                    {config.title}
-                  </Label>
-                  <Textarea
-                    id={`${selectedCountry}-${config.key}`}
-                    value={prompts[config.key]}
-                    onChange={(e) => handleChange(config.key, e.target.value)}
-                    placeholder={config.placeholder}
-                    className="min-h-24 md:min-h-32 text-sm"
-                  />
-                  <p className="text-[11px] text-muted-foreground text-right">
-                    {prompts[config.key].length.toLocaleString()} characters
-                  </p>
-                </div>
-                <Button
-                  onClick={() => handleSave(config.key)}
-                  disabled={saveStatus[config.key] === 'saving'}
-                  variant={getButtonVariant(saveStatus[config.key])}
-                  size="sm"
-                  className="w-full sm:w-auto"
-                >
-                  {getButtonText(saveStatus[config.key])}
-                </Button>
-              </CardContent>
-            </Card>
-          ))}
+          {PROMPT_CONFIGS.map((config) => {
+            const typeBlocks = blocks[config.key];
+            const totalChars = joinBlocks(typeBlocks).length;
+
+            return (
+              <Card key={config.key}>
+                <CardHeader className="p-4 pb-2 md:p-6 md:pb-3">
+                  <CardTitle className="text-sm md:text-base">{config.title}</CardTitle>
+                  <CardDescription className="text-xs">
+                    {config.description}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="p-4 pt-0 md:p-6 md:pt-0 space-y-3">
+                  <div className="space-y-3">
+                    {typeBlocks.map((block, idx) => (
+                      <div key={idx} className="space-y-1.5">
+                        <Label htmlFor={`${selectedCountry}-${config.key}-${idx}`} className="sr-only">
+                          {config.title} — Section {idx + 1}
+                        </Label>
+                        <Textarea
+                          id={`${selectedCountry}-${config.key}-${idx}`}
+                          value={block}
+                          onChange={(e) => handleBlockChange(config.key, idx, e.target.value)}
+                          placeholder={idx === 0 ? config.placeholder : 'Continue instructions...'}
+                          className="min-h-20 md:min-h-24 text-sm"
+                        />
+                        <div className="flex items-center justify-between">
+                          <p className="text-[11px] text-muted-foreground">
+                            {block.length.toLocaleString()} chars
+                          </p>
+                          {typeBlocks.length > 1 && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleRemoveBlock(config.key, idx)}
+                              className="h-6 px-2 text-muted-foreground hover:text-destructive"
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleAddBlock(config.key)}
+                    className="w-full border-dashed"
+                  >
+                    <Plus className="h-3.5 w-3.5 mr-1.5" />
+                    Add Section
+                  </Button>
+
+                  <div className="flex items-center justify-between pt-1">
+                    <p className="text-[11px] text-muted-foreground">
+                      Total: {totalChars.toLocaleString()} characters
+                    </p>
+                    <Button
+                      onClick={() => handleSave(config.key)}
+                      disabled={saveStatus[config.key] === 'saving'}
+                      variant={getButtonVariant(saveStatus[config.key])}
+                      size="sm"
+                    >
+                      {getButtonText(saveStatus[config.key])}
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
       )}
     </div>
