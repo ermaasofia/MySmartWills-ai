@@ -112,7 +112,7 @@ export default function PrivacyPolicyPage() {
           <h2>10. Contact Us</h2>
           <p>
             For privacy-related inquiries, contact us at{" "}
-            <a href="mailto:privacy@aismartwills.me">privacy@aismartwills.me</a>
+            <a href="mailto:privacy@smartwills.ai">privacy@smartwills.ai</a>
           </p>
         </div>
       </main>

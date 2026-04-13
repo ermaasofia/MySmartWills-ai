@@ -1,304 +1,304 @@
-# 🚀 Complete Setup Guide for aismartwills.me
+# Complete Setup Guide for smartwills.ai
 
 Follow these steps **in order**. Each step builds on the previous one.
 
+> **Setup:**
+> - **Domain:** `smartwills.ai` (owned by CTO, registered at Namecheap)
+> - **DNS:** Managed by Omar via **Cloudflare** (free plan) — CTO points nameservers to Cloudflare
+> - **Email:** Zoho Zepto (SMTP relay through Supabase) — CTO owns Zepto dashboard
+> - **Hosting:** Vercel (managed by Omar)
+
 ---
 
-## STEP 1: Connect Domain to Vercel (Your Website)
+## STEP 1: Add smartwills.ai to Cloudflare
 
 ### What this does:
-Points `aismartwills.me` to your Vercel website instead of `aismartwills.vercel.app`
+Gives you full control of DNS records for smartwills.ai through your Cloudflare account.
+
+### How to do it:
+
+1. **Go to Cloudflare Dashboard**
+   - Open [dash.cloudflare.com](https://dash.cloudflare.com)
+   - Sign in with your account
+
+2. **Add the site**
+   - Click **+ Add a site**
+   - Enter: `smartwills.ai`
+   - Select **Free plan** → Continue
+
+3. **Cloudflare gives you 2 nameservers**
+   - Example (yours will be different):
+     ```
+     anna.ns.cloudflare.com
+     rick.ns.cloudflare.com
+     ```
+   - **Copy these** — you'll send them to the CTO
+
+4. **Skip the DNS scan for now** — click Continue/Done, you'll add records manually later
+
+---
+
+## STEP 2: CTO Changes Nameservers in Namecheap
+
+### What this does:
+Transfers DNS control from Namecheap to your Cloudflare account.
+
+### Message to send CTO:
+
+> Bro, tolong tukar nameservers untuk smartwills.ai di Namecheap:
+>
+> 1. Pergi Namecheap → Domain List → smartwills.ai → Manage
+> 2. Under **Nameservers**, change from "Namecheap BasicDNS" to **Custom DNS**
+> 3. Paste these two nameservers:
+>    - `anna.ns.cloudflare.com` *(replace with your actual CF nameservers)*
+>    - `rick.ns.cloudflare.com`
+> 4. Click the green checkmark to save
+>
+> Lepas tu aku handle semua DNS records dari Cloudflare side.
+
+**Wait 1–24 hours** for nameserver propagation. Cloudflare dashboard will show status change from "Pending" to **"Active"** when ready.
+
+---
+
+## STEP 3: Add Vercel DNS Records in Cloudflare
+
+### What this does:
+Points `smartwills.ai` and `www.smartwills.ai` to Vercel's servers.
+
+### How to do it:
+
+1. **Go to Cloudflare Dashboard**
+   - Click on `smartwills.ai` → **DNS** → **Records**
+
+2. **Vercel auto-configures via Cloudflare integration**
+   - When you add `smartwills.ai` in Vercel (Step 4), Vercel detects Cloudflare and shows an **"Authorize"** button
+   - Click **Authorize** — this lets Vercel add the correct DNS records directly in Cloudflare:
+     - CNAME `@` → `fe9c5e6b95614830.vercel-dns-017.com` (DNS only)
+     - CNAME `www` → `fe9c5e6b95614830.vercel-dns-017.com` (DNS only)
+     - TXT `_vercel` for domain verification
+   - Vercel will also remove old parking page records (e.g. Namecheap defaults)
+
+3. **Clean up old records (if any)**
+   - If you manually added an A record `76.76.21.21`, delete it — Vercel now uses CNAME instead
+   - All records should be **DNS only (grey cloud / proxy off)**
+
+> **IMPORTANT:** Records MUST be **DNS only (grey cloud / proxy off)**. Vercel issues its own SSL certificate — Cloudflare proxy will interfere with SSL provisioning and cause "Too many redirects" errors.
+
+---
+
+## STEP 4: Add Domain to Vercel
+
+### What this does:
+Tells Vercel to serve your app on the new domain and issue an SSL certificate.
 
 ### How to do it:
 
 1. **Go to Vercel Dashboard**
-   - Open [vercel.com](https://vercel.com)
-   - Sign in
-   - Click on your **aismartwills** project
+   - Open [vercel.com](https://vercel.com) → your project
 
 2. **Open Domain Settings**
-   - Click the **Settings** tab at the top
-   - Click **Domains** in the left sidebar
+   - Settings → Domains
 
-3. **Add Your Domain**
-   - In the box that says "Enter domain", type: `aismartwills.me`
-   - Click **Add**
-   - Also add: `www.aismartwills.me` (so both work)
+3. **Add domains**
+   - Add: `smartwills.ai` → Click Add
+   - Add: `www.smartwills.ai` → Click Add
+   - Vercel will auto-configure www → root redirect
 
-4. **Vercel will show you DNS records**
-   - You'll see something like:
-     ```
-     Type: A
-     Name: @
-     Value: 76.76.21.21
-     
-     Type: CNAME
-     Name: www
-     Value: cname.vercel-dns.com
-     ```
-   - **Keep this tab open** — you'll need these values in Step 2
+4. **Wait for verification**
+   - Status will show "Pending" → then **"Valid"** once DNS propagates
+   - SSL certificate is issued automatically
 
 ---
 
-## STEP 2: Update DNS in Namecheap
+## STEP 5: Set Up Zoho Zepto Email DNS
 
 ### What this does:
-Tells the internet that `aismartwills.me` points to Vercel's servers
+Configures email authentication (SPF, DKIM, DMARC) so auth emails from `noreply@mysmartwills.com` don't go to spam.
 
 ### How to do it:
 
-1. **Go to Namecheap**
-   - Open [namecheap.com](https://namecheap.com)
-   - Sign in
-   - Click **Domain List** in the left sidebar
+1. **Ask CTO for Zepto DNS records**
 
-2. **Open DNS Settings**
-   - Find `aismartwills.me` in your list
-   - Click the **Manage** button next to it
-   - Click the **Advanced DNS** tab
+   > Bro, tolong add domain `smartwills.ai` dalam Zoho Zepto dashboard:
+   > - Pergi Zepto → Domains → Add Domain → `smartwills.ai`
+   > - Dia akan show DNS records yang perlu add (SPF, DKIM, verification)
+   > - Screenshot atau copy semua records tu hantar kat aku
+   > - Aku yang add dalam Cloudflare
 
-3. **Delete Old Records (if any)**
-   - Look for any existing `A Record` with Host `@`
-   - Look for any existing `CNAME Record` with Host `www`
-   - Click the **trash icon** to delete them
+2. **Add records in Cloudflare**
+   - Go to Cloudflare → `smartwills.ai` → DNS → Records
+   - Add each record the CTO sends you. Typically:
 
-4. **Add Vercel's A Record**
-   - Click **+ Add New Record**
-   - Type: `A Record`
-   - Host: `@`
-   - Value: `76.76.21.21` (from Vercel)
-   - TTL: `Automatic`
-   - Click the **✓ checkmark** to save
+   | Type | Name | Value |
+   |------|------|-------|
+   | TXT | `@` | `v=spf1 include:zeptomail.net ~all` |
+   | TXT | `zmail._domainkey` *(or whatever Zepto says)* | *(long DKIM key from CTO)* |
+   | TXT | `_dmarc` | `v=DMARC1; p=none;` |
+   | CNAME/TXT | *(verification record from CTO)* | *(value from CTO)* |
 
-5. **Add Vercel's CNAME Record**
-   - Click **+ Add New Record**
-   - Type: `CNAME Record`
-   - Host: `www`
-   - Value: `cname.vercel-dns.com` (from Vercel)
-   - TTL: `Automatic`
-   - Click the **✓ checkmark** to save
+   > Note: Copy the exact names and values from the CTO's screenshot. Do not guess.
 
-6. **Wait 10-30 minutes**
-   - DNS changes take time to propagate
-   - Go back to Vercel → Domains
-   - You'll see "Pending" → then "Valid" when ready
+3. **Tell CTO to verify**
+
+   > Records dah add. Tolong click Verify dalam Zepto dashboard.
+
+4. **Get SMTP credentials from CTO**
+
+   > Domain dah verified. Tolong bagi aku SMTP credentials dari Zepto:
+   > - Pergi Settings → Send Mail Tokens → SMTP
+   > - Aku perlukan: **SMTP username** dan **SMTP password/token**
+   > - (Bukan API key — aku perlukan SMTP specific credentials)
 
 ---
 
-## STEP 3: Set Up Email Domain in Resend
+## STEP 6: Configure Supabase with Zoho Zepto SMTP
 
 ### What this does:
-Allows you to send emails from `noreply@aismartwills.me` instead of `onboarding@resend.dev`
-
-### How to do it:
-
-1. **Go to Resend**
-   - Open [resend.com](https://resend.com)
-   - Sign in
-   - Click **Domains** in the left sidebar
-
-2. **Add Your Domain**
-   - Click **+ Add Domain** button
-   - Enter: `aismartwills.me`
-   - Click **Add**
-
-3. **Resend Shows DNS Records**
-   - You'll see 3 records to add:
-   
-   **Record 1 - SPF (TXT)**
-   ```
-   Type: TXT
-   Name: @
-   Value: v=spf1 include:send.resend.com ~all
-   ```
-   
-   **Record 2 - DKIM (TXT)**
-   ```
-   Type: TXT
-   Name: resend._domainkey
-   Value: (long string that Resend provides)
-   ```
-   
-   **Record 3 - DMARC (TXT)**
-   ```
-   Type: TXT
-   Name: _dmarc
-   Value: v=DMARC1; p=none;
-   ```
-
-4. **Add These to Namecheap DNS**
-   - Go back to Namecheap → `aismartwills.me` → **Advanced DNS**
-   - For **each of the 3 records** above:
-     - Click **+ Add New Record**
-     - Type: `TXT Record`
-     - Host: (copy from Resend - `@`, `resend._domainkey`, or `_dmarc`)
-     - Value: (copy the exact value from Resend)
-     - TTL: `Automatic`
-     - Click **✓ checkmark**
-
-5. **Verify in Resend**
-   - Wait 5-15 minutes
-   - Go back to Resend → Domains
-   - Click **Verify** next to `aismartwills.me`
-   - Status will change to ✅ **Verified**
-
----
-
-## STEP 4: Update Supabase Settings
-
-### What this does:
-Makes auth emails redirect to your domain and send from your domain
+Routes all Supabase auth emails (signup confirmation, password reset, magic link) through Zoho Zepto.
 
 ### How to do it:
 
 1. **Update Site URL**
    - Go to [Supabase Dashboard](https://supabase.com/dashboard/project/qkhlsbgycewpidtacmzg)
-   - Click **Authentication** (lightning bolt icon) in left sidebar
+   - Click **Authentication** in left sidebar
    - Click **URL Configuration** tab
-   - Find **Site URL** field
-   - Change from `http://localhost:3000` to: `https://aismartwills.me`
+   - **Site URL:** `https://smartwills.ai`
    - Click **Save**
 
 2. **Add Redirect URLs**
    - Still in **URL Configuration**
-   - Find **Redirect URLs** section
-   - Add this: `https://aismartwills.me/**`
+   - Add: `https://smartwills.ai/**`
    - Click **Save**
 
-3. **Update Email Sender**
-   - Click **SMTP Settings** tab (still in Authentication)
-   - Find **Sender email address**
-   - Change from `onboarding@resend.dev` to: `noreply@aismartwills.me`
-   - Click **Save changes**
-
----
-
-## STEP 5: Update Environment Variables in Vercel
-
-### What this does:
-Tells your app to use the new domain
-
-### How to do it:
-
-1. **Go to Vercel Dashboard**
-   - Your project → **Settings** → **Environment Variables**
-
-2. **Find NEXT_PUBLIC_APP_URL**
-   - Look for the variable `NEXT_PUBLIC_APP_URL`
-   - If it exists, click the **...** menu → **Edit**
-   - If it doesn't exist, click **Add**
-
-3. **Set the Value**
-   - Value: `https://aismartwills.me`
-   - Apply to: **Production**, **Preview**, **Development** (check all)
+3. **Enable Custom SMTP**
+   - Click **SMTP Settings** tab
+   - Toggle **Enable Custom SMTP** to ON
+   - Fill in:
+     - **Host:** `smtp.zeptomail.com`
+     - **Port:** `587`
+     - **Username:** *(from CTO — usually `emailapikey`)*
+     - **Password:** *(SMTP token from CTO — NOT the API key)*
+     - **Sender email:** `noreply@mysmartwills.com`
+     - **Sender name:** `AI SmartWills`
    - Click **Save**
 
-4. **Also add all your other variables** (if not already there):
-   - `NEXT_PUBLIC_SUPABASE_URL`
-   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-   - `GROQ_API_KEY`
-   - `GOOGLE_GENERATIVE_AI_API_KEY`
-   
-   (Copy from your `.env.local` file)
+4. **Update Email Templates**
+   - Click **Email Templates** tab
+   - For each template (Confirm signup, Reset password, Magic link):
+     - Update logo `<img>` src to `https://smartwills.ai/logo.png`
+     - Update footer link to `smartwills.ai`
+   - See `EMAIL_SETUP.md` for full branded HTML templates
 
 ---
 
-## STEP 6: Deploy
+## STEP 7: Update Environment Variables in Vercel
 
-### What this does:
-Applies all the changes to your live website
+1. Go to Vercel → your project → **Settings** → **Environment Variables**
+2. Update `NEXT_PUBLIC_APP_URL` = `https://smartwills.ai`
+3. Apply to: **Production**, **Preview**, **Development**
+4. Click **Save**
 
-### How to do it:
-
-1. **Push to GitHub**
-   ```powershell
-   git add .
-   git commit -m "Update domain to aismartwills.me"
-   git push
-   ```
-
-2. **Vercel Auto-Deploys**
-   - Go to Vercel Dashboard → **Deployments**
-   - Wait for "Building..." to finish (1-2 minutes)
-   - Status will show ✅ **Ready**
+Ensure all other env vars are present:
+- `NEXT_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- `GROQ_API_KEY`
+- `ADMIN_EMAILS`
+- `UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN`
+- `NEXT_PUBLIC_CLOUDFLARE_TURNSTILE_SITE_KEY` / `CLOUDFLARE_TURNSTILE_SECRET_KEY`
 
 ---
 
-## STEP 7: Test Everything
+## STEP 8: Update Google OAuth Redirect URI
 
-### Test 1: Website Access
-1. Open `https://aismartwills.me` in your browser
-2. You should see your landing page
-3. Logo and dark mode should work
-
-### Test 2: Signup with Email
-1. Go to `https://aismartwills.me/signup`
-2. Sign up with **any email address**
-3. Check your email inbox
-4. You should receive an email from `noreply@aismartwills.me`
-5. Click the verification link
-6. It should redirect to `https://aismartwills.me/chat` (not localhost)
-
-### Test 3: Chat Functionality
-1. Go to `https://aismartwills.me/chat`
-2. Select a country
-3. Type a question about will planning
-4. AI should respond
+1. Go to [Google Cloud Console](https://console.cloud.google.com) → APIs & Services → Credentials
+2. Open your OAuth 2.0 Client ID
+3. Under **Authorized redirect URIs**, add:
+   - `https://smartwills.ai/auth/callback`
+   - `https://www.smartwills.ai/auth/callback`
+4. Click **Save**
 
 ---
 
-## 📋 Quick Checklist
+## STEP 9: Deploy
 
-Copy this checklist and check off as you go:
+```powershell
+git add .
+git commit -m "Migrate to smartwills.ai domain + Zoho Zepto SMTP"
+git push
+```
 
-- [ ] Added domain to Vercel
-- [ ] Added Vercel's A record to Namecheap DNS
-- [ ] Added Vercel's CNAME record to Namecheap DNS
-- [ ] Waited for DNS to propagate (10-30 min)
-- [ ] Added domain to Resend
-- [ ] Added all 3 email DNS records to Namecheap
-- [ ] Verified domain in Resend (shows ✅)
-- [ ] Updated Supabase Site URL to `https://aismartwills.me`
-- [ ] Updated Supabase email sender to `noreply@aismartwills.me`
-- [ ] Added environment variables to Vercel
-- [ ] Pushed code to GitHub
-- [ ] Waited for Vercel deployment to finish
-- [ ] Tested website loads at `https://aismartwills.me`
-- [ ] Tested signup email works
-- [ ] Tested email verification redirects correctly
-- [ ] Tested chat functionality
+Vercel will auto-deploy. Wait 1–2 minutes.
 
 ---
 
-## ❓ Troubleshooting
+## STEP 10: Test Everything
+
+### Test 1: Website
+- Open `https://smartwills.ai` — landing page loads
+- Logo and dark mode work
+
+### Test 2: Signup Email
+- Go to `https://smartwills.ai/signup` → sign up
+- Email arrives from `noreply@mysmartwills.com`
+- Click verification link → redirects to `https://smartwills.ai/chat`
+
+### Test 3: Password Reset
+- `/forgot-password` → enter email
+- Reset email arrives from `noreply@mysmartwills.com`
+- Link leads to `https://smartwills.ai/reset-password`
+
+### Test 4: Google OAuth
+- Sign out → "Continue with Google" → redirects to `smartwills.ai/chat`
+
+### Test 5: Chat
+- Select country → ask question → AI responds
+
+---
+
+## Quick Checklist
+
+- [ ] Added `smartwills.ai` to Cloudflare (got nameservers)
+- [ ] CTO changed nameservers at Namecheap
+- [ ] Cloudflare shows "Active"
+- [ ] Added Vercel A + CNAME records in Cloudflare (grey cloud!)
+- [ ] Added `smartwills.ai` to Vercel (domain shows "Valid")
+- [ ] CTO added `smartwills.ai` in Zepto, sent DNS records
+- [ ] Added Zepto email DNS records in Cloudflare
+- [ ] CTO verified domain in Zepto
+- [ ] Got SMTP credentials from CTO
+- [ ] Enabled custom SMTP in Supabase
+- [ ] Updated Supabase Site URL + redirect URLs
+- [ ] Updated email templates
+- [ ] Updated `NEXT_PUBLIC_APP_URL` in Vercel
+- [ ] Updated Google OAuth redirect URIs
+- [ ] Pushed code and deployed
+- [ ] All 5 tests pass
+
+---
+
+## Troubleshooting
 
 ### "This site can't be reached"
-- DNS not propagated yet → Wait 30 more minutes
-- Wrong DNS records → Double-check Step 2
+- Nameservers not propagated → Wait up to 24 hours
+- Check: `dig smartwills.ai +short` should return `76.76.21.21`
 
 ### "Too many redirects"
-- Vercel domain not configured → Check Step 1
-- Wait for deployment → Check Vercel Deployments tab
+- Cloudflare proxy is ON → Turn it OFF (grey cloud) for both A and CNAME records
+- Or if you want Cloudflare proxy: set SSL mode to **Full (Strict)** in Cloudflare
+
+### SSL certificate pending in Vercel
+- Make sure Cloudflare records are **DNS only (grey cloud)**
+- Vercel needs direct access to issue Let's Encrypt certificate
 
 ### Email not arriving
-- Domain not verified in Resend → Check Step 3
+- Domain not verified in Zepto → Ask CTO to check
+- Wrong SMTP credentials → Double-check username/password in Supabase SMTP settings
 - Check spam folder
-- Resend logs: [resend.com/emails](https://resend.com/emails)
+- Check Zepto logs: Reports → Sent Emails
 
-### Email goes to localhost
-- Supabase Site URL not updated → Check Step 4
-- Need to redeploy → Push a new commit
+### DKIM verification fails
+- DKIM key value got truncated — paste the **entire** value without line breaks
+- Cloudflare doesn't have the same character limit as Namecheap, so this is less likely
 
----
-
-## 🎉 When All Done
-
-You'll have:
-- ✅ Professional domain: `aismartwills.me`
-- ✅ Branded emails: `noreply@aismartwills.me`
-- ✅ Secure HTTPS with SSL certificate (automatic)
-- ✅ Production-ready with all security headers
-- ✅ Rate limiting and input validation
-- ✅ SEO optimized with sitemap and robots.txt
-
-**Ready to show people!** 🚀
+### Google OAuth fails
+- Redirect URI not added → Check Step 8
+- May take a few minutes for Google to propagate changes

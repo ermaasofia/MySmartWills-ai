@@ -37,13 +37,13 @@ export function breadcrumbJsonLd(pageName: string, pageUrl: string) {
         '@type': 'ListItem',
         position: 1,
         name: 'Home',
-        item: 'https://aismartwills.me',
+        item: 'https://smartwills.ai',
       },
       {
         '@type': 'ListItem',
         position: 2,
         name: pageName,
-        item: `https://aismartwills.me${pageUrl}`,
+        item: `https://smartwills.ai${pageUrl}`,
       },
     ],
   };

@@ -3,19 +3,19 @@ import type { MetadataRoute } from 'next';
 export default function sitemap(): MetadataRoute.Sitemap {
   return [
     {
-      url: 'https://aismartwills.me',
+      url: 'https://smartwills.ai',
       lastModified: new Date(),
       changeFrequency: 'weekly',
       priority: 1,
     },
     {
-      url: 'https://aismartwills.me/privacy',
+      url: 'https://smartwills.ai/privacy',
       lastModified: new Date(),
       changeFrequency: 'yearly',
       priority: 0.3,
     },
     {
-      url: 'https://aismartwills.me/terms',
+      url: 'https://smartwills.ai/terms',
       lastModified: new Date(),
       changeFrequency: 'yearly',
       priority: 0.3,

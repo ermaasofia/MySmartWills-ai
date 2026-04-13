@@ -38,7 +38,7 @@ Click on **Confirm signup** and replace the entire content with this branded tem
           <!-- Header with Logo -->
           <tr>
             <td style="padding: 40px 40px 30px; text-align: center; border-bottom: 1px solid #e5e5e5;">
-              <img src="https://aismartwills.me/logo.png" alt="AI SmartWills" width="64" height="64" style="display: block; margin: 0 auto 20px;">
+              <img src="https://smartwills.ai/logo.png" alt="AI SmartWills" width="64" height="64" style="display: block; margin: 0 auto 20px;">
               <h1 style="margin: 0; font-size: 28px; font-weight: 700; color: #000000; letter-spacing: -0.5px;">AI SmartWills</h1>
               <p style="margin: 8px 0 0; font-size: 14px; color: #525252;">Intelligent Legal Will Planning</p>
             </td>
@@ -99,7 +99,7 @@ Click on **Confirm signup** and replace the entire content with this branded tem
                 Serving 12 countries across Asia-Pacific
               </p>
               <p style="margin: 0 0 10px; font-size: 13px; color: #525252;">
-                <a href="https://aismartwills.me" style="color: #000000; text-decoration: none; font-weight: 600;">aismartwills.me</a>
+                <a href="https://smartwills.ai" style="color: #000000; text-decoration: none; font-weight: 600;">smartwills.ai</a>
               </p>
               <p style="margin: 0; font-size: 12px; color: #737373;">
                 © 2026 AI SmartWills. All rights reserved.
@@ -171,16 +171,21 @@ Use the same template structure, but change:
 
 ## Step 4: Configure Email Settings
 
-### A. Update SMTP Settings
+### A. Update SMTP Settings (Zoho Zepto via parent domain)
 1. Still in Authentication, click **SMTP Settings** tab
-2. **Sender email:** `noreply@aismartwills.me`
-3. **Sender name:** `AI SmartWills`
-4. Click **Save changes**
+2. Toggle **Enable Custom SMTP** → ON
+3. **Host:** `smtp.zeptomail.com`
+4. **Port:** `587`
+5. **Username:** `emailapikey`
+6. **Password:** *(Zepto Send Mail Token from CTO — strip the `Zoho-enczapikey ` prefix)*
+7. **Sender email:** `noreply@mysmartwills.com` *(parent company domain, already verified in CTO's Zepto account)*
+8. **Sender name:** `AI SmartWills`
+9. Click **Save changes**
 
 ### B. Update URL Configuration
 1. Click **URL Configuration** tab
-2. **Site URL:** `https://aismartwills.me`
-3. **Redirect URLs:** Add `https://aismartwills.me/**`
+2. **Site URL:** `https://smartwills.ai`
+3. **Redirect URLs:** Add `https://smartwills.ai/**`
 4. Click **Save**
 
 ---
@@ -191,7 +196,7 @@ Use the same template structure, but change:
    - Authentication → Users → Find your email → Delete
 
 2. **Sign up again:**
-   - Go to `https://aismartwills.me/signup`
+   - Go to `https://smartwills.ai/signup`
    - Use your email
    - Fill the form and submit
 
@@ -201,7 +206,7 @@ Use the same template structure, but change:
    - Black and white design matching your site
 
 4. **Click the confirmation link:**
-   - Should redirect to `https://aismartwills.me/chat`
+   - Should redirect to `https://smartwills.ai/chat`
 
 ---
 
@@ -254,8 +259,8 @@ Available in all email templates:
 ## 🔧 Troubleshooting
 
 ### Logo not showing in email?
-- Make sure your site is deployed to `aismartwills.me`
-- Logo must be publicly accessible at `https://aismartwills.me/logo.png`
+- Make sure your site is deployed to `smartwills.ai`
+- Logo must be publicly accessible at `https://smartwills.ai/logo.png`
 - Some email clients block images by default - users need to "Display images"
 
 ### Email showing plain text?

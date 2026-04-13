@@ -18,7 +18,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://aismartwills.me'),
+  metadataBase: new URL('https://smartwills.ai'),
   title: {
     default: 'AI SmartWills - Intelligent Legal Will Planning Assistant',
     template: '%s | AI SmartWills',
@@ -42,7 +42,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'en_US',
-    url: 'https://aismartwills.me',
+    url: 'https://smartwills.ai',
     title: 'AI SmartWills - Intelligent Legal Will Planning Assistant',
     description: 'Your AI-powered assistant for legal will planning across 12 countries in Asia-Pacific.',
     siteName: 'AI SmartWills',
@@ -78,8 +78,8 @@ export default function RootLayout({
       {
         '@type': 'Organization',
         name: 'AI SmartWills',
-        url: 'https://aismartwills.me',
-        logo: 'https://aismartwills.me/logo.png',
+        url: 'https://smartwills.ai',
+        logo: 'https://smartwills.ai/logo.png',
         description: 'AI-powered will planning assistant for Asia-Pacific.',
         sameAs: [
           'https://www.facebook.com/smartwillsmalaysia',
@@ -91,11 +91,11 @@ export default function RootLayout({
       {
         '@type': 'WebSite',
         name: 'AI SmartWills',
-        url: 'https://aismartwills.me',
+        url: 'https://smartwills.ai',
         description: 'Your AI-powered assistant for legal will planning across 12 countries in Asia-Pacific.',
         potentialAction: {
           '@type': 'SearchAction',
-          target: 'https://aismartwills.me/chat?q={search_term_string}',
+          target: 'https://smartwills.ai/chat?q={search_term_string}',
           'query-input': 'required name=search_term_string',
         },
       },
@@ -104,7 +104,7 @@ export default function RootLayout({
         name: 'AI SmartWills',
         applicationCategory: 'BusinessApplication',
         operatingSystem: 'Web',
-        url: 'https://aismartwills.me',
+        url: 'https://smartwills.ai',
         description: 'AI-powered will planning assistant for 12 Asia-Pacific countries.',
         offers: {
           '@type': 'Offer',

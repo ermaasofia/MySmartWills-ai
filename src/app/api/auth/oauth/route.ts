@@ -68,7 +68,7 @@ export async function POST(request: Request) {
   // ── Build absolute callback URL ───────────────────────────────────
   // Always derive the origin from the actual incoming request.
   // This automatically gives http://localhost:3000 on local dev and
-  // https://www.aismartwills.me on production — no env vars needed.
+  // https://www.smartwills.ai on production — no env vars needed.
   // NEXT_PUBLIC_SITE_URL can force-override (e.g. behind a reverse proxy).
   const requestOrigin = new URL(request.url).origin;
   const origin = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, '') ?? requestOrigin;

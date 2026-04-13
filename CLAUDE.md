@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-AI SmartWills — an intelligent will planning assistant providing country-specific legal guidance for 12 Asia-Pacific countries (MY, SG, HK, CN, TW, ID, TH, AU, NZ, BN, VN, PH). Live at `https://aismartwills.me`.
+AI SmartWills — an intelligent will planning assistant providing country-specific legal guidance for 12 Asia-Pacific countries (MY, SG, HK, CN, TW, ID, TH, AU, NZ, BN, VN, PH). Live at `https://smartwills.ai`.
 
 ## Commands
 

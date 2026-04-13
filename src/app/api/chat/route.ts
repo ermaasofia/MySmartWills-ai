@@ -136,7 +136,7 @@ export async function POST(req: Request) {
   try {
     // SECURITY: Reject non-POST or suspicious origins
     const origin = req.headers.get('origin');
-    const appUrl = (process.env.NEXT_PUBLIC_APP_URL || 'https://aismartwills.me').replace(/\/+$/, '');
+    const appUrl = (process.env.NEXT_PUBLIC_APP_URL || 'https://smartwills.ai').replace(/\/+$/, '');
     const allowedOrigins = [
       appUrl,
       appUrl.replace('://', '://www.'),

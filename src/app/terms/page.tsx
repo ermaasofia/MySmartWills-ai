@@ -126,7 +126,7 @@ export default function TermsPage() {
           <h2>12. Contact</h2>
           <p>
             For questions about these Terms, contact us at{" "}
-            <a href="mailto:legal@aismartwills.me">legal@aismartwills.me</a>
+            <a href="mailto:legal@smartwills.ai">legal@smartwills.ai</a>
           </p>
         </div>
       </main>

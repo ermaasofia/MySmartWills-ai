@@ -9,7 +9,7 @@ export async function POST(req: Request) {
   try {
     // SECURITY: Origin check
     const origin = req.headers.get('origin');
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://aismartwills.me';
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://smartwills.ai';
     const allowedOrigins = [
       appUrl,
       appUrl.replace('://', '://www.'),

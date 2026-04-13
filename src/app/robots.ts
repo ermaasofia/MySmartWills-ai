@@ -9,6 +9,6 @@ export default function robots(): MetadataRoute.Robots {
         disallow: ['/chat', '/api/', '/login', '/signup'],
       },
     ],
-    sitemap: 'https://aismartwills.me/sitemap.xml',
+    sitemap: 'https://smartwills.ai/sitemap.xml',
   };
 }
