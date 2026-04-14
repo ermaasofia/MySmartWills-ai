@@ -1,7 +1,7 @@
 # AI SmartWills - Production Security & Architecture Audit
 
 **Date:** 2026-04-01
-**Target:** https://aismartwills.me
+**Target:** https://smartwills.ai
 **Codebase:** Next.js 16 + Supabase + Groq LLM
 
 ---
@@ -61,7 +61,7 @@ export function getClientIp(headers: Headers): string {
 **Risk:** If your app is deployed on Vercel (not directly behind Cloudflare proxy), `cf-connecting-ip` won't be present. The function falls back to `x-forwarded-for`, which is **client-controlled**. An attacker can send:
 ```bash
 for i in $(seq 1 1000); do
-  curl -X POST https://aismartwills.me/api/auth/login \
+  curl -X POST https://smartwills.ai/api/auth/login \
     -H "X-Forwarded-For: 10.0.0.$((i % 256))" \
     -d '{"email":"victim@email.com","password":"guess'$i'"}'
 done
@@ -155,9 +155,9 @@ If the database `profiles.role` check fails (e.g., Supabase down), the system fa
 #### 2.10 CORS Origin Comparison Without Trailing Slash Normalization
 **File:** `src/app/api/chat/route.ts:280`
 ```typescript
-const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://aismartwills.me';
+const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://smartwills.ai';
 ```
-If `NEXT_PUBLIC_APP_URL` is set with a trailing slash (`https://aismartwills.me/`), origin comparison will fail and legitimate requests will be blocked.
+If `NEXT_PUBLIC_APP_URL` is set with a trailing slash (`https://smartwills.ai/`), origin comparison will fail and legitimate requests will be blocked.
 
 ---
 
