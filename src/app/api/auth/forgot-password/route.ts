@@ -1,5 +1,4 @@
 import { createClient } from '@/lib/supabase/server';
-import { verifyTurnstileToken } from '@/lib/turnstile';
 import { rateLimitAsync } from '@/lib/rate-limit';
 import { getClientIp } from '@/lib/ip';
 import { NextResponse } from 'next/server';
@@ -38,12 +37,21 @@ export async function POST(request: Request) {
   const email = typeof body.email === 'string' ? body.email.trim().slice(0, 320) : '';
   const captchaToken = typeof body.captchaToken === 'string' ? body.captchaToken : '';
 
-  // Validate redirectTo — only allow safe relative paths (same pattern as OAuth route)
+  // Validate redirectTo — must be absolute URL with same origin as the request.
+  // Supabase's Redirect URLs allowlist provides defense-in-depth.
   const rawRedirect = typeof body.redirectTo === 'string' ? body.redirectTo : null;
-  const redirectTo =
-    rawRedirect && rawRedirect.startsWith('/') && !rawRedirect.startsWith('//')
-      ? rawRedirect
-      : undefined;
+  let redirectTo: string | undefined;
+  if (rawRedirect) {
+    try {
+      const parsed = new URL(rawRedirect);
+      const requestUrl = new URL(request.url);
+      if (parsed.origin === requestUrl.origin) {
+        redirectTo = rawRedirect;
+      }
+    } catch {
+      // Invalid URL — leave redirectTo undefined so Supabase falls back to Site URL
+    }
+  }
 
   if (!email) {
     return NextResponse.json(
@@ -52,18 +60,10 @@ export async function POST(request: Request) {
     );
   }
 
-  // ── Verify Turnstile CAPTCHA server-side ─────────────────────────
-  if (captchaToken) {
-    const turnstileResult = await verifyTurnstileToken(captchaToken, ip);
-    if (!turnstileResult.success) {
-      return NextResponse.json(
-        { error: 'CAPTCHA verification failed. Please try again.' },
-        { status: 403 }
-      );
-    }
-  }
-
   // ── Send reset email via Supabase ───────────────────────────────
+  // Supabase verifies the Turnstile token itself when captcha protection
+  // is enabled in Auth settings. Don't verify here too — Turnstile tokens
+  // are single-use, so a double-verify produces "timeout-or-duplicate".
   const supabase = await createClient();
   await supabase.auth.resetPasswordForEmail(email, {
     redirectTo,
