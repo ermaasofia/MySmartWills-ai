@@ -12,7 +12,7 @@ Reference doc for the current production infrastructure. Describes the live setu
 | DNS management | Omar | Cloudflare (free plan) | Nameservers delegated from Namecheap → Cloudflare |
 | Hosting | Omar | Vercel | Auto-deploy from `main` branch |
 | Auth + database | Omar | Supabase | Project ID `qkhlsbgycewpidtacmzg` |
-| Transactional email | Omar | Resend | `noreply@smartwills.ai`, SMTP relay into Supabase |
+| Transactional email | CTO (AWS + `mysmartwills.com` DNS) / Omar (Supabase wiring) | Amazon SES (`ap-southeast-1`) | Sender `noreply@mysmartwills.com` (company-wide). SMTP relay into Supabase. Production access approved. No email DNS on `smartwills.ai`. |
 | CAPTCHA | Omar | Cloudflare Turnstile | Site key in `NEXT_PUBLIC_CLOUDFLARE_TURNSTILE_SITE_KEY` |
 | OAuth (Google) | Omar | Google Cloud Console | Redirect URI → `/auth/callback` |
 
@@ -27,9 +27,9 @@ All records below should be **DNS only (grey cloud)** unless noted otherwise. Ve
 | CNAME | `@` | `cname.vercel-dns.com` *(or the project-specific value Vercel's "Authorize in Cloudflare" flow writes)* | Serve site on apex |
 | CNAME | `www` | same as `@` | www redirect |
 | TXT | `_vercel` | *(value from Vercel)* | Vercel domain verification |
-| TXT | `@` | *(SPF from Resend)* | Email sender policy |
-| TXT / CNAME | *(Resend DKIM selector)* | *(value from Resend)* | DKIM signing for outbound mail |
-| TXT | `_dmarc` | `v=DMARC1; p=none;` | Reporting-only DMARC, optional but recommended |
+
+
+Note: **No email DNS records live on `smartwills.ai`.** Sender is `noreply@mysmartwills.com` — SPF, DKIM, and DMARC for that domain are managed by CTO on `mysmartwills.com`'s DNS, not here.
 
 ---
 
@@ -40,11 +40,11 @@ If this ever needs to be rebuilt from scratch, the order is:
 1. **Cloudflare** — add `smartwills.ai` as a site (free plan), get 2 nameservers
 2. **CTO (Namecheap)** — switch nameservers on `smartwills.ai` to the Cloudflare ones. Wait for Cloudflare dashboard to show "Active" (usually <1h, up to 24h)
 3. **Vercel** — Project → Settings → Domains → add `smartwills.ai` and `www.smartwills.ai`. Use the **"Authorize in Cloudflare"** button so Vercel writes its own DNS records — avoids guessing CNAME targets
-4. **Resend** — see `EMAIL_SETUP.md`
+4. **Amazon SES** (CTO-owned AWS account) — CTO confirms `mysmartwills.com` is already verified in `ap-southeast-1` with DKIM in place and production access. No DNS work on `smartwills.ai`. See `EMAIL_SETUP.md`
 5. **Supabase** — Dashboard → Authentication → URL Configuration:
    - **Site URL:** `https://smartwills.ai`
    - **Redirect URLs:** add `https://smartwills.ai/**`
-6. **Supabase → SMTP Settings** — plug in Resend credentials (see `EMAIL_SETUP.md`)
+6. **Supabase → SMTP Settings** — plug in SES SMTP credentials from CTO (see `EMAIL_SETUP.md`)
 7. **Google Cloud Console** — OAuth 2.0 Client → Authorized redirect URIs → add:
    - `https://smartwills.ai/auth/callback`
    - `https://www.smartwills.ai/auth/callback`
@@ -59,8 +59,8 @@ After any change to domain / email / auth infra, run the full smoke test:
 | Step | Expected |
 |---|---|
 | Open `https://smartwills.ai` | Landing page loads, SSL valid, logo + dark mode work |
-| `/signup` → create account | Confirmation email arrives from `noreply@smartwills.ai`, click link → `/chat` |
-| `/forgot-password` → submit | Reset email arrives from `noreply@smartwills.ai`, link opens `/reset-password` |
+| `/signup` → create account | Confirmation email arrives from `noreply@mysmartwills.com`, click link → `/chat` |
+| `/forgot-password` → submit | Reset email arrives from `noreply@mysmartwills.com`, link opens `/reset-password` |
 | Sign out → "Continue with Google" | Redirects back to `/chat` authenticated |
 | `/chat` → pick country → ask question | Streaming AI response works |
 
@@ -75,8 +75,8 @@ Cross-check **Supabase → Logs → Auth logs** for any `500 Error sending recov
 | "This site can't be reached" | Nameserver propagation incomplete | Wait up to 24h; verify with `dig smartwills.ai +short` returns Vercel CNAME target |
 | "Too many redirects" | Cloudflare proxy (orange cloud) enabled on apex/www CNAME | Switch those records to **DNS only** (grey cloud) |
 | Vercel SSL stuck on "Pending" | Cloudflare proxy blocking Let's Encrypt challenge | Same — set proxy to DNS only |
-| Email not arriving | Domain not verified in Resend, or wrong SMTP creds | Verify domain in Resend dashboard, re-check Supabase SMTP credentials |
-| DKIM verification fails in Resend | Record value truncated or has a typo | Re-paste the full value; Cloudflare has no character limit, so a full copy should always work |
+| Email not arriving | `mysmartwills.com` not verified in SES (CTO side), or wrong SMTP creds in Supabase | Ask CTO to confirm `mysmartwills.com` status in AWS → SES → Verified identities (ap-southeast-1); re-check Supabase SMTP credentials |
+| Emails going to Spam | DKIM / DMARC issues on `mysmartwills.com` | Ask CTO to check SPF + DKIM + DMARC on `mysmartwills.com`; run `mail-tester.com` for a deliverability score |
 | Google OAuth fails after login | Redirect URI not whitelisted | Add `https://smartwills.ai/auth/callback` in Google Cloud Console → wait a few minutes |
 
 ---

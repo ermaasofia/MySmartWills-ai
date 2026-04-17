@@ -1,41 +1,51 @@
-# Email Setup — Resend + Supabase
+# Email Setup — Amazon SES + Supabase
 
 How auth emails (signup confirmation, password reset, magic link) are delivered in production.
 
-- **Provider:** Resend (free tier, 3,000/month, 100/day)
-- **Sender:** `noreply@smartwills.ai`
-- **Relay:** Supabase Auth → Resend SMTP → user inbox
-- **Why Resend (not Zepto or SES):** Resend authenticates via API key, so there's no IP allowlist problem. Supabase's email workers can connect from any of their dynamic IPs. `smartwills.ai` DNS is in our own Cloudflare, so we can verify the domain without depending on the CTO.
+- **Provider:** Amazon SES (AWS account owned by CTO)
+- **Region:** `ap-southeast-1` (Singapore)
+- **Sender:** `noreply@mysmartwills.com` — company-wide sending address, not `smartwills.ai`. Users will see emails arrive from `mysmartwills.com` but links point back to `smartwills.ai`.
+- **Relay:** Supabase Auth → Amazon SES SMTP → user inbox
+- **Mode:** Production access approved (out of sandbox — safe to send to any recipient)
+- **Why SES (over Resend / Zepto):** Company standard. CTO handles the AWS account; Omar only plugs SMTP credentials into Supabase. No SDK, no app-code changes.
+- **Zero DNS work on `smartwills.ai`:** Domain verification, DKIM, and SPF all live on `mysmartwills.com` (CTO-controlled DNS). Do not add any email DNS records to Cloudflare for `smartwills.ai`.
 
 ---
 
-## Part 1: Verify `smartwills.ai` in Resend
+## Part 1: Confirm `mysmartwills.com` is a Verified Sending Identity in SES
 
-1. Log in to [resend.com](https://resend.com) → **Domains** → **Add Domain**
-2. Enter `smartwills.ai`, confirm region (closest to your users — `ap-southeast-1` works for APAC)
-3. Resend displays DNS records to add. Typically 3 of them:
-   - **SPF** — `TXT` on apex
-   - **DKIM** — `TXT` or `CNAME` on a selector hostname (e.g. `resend._domainkey`)
-   - **DMARC** — `TXT` at `_dmarc.smartwills.ai` (optional but recommended)
-4. **Add all records in Cloudflare** (smartwills.ai → DNS → Records):
-   - Copy the exact hostname and value from Resend — don't hardcode
-   - For any **CNAME**, set Cloudflare proxy status to **DNS only (grey cloud)** — orange cloud breaks email DNS validation
-5. Return to Resend → click **Verify** → wait for green status (usually <5 minutes)
+The sender domain is `mysmartwills.com` (company-wide), not `smartwills.ai`. Verification is fully owned by CTO on their DNS for `mysmartwills.com`. **No DNS changes are needed in Cloudflare for `smartwills.ai`.**
+
+Before touching Supabase, ask CTO to confirm (screenshot is enough):
+
+1. AWS Console → **SES** → region set to **Asia Pacific (Singapore) ap-southeast-1**
+2. **Verified identities** → `mysmartwills.com` status = **Verified** (green)
+3. DKIM status = **Success** (3 CNAMEs live in `mysmartwills.com`'s DNS)
+4. Account dashboard shows **Production access** (not sandbox), daily cap comfortably above expected send volume
+
+If any of those are not green, stop — ask CTO to fix on their side. Do not try to add records to Cloudflare `smartwills.ai` DNS; that does nothing for a `mysmartwills.com` sender.
+
+**Deliverability note:** Sending from `mysmartwills.com` with links to `smartwills.ai` is a cross-domain pattern. Strict spam filters (especially corporate Outlook) occasionally flag it. If delivery issues appear after go-live, CTO can tighten DMARC alignment on `mysmartwills.com`.
 
 ---
 
-## Part 2: Generate Resend SMTP Credentials
+## Part 2: Obtain SMTP Credentials from CTO
 
-1. Resend dashboard → **API Keys** → **Create API Key**
-2. Name: something like `supabase-prod`
-3. Permission: **Full access** (or sending-only if available)
-4. Copy the key immediately — Resend shows it once, then hides it
+Supabase needs **SMTP username + password** — these are not the same as AWS IAM access keys.
 
-SMTP values to use:
-- **Host:** `smtp.resend.com`
-- **Port:** `587` (STARTTLS) or `465` (SSL)
-- **Username:** `resend`
-- **Password:** [the API key from step 4]
+If CTO hands over raw access keys by mistake, ask them to go to **AWS Console → SES → SMTP settings → Create SMTP credentials**, which generates the correct pair. The username starts with `AKIA...`, the password is a ~44-character base64 string.
+
+You should end up with:
+
+```
+Host:     email-smtp.ap-southeast-1.amazonaws.com
+Port:     587          (STARTTLS)
+Username: AKIA...      (SMTP username, not bare access key ID)
+Password: <base64>     (SMTP password, not access key secret)
+Sender:   noreply@mysmartwills.com
+```
+
+Do not commit these anywhere. They live only in the Supabase Auth dashboard.
 
 ---
 
@@ -46,14 +56,16 @@ Supabase dashboard → **Authentication → SMTP Settings**:
 | Field | Value |
 |---|---|
 | Enable Custom SMTP | ON |
-| Sender email | `noreply@smartwills.ai` |
+| Sender email | `noreply@mysmartwills.com` |
 | Sender name | `AI SmartWills` |
-| Host | `smtp.resend.com` |
+| Host | `email-smtp.ap-southeast-1.amazonaws.com` |
 | Port | `587` |
-| Username | `resend` |
-| Password | Resend API key |
+| Username | SES SMTP username |
+| Password | SES SMTP password |
 
-Click **Save**. Supabase validates the connection; if it throws an error here, credentials are wrong.
+The "Sender name" field controls what users see as the display name in their inbox — `AI SmartWills <noreply@mysmartwills.com>` reassures users that the email belongs to this product even though the domain differs from the site they signed up on.
+
+Click **Save**. Supabase runs a TCP handshake on save; an error here means wrong credentials, wrong host, or a port mismatch.
 
 Also ensure **Authentication → URL Configuration**:
 - **Site URL:** `https://smartwills.ai`
@@ -63,7 +75,7 @@ Also ensure **Authentication → URL Configuration**:
 
 ## Part 4: Email Templates (Optional Branding)
 
-Supabase default email templates work out of the box. If you want the branded version matching the site's typography (Crimson Text, black/white), use the template below for **Confirm signup**, then reuse with small tweaks for Magic Link and Reset Password.
+Supabase default email templates work out of the box. The templates below match the site's typography (Crimson Text, black/white) and work with any SMTP provider — use them for **Confirm signup**, then reuse with small tweaks for Magic Link and Reset Password.
 
 **Template variables available to all templates:**
 
@@ -183,16 +195,20 @@ Supabase default email templates work out of the box. If you want the branded ve
 After wiring everything up:
 
 1. Hard refresh `https://smartwills.ai/forgot-password`
-2. Submit with a Gmail account you own
+2. Submit with a Gmail account you own (any inbox — production mode means no allowlist)
 3. Check **Supabase → Logs → Auth logs** for `/recover`:
-   - Expect success
+   - Expect HTTP 200
    - No `535 Authentication Failed`
+   - No `Email address is not verified`
    - No `timeout-or-duplicate` captcha errors
-4. Within 30 seconds, email should arrive from `noreply@smartwills.ai` (check Inbox + Promotions + Spam)
-5. Click the reset link → should open `https://smartwills.ai/reset-password`
-6. Submit a new password → should log in and redirect to `/chat`
+4. Within 30 seconds, email should arrive from `noreply@mysmartwills.com` (check Inbox + Promotions + Spam)
+5. Open the email → **Show original** in Gmail → confirm `Return-Path:` contains `amazonses.com`, DKIM = `PASS`, and the signing domain = `mysmartwills.com`
+6. Click the reset link → should open `https://smartwills.ai/reset-password`
+7. Submit a new password → should log in and redirect to `/chat`
 
 Then do the same for signup (`/signup`) to verify the Confirm Signup template.
+
+Optional: run your send through [mail-tester.com](https://www.mail-tester.com) for a deliverability score. Aim for 9/10 or higher.
 
 ---
 
@@ -200,9 +216,13 @@ Then do the same for signup (`/signup`) to verify the Confirm Signup template.
 
 | Symptom | Likely cause | Fix |
 |---|---|---|
-| `535 Authentication Failed` in Supabase logs | Wrong SMTP username/password | Username is literal `resend`; password is the API key, not an OAuth token |
-| Domain stuck "Pending" in Resend | DNS records wrong or Cloudflare proxy ON | Re-check records match exactly; set CNAMEs to DNS only (grey cloud) |
-| Email lands in Spam | DKIM/DMARC missing or SPF too lax | Make sure all 3 records (SPF, DKIM, DMARC) are present; use `mail-tester.com` for a full deliverability score |
+| `535 Authentication Failed` in Supabase logs | Wrong SMTP username/password | Username must start `AKIA...`; password is the SMTP password (not the IAM secret). Have CTO regenerate SMTP credentials in SES console. |
+| `Email address is not verified` from SES | `mysmartwills.com` not verified in SES (CTO side) | Ask CTO to confirm `mysmartwills.com` status in AWS → SES → Verified identities (ap-southeast-1). Omar cannot fix this — the DNS and AWS account are CTO's. |
+| Emails flagged as spam on first send | Cross-domain sender (`mysmartwills.com`) + link (`smartwills.ai`) tripping reputation checks | Ask CTO to verify SPF / DKIM / DMARC are all passing on `mysmartwills.com`; run `mail-tester.com` for a score. |
+| `Daily message quota exceeded` | Hit SES sending cap (starts ~50k/day in production) | Check SES → Sending statistics. Request a quota increase in the AWS console. |
+| `Maximum sending rate exceeded` | Sending faster than 14 msg/s default | Unlikely for auth emails; if it happens, open AWS support for a rate bump. |
+| Emails land in Spam | SPF/DKIM/DMARC incomplete | Confirm SPF TXT on apex contains `include:amazonses.com`; DKIM CNAMEs verified; DMARC TXT at `_dmarc`. Use `mail-tester.com` to pinpoint. |
+| Domain stuck "Pending" in SES | DNS records wrong or Cloudflare proxy ON | Re-check records match exactly; set CNAMEs to DNS only (grey cloud) |
 | Logo not showing in Gmail | Image blocked by default | Not fixable server-side; users can click "Display images" |
 | Link in email opens wrong page | Supabase Site URL or Redirect URLs mismatched | Re-check URL Configuration values; add `https://smartwills.ai/**` to redirect allowlist |
 
@@ -210,7 +230,7 @@ Then do the same for signup (`/signup`) to verify the Confirm Signup template.
 
 ## Notes
 
-- Resend free tier quota resets monthly. Monitor usage in Resend dashboard → **Usage**
-- If traffic grows past ~3K emails/month, either upgrade Resend tier or consider migrating to AWS SES (same SMTP interface in Supabase, different credentials — no code changes)
-- Keep the old Resend API key disabled/rotated quarterly
-- Email templates update in Supabase immediately; no deployment needed
+- Request for SES quota / rate increases goes through CTO since they own the AWS account.
+- Email templates update in Supabase immediately; no deployment needed.
+- Monitor SES send volume in **AWS Console → SES → Account dashboard**.
+- If SES is ever taken offline and an emergency fallback is needed, any other SMTP provider (Resend, SendGrid, Mailgun) can be plugged into the same Supabase SMTP Settings panel — no code change required.
