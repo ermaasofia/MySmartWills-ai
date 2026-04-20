@@ -105,6 +105,18 @@ export function ChatShell({
     setSelectedSavy(country);
   }, []);
 
+  const handleSwitchSavy = useCallback(
+    (code: string) => {
+      const target = SAVY_COUNTRIES.find((c) => c.code === code && c.isActive);
+      if (target) {
+        setActiveSessionId(null);
+        setSelectedSavy(target);
+        router.replace('/chat', { scroll: false });
+      }
+    },
+    [router],
+  );
+
   // Show selector when: no active session AND no country selected yet
   const showSelector = !activeSessionId && !selectedSavy;
 
@@ -151,6 +163,7 @@ export function ChatShell({
               className="flex-1 flex flex-col min-h-0"
             >
               <ChatInterface
+                key={selectedSavy?.code ?? 'none'}
                 userId={userId}
                 initialSessionId={activeSessionId ?? undefined}
                 selectedSavy={selectedSavy ?? undefined}
@@ -158,6 +171,7 @@ export function ChatShell({
                 onTitleChange={handleTitleChange}
                 onOpenSidebar={() => setIsSidebarOpen(true)}
                 isAdmin={isAdmin}
+                onSwitchSavy={handleSwitchSavy}
               />
             </motion.div>
           )}

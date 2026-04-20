@@ -110,10 +110,24 @@ function getSystemPrompt(
     customPromptsSection = customPromptsSection.slice(0, MAX_CUSTOM_PROMPTS_CHARS) + '\n[...truncated for token limit]';
   }
 
-  // For Malaysia (non-Muslim), add redirect rule for Muslim users
-  const redirectRule = countryCode === 'MY'
-    ? '\n7. IMPORTANT: This Savy is for NON-MUSLIM conventional wills ONLY. If the user mentions they are Muslim, or asks about Faraid/Islamic wills/wasiat Islam, DO NOT provide Islamic will guidance. Instead, politely redirect them: "Untuk wasiat Islam dan Faraid, sila gunakan Savy WasiatKu yang disediakan khas untuk pengguna Muslim. Anda boleh pilih WasiatKu dari senarai Savy di halaman utama chat." Do not discuss Faraid or Islamic inheritance in this Savy.'
-    : '';
+  // Universal cross-Savy redirect rule — the AI auto-detects when the user's question
+  // fits another Savy's scope better and redirects via the [REDIRECT:CODE] marker.
+  const redirectMarkerRule = `\n7. CROSS-SAVY REDIRECT: You are the Savy for ${countryName}. If the user asks about a topic that clearly belongs to a different Savy below, politely decline, recommend the correct Savy, and at the VERY END of your response on its own line include the marker [REDIRECT:CODE].
+
+Active Savys and their scope:
+- MY — Malaysia, NON-Muslim conventional wills (Wills Act 1959)
+- MY_WK — Malaysia, ISLAMIC wills / Faraid / hibah / wasiat Islam / syariah
+- SG — Singapore wills
+- HK — Hong Kong wills
+
+Redirect when (examples):
+- On Savy MY, user asks about Islamic/Muslim topics → [REDIRECT:MY_WK]
+- On Savy WasiatKu, user asks about non-Muslim conventional wills → [REDIRECT:MY]
+- On Savy SG, user asks about Malaysian law → [REDIRECT:MY] (or [REDIRECT:MY_WK] if Muslim)
+- On Savy HK, user asks about Malaysia/Singapore → [REDIRECT:MY] or [REDIRECT:SG]
+- On any Savy, user asks about a different country covered by another Savy → redirect accordingly
+
+Do NOT emit the marker for in-scope questions. Do NOT mention or explain the marker to the user. Only emit [REDIRECT:CODE] when genuinely redirecting to another Savy.`;
 
   return `You are AI SmartWills, a will planning assistant for ${countryName}.
 ${customPromptsSection}
@@ -124,7 +138,7 @@ RULES:
 3. Respond in the user's language (BM/EN/CN etc). Keep responses 150-400 words. Use bold, bullets, headings. No markdown tables.
 4. You provide general will planning info, NOT legal advice. Recommend qualified professionals for specific cases.
 5. Never invent URLs, phone numbers, prices, or legal facts. Use data from COMPANY INFO/SERVICES sections if provided. If unsure, say so.
-6. Be culturally sensitive.${redirectRule}
+6. Be culturally sensitive.${redirectMarkerRule}
 
 LEGAL CONTEXT (${countryName}): ${countryContext}
 ${memoryContext}

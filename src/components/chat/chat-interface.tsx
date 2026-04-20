@@ -1,6 +1,6 @@
 ﻿'use client';
 
-import { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
@@ -9,6 +9,7 @@ import { PromptBox } from '@/components/ui/chatgpt-prompt-input';
 import { SAVY_COUNTRIES, type SavyCountry } from '@/lib/constants';
 import { Menu, RotateCcw, Settings } from 'lucide-react';
 import { MarkdownRenderer } from '@/components/chat/markdown-renderer';
+import { SavyRedirectCTA } from '@/components/chat/savy-redirect-cta';
 import { SessionSummary } from '@/hooks/use-chat-sessions';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -31,6 +32,8 @@ interface ChatInterfaceProps {
   onOpenSidebar?: () => void;
   /** Whether the user is an admin */
   isAdmin?: boolean;
+  /** Called when the user clicks a cross-Savy redirect CTA. Receives the target Savy code. */
+  onSwitchSavy?: (code: string) => void;
 }
 
 function TypingDots() {
@@ -95,6 +98,7 @@ export function ChatInterface({
   onTitleChange,
   onOpenSidebar,
   isAdmin = false,
+  onSwitchSavy,
 }: ChatInterfaceProps) {
   const router = useRouter();
 
@@ -108,6 +112,9 @@ export function ChatInterface({
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(
     initialSessionId ?? null,
   );
+
+  // Map of assistant message ID -> target Savy code when the AI emits a [REDIRECT:CODE] marker
+  const [redirectTargets, setRedirectTargets] = useState<Map<string, string>>(new Map());
 
   const scrollRef = useRef<HTMLDivElement>(null);
   // Tracks which session is currently loaded - used to skip redundant fetches
@@ -239,16 +246,37 @@ export function ChatInterface({
 
         if (reader) {
           let done = false;
+          let fullContent = '';
           while (!done) {
             const { value, done: readerDone } = await reader.read();
             done = readerDone;
             if (value) {
               const chunk = decoder.decode(value, { stream: true });
+              fullContent += chunk;
               setMessages((prev) =>
                 prev.map((m) =>
                   m.id === assistantMessage.id ? { ...m, content: m.content + chunk } : m,
                 ),
               );
+            }
+          }
+
+          const markerMatch = fullContent.match(/\[REDIRECT:\s*([A-Z_]+)\s*\]/i);
+          if (markerMatch) {
+            const targetCode = markerMatch[1].toUpperCase();
+            const targetSavy = SAVY_COUNTRIES.find((c) => c.code === targetCode && c.isActive);
+            if (targetSavy && targetCode !== activeSavy.code) {
+              const cleanedContent = fullContent.replace(/\[REDIRECT:\s*[A-Z_]+\s*\]/gi, '').trim();
+              setMessages((prev) =>
+                prev.map((m) =>
+                  m.id === assistantMessage.id ? { ...m, content: cleanedContent } : m,
+                ),
+              );
+              setRedirectTargets((prev) => {
+                const next = new Map(prev);
+                next.set(assistantMessage.id, targetCode);
+                return next;
+              });
             }
           }
         }
@@ -367,13 +395,35 @@ export function ChatInterface({
           ) : null}
 
           <AnimatePresence mode="popLayout">
-            {messages.map((message, index) => (
-              <ChatMessage
-                key={message.id}
-                message={message}
-                isLatest={index === messages.length - 1}
-              />
-            ))}
+            {messages.map((message, index) => {
+              const targetCode =
+                message.role === 'assistant' ? redirectTargets.get(message.id) : undefined;
+              const targetSavy = targetCode
+                ? SAVY_COUNTRIES.find((c) => c.code === targetCode)
+                : undefined;
+              const showCTA = !!targetSavy && !!onSwitchSavy;
+              return (
+                <React.Fragment key={message.id}>
+                  <ChatMessage message={message} isLatest={index === messages.length - 1} />
+                  <AnimatePresence>
+                    {showCTA && targetSavy && (
+                      <SavyRedirectCTA
+                        key={`cta-${message.id}`}
+                        target={targetSavy}
+                        onNavigate={() => onSwitchSavy!(targetSavy.code)}
+                        onDismiss={() =>
+                          setRedirectTargets((prev) => {
+                            const next = new Map(prev);
+                            next.delete(message.id);
+                            return next;
+                          })
+                        }
+                      />
+                    )}
+                  </AnimatePresence>
+                </React.Fragment>
+              );
+            })}
           </AnimatePresence>
 
           {/* Typing indicator */}
