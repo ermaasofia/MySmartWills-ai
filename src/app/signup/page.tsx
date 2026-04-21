@@ -1,69 +1,40 @@
 import { Metadata } from "next";
 import Link from "next/link";
-import Image from "next/image";
 import { SignupForm } from "@/components/auth/signup-form";
-import { ThemeToggle } from "@/components/theme-toggle";
-import { Breadcrumb, breadcrumbJsonLd } from "@/components/layout/breadcrumb";
+import { AuthShell } from "@/components/auth/auth-shell";
+import { breadcrumbJsonLd } from "@/components/layout/breadcrumb";
 
 export const metadata: Metadata = {
-  title: "Sign Up - AI SmartWills",
-  description: "Create your free AI SmartWills account and start planning your will with AI guidance.",
+  title: "Sign Up - SmartWills.ai",
+  description: "Create your free SmartWills.ai account and start planning your will with AI guidance.",
   openGraph: {
-    title: "Sign Up - AI SmartWills",
-    description: "Create your free AI SmartWills account and start planning your will with AI guidance.",
+    title: "Sign Up - SmartWills.ai",
+    description: "Create your free SmartWills.ai account and start planning your will with AI guidance.",
     url: "/signup",
   },
 };
 
 export default function SignupPage() {
   return (
-    <div className="min-h-screen flex flex-col">
+    <>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd('Sign Up', '/signup')) }}
       />
-      {/* Header */}
-      <header className="border-b border-border">
-        <div className="container mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2 text-lg sm:text-2xl font-bold tracking-tight">
-            <Image src="/logo.png" alt="SmartWills" width={32} height={32} className="h-7 w-7 sm:h-8 sm:w-8 object-contain" />
-            AI SmartWills
-          </Link>
-          <ThemeToggle />
-        </div>
-      </header>
-
-      {/* Main Content */}
-      <main className="flex-1 flex items-center justify-center px-4 sm:px-6 py-8 sm:py-12">
-        <div className="w-full max-w-md">
-          <Breadcrumb currentPage="Sign Up" />
-          <div className="text-center mb-6 sm:mb-8">
-            <h1 className="text-2xl sm:text-3xl font-bold mb-2">Create Account</h1>
-            <p className="text-muted-foreground">
-              Start your will planning journey today
-            </p>
-          </div>
-          
-          <SignupForm />
-
-          <p className="text-center text-sm text-muted-foreground mt-6">
+      <AuthShell
+        title="Create account"
+        description="Start your will planning journey today."
+        footer={
+          <>
             Already have an account?{" "}
-            <Link 
-              href="/login" 
-              className="font-medium underline underline-offset-4 hover:text-foreground"
-            >
+            <Link href="/login" className="font-medium text-[#ededed] underline underline-offset-4 hover:text-white">
               Sign in
             </Link>
-          </p>
-        </div>
-      </main>
-
-      {/* Footer */}
-      <footer className="border-t border-border py-4 sm:py-6 px-4 sm:px-6">
-        <div className="container mx-auto text-center text-sm text-muted-foreground">
-          <p>2026 AI SmartWills. Part of the SmartWills ecosystem.</p>
-        </div>
-      </footer>
-    </div>
+          </>
+        }
+      >
+        <SignupForm />
+      </AuthShell>
+    </>
   );
 }

@@ -35,7 +35,7 @@ export const TurnstileWidget = forwardRef<TurnstileWidgetRef, TurnstileWidgetPro
         onSuccess={onSuccess}
         onError={onError}
         options={{
-          theme: 'auto',
+          theme: 'dark',
           size: 'normal',
         }}
       />

@@ -1,16 +1,16 @@
-﻿'use client';
+'use client';
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Button } from '@/components/ui/button';
 import { EditableTitle } from '@/components/chat/editable-title';
 import { PromptBox } from '@/components/ui/chatgpt-prompt-input';
 import { SAVY_COUNTRIES, type SavyCountry } from '@/lib/constants';
-import { Menu, RotateCcw, Settings } from 'lucide-react';
+import { Menu, Settings, Lock, MoreHorizontal } from 'lucide-react';
 import { MarkdownRenderer } from '@/components/chat/markdown-renderer';
 import { SavyRedirectCTA } from '@/components/chat/savy-redirect-cta';
 import { SessionSummary } from '@/hooks/use-chat-sessions';
+import { getSuggestionsForCountry } from '@/lib/suggestions';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface Message {
@@ -22,54 +22,64 @@ interface Message {
 interface ChatInterfaceProps {
   userId: string;
   initialSessionId?: string;
-  /** Pre-selected Savy country from the selector screen */
   selectedSavy?: SavyCountry;
-  /** Called when a brand-new session is created so the sidebar list updates */
   onSessionCreated?: (session: SessionSummary) => void;
-  /** Called when the session title is renamed so the sidebar list updates */
   onTitleChange?: (id: string, title: string) => void;
-  /** Opens the mobile sidebar drawer */
   onOpenSidebar?: () => void;
-  /** Whether the user is an admin */
   isAdmin?: boolean;
-  /** Called when the user clicks a cross-Savy redirect CTA. Receives the target Savy code. */
   onSwitchSavy?: (code: string) => void;
+  /** Bumped by the parent each time an assistant stream finishes — triggers plan panel re-fetch */
+  onAssistantComplete?: () => void;
+}
+
+function SwAvatar() {
+  return (
+    <div
+      className="flex h-7 w-7 shrink-0 items-center justify-center rounded-[8px] font-mono text-[10px] font-bold text-[#0a0a0a]"
+      style={{ background: 'linear-gradient(135deg, var(--accent), #ededed)' }}
+    >
+      sw
+    </div>
+  );
 }
 
 function TypingDots() {
   return (
     <div className="flex items-center gap-1">
-      {[1, 2, 3].map((dot) => (
-        <motion.div
-          key={dot}
-          className="w-2 h-2 bg-foreground/60 rounded-full"
-          initial={{ opacity: 0.3 }}
-          animate={{ opacity: [0.3, 1, 0.3], scale: [0.85, 1.1, 0.85] }}
-          transition={{ duration: 1.2, repeat: Infinity, delay: dot * 0.15, ease: 'easeInOut' }}
+      {[0, 1, 2].map((i) => (
+        <span
+          key={i}
+          className="block h-1.5 w-1.5 rounded-full bg-[var(--accent)]"
+          style={{
+            animation: 'sw-pulse 1.2s ease-in-out infinite',
+            animationDelay: `${i * 0.18}s`,
+          }}
         />
       ))}
     </div>
   );
 }
 
-function ChatMessage({ message, isLatest }: { message: Message; isLatest: boolean }) {
+function ChatMessage({ message }: { message: Message }) {
   const isUser = message.role === 'user';
 
   if (isUser) {
     return (
       <motion.div
-        initial={{ opacity: 0, y: 20, scale: 0.95 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        transition={{ duration: 0.3, ease: 'easeOut' }}
-        className="flex gap-4 justify-end"
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.25, ease: 'easeOut' }}
+        className="flex justify-end"
       >
-        <motion.div
-          className="max-w-[75%] rounded-2xl px-4 py-2.5 shadow-sm bg-primary text-primary-foreground"
-          whileHover={{ scale: 1.01 }}
-          transition={{ duration: 0.2 }}
+        <div
+          className="max-w-[78%] px-4 py-2.5 text-sm leading-relaxed text-[#0a0a0a]"
+          style={{
+            background: 'var(--accent)',
+            borderRadius: '14px 14px 2px 14px',
+          }}
         >
-          <p className="whitespace-pre-wrap break-words text-sm leading-relaxed">{message.content}</p>
-        </motion.div>
+          <p className="whitespace-pre-wrap break-words">{message.content}</p>
+        </div>
       </motion.div>
     );
   }
@@ -78,20 +88,22 @@ function ChatMessage({ message, isLatest }: { message: Message; isLatest: boolea
     <motion.div
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3, ease: 'easeOut' }}
-      className="flex gap-3 justify-start items-start"
+      transition={{ duration: 0.25, ease: 'easeOut' }}
+      className="flex items-start gap-3"
     >
-      <div className="max-w-[85%] min-w-0">
-        <div className="text-sm text-foreground">
-          <MarkdownRenderer content={message.content} />
-        </div>
+      <SwAvatar />
+      <div
+        className="max-w-[82%] min-w-0 border border-[var(--border)] bg-white/[0.05] px-4 py-3 text-sm text-[#ededed]"
+        style={{ borderRadius: '14px 14px 14px 2px' }}
+      >
+        <MarkdownRenderer content={message.content} />
       </div>
     </motion.div>
   );
 }
 
 export function ChatInterface({
-  userId,
+  userId: _userId,
   initialSessionId,
   selectedSavy,
   onSessionCreated,
@@ -99,11 +111,12 @@ export function ChatInterface({
   onOpenSidebar,
   isAdmin = false,
   onSwitchSavy,
+  onAssistantComplete,
 }: ChatInterfaceProps) {
   const router = useRouter();
+  void _userId;
 
-  // Country comes from the Savy selector (prop) or from loading a session
-  const fallbackCountry = SAVY_COUNTRIES[0]; // Malaysia
+  const fallbackCountry = SAVY_COUNTRIES[0];
   const [activeSavy, setActiveSavy] = useState<SavyCountry>(selectedSavy ?? fallbackCountry);
   const [messages, setMessages] = useState<Message[]>([]);
   const [sessionTitle, setSessionTitle] = useState('New Chat');
@@ -113,14 +126,11 @@ export function ChatInterface({
     initialSessionId ?? null,
   );
 
-  // Map of assistant message ID -> target Savy code when the AI emits a [REDIRECT:CODE] marker
   const [redirectTargets, setRedirectTargets] = useState<Map<string, string>>(new Map());
 
   const scrollRef = useRef<HTMLDivElement>(null);
-  // Tracks which session is currently loaded - used to skip redundant fetches
   const loadedSessionRef = useRef<string | null>(initialSessionId ?? null);
 
-  // Load history when an existing session is provided
   useEffect(() => {
     if (!initialSessionId) {
       setMessages([]);
@@ -130,7 +140,6 @@ export function ChatInterface({
       return;
     }
 
-    // Already loaded or streaming into this session - skip re-fetch
     if (initialSessionId === loadedSessionRef.current) return;
     loadedSessionRef.current = initialSessionId;
 
@@ -163,14 +172,15 @@ export function ChatInterface({
     loadHistory();
   }, [initialSessionId]);
 
-  // Auto-scroll
   useEffect(() => {
     if (scrollRef.current) {
-      scrollRef.current.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' });
+      scrollRef.current.scrollTo({
+        top: scrollRef.current.scrollHeight,
+        behavior: 'smooth',
+      });
     }
   }, [messages]);
 
-  //  Rename session title 
   const handleTitleSave = useCallback(
     async (newTitle: string) => {
       if (!currentSessionId) return;
@@ -185,7 +195,6 @@ export function ChatInterface({
     [currentSessionId, onTitleChange],
   );
 
-  // Send message 
   const handleSend = useCallback(
     async (text: string) => {
       if (!text.trim() || isLoading) return;
@@ -222,7 +231,6 @@ export function ChatInterface({
           loadedSessionRef.current = returnedSessionId;
           router.replace(`/chat?session=${returnedSessionId}`, { scroll: false });
 
-          // Tell the sidebar about the new session
           const autoTitle = text.trim().slice(0, 80);
           setSessionTitle(autoTitle);
           onSessionCreated?.({
@@ -280,6 +288,8 @@ export function ChatInterface({
             }
           }
         }
+
+        onAssistantComplete?.();
       } catch (error) {
         console.error('Chat error:', error);
         setMessages((prev) => [
@@ -294,108 +304,95 @@ export function ChatInterface({
         setIsLoading(false);
       }
     },
-    [isLoading, messages, activeSavy, currentSessionId, router, onSessionCreated, userId],
+    [
+      isLoading,
+      messages,
+      activeSavy,
+      currentSessionId,
+      router,
+      onSessionCreated,
+      onAssistantComplete,
+    ],
   );
 
-  // New chat 
-  const handleNewChat = () => {
-    setMessages([]);
-    setSessionTitle('New Chat');
-    setCurrentSessionId(null);
-    router.replace('/chat', { scroll: false });
-  };
+  const suggestions = getSuggestionsForCountry(activeSavy.code);
+  const showSuggestions = messages.length === 0 && !isLoadingHistory;
 
   return (
-    <div className="flex-1 flex flex-col min-h-0 relative bg-background">
-      {/* Top bar */}
-      <div className="flex items-center gap-2 px-3 sm:px-4 py-2.5 border-b border-border/60 bg-background/90 backdrop-blur-md z-10 shrink-0">
-        {/* Hamburger - mobile only */}
+    <div className="flex flex-1 flex-col min-h-0 bg-[#0a0a0a]">
+      {/* Header */}
+      <div className="flex items-center gap-3 border-b border-[var(--border)] px-4 py-3 shrink-0">
         <button
           onClick={onOpenSidebar}
-          className="md:hidden p-1.5 rounded hover:bg-muted transition-colors shrink-0"
+          className="md:hidden rounded p-1.5 text-white/60 hover:bg-white/[0.06]"
           aria-label="Open sidebar"
         >
           <Menu className="h-5 w-5" />
         </button>
 
-        {/* Session title (editable once a session exists) */}
-        <div className="flex-1 min-w-0">
+        <div className="min-w-0 flex-1">
           {currentSessionId ? (
             <EditableTitle title={sessionTitle} onSave={handleTitleSave} />
           ) : (
-            <span className="text-sm font-semibold text-muted-foreground">New Chat</span>
+            <span className="text-sm font-medium text-[#ededed]">New conversation</span>
           )}
+          <div className="mt-0.5 flex items-center gap-2 font-mono text-[11px] text-white/45">
+            <span>{activeSavy.flag}</span>
+            <span>{activeSavy.savyName}</span>
+            <span className="text-white/25">·</span>
+            <Lock className="h-2.5 w-2.5" />
+            <span>End-to-end encrypted</span>
+          </div>
         </div>
 
-        {/* Country badge (read-only) */}
-        <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-muted text-xs font-medium shrink-0">
-          <span>{activeSavy.flag}</span>
-          <span className="hidden sm:inline">{activeSavy.savyName}</span>
-          <span className="sm:hidden">{activeSavy.code}</span>
-        </div>
-
-        {/* Admin AI Settings button */}
         {isAdmin && (
-          <Button
-            variant="ghost"
-            size="sm"
-            asChild
-            className="gap-1.5 shrink-0"
+          <Link
+            href={`/admin/ai-instructions?country=${activeSavy.code}`}
+            className="hidden sm:inline-flex items-center gap-1.5 rounded-[8px] border border-[var(--border)] px-2.5 py-1.5 text-xs text-white/70 transition-colors hover:bg-white/[0.05]"
             aria-label="AI Settings"
           >
-            <Link href={`/admin/ai-instructions?country=${activeSavy.code}`}>
-              <Settings className="h-4 w-4" />
-              <span className="hidden sm:inline text-xs">AI Settings</span>
-            </Link>
-          </Button>
+            <Settings className="h-3.5 w-3.5" />
+            AI Settings
+          </Link>
         )}
 
-        {/* New chat button */}
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={handleNewChat}
-          disabled={messages.length === 0}
-          className="gap-1.5 shrink-0"
-          aria-label="New chat"
+        <button
+          className="rounded-[6px] p-1.5 text-white/45 transition-colors hover:bg-white/[0.05] hover:text-white/80"
+          aria-label="More"
         >
-          <RotateCcw className="h-4 w-4" />
-          <span className="hidden sm:inline text-xs">New</span>
-        </Button>
+          <MoreHorizontal className="h-4 w-4" />
+        </button>
       </div>
 
       {/* Messages */}
-      <div
-        ref={scrollRef}
-        className="flex-1 overflow-y-auto px-3 sm:px-6 relative"
-      >
-        {/* Ambient gradients */}
-        <div className="pointer-events-none absolute inset-0 overflow-hidden">
-          <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/5 rounded-full filter blur-[128px]" />
-          <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-primary/5 rounded-full filter blur-[128px]" />
-        </div>
-
-        <div className="relative container mx-auto max-w-3xl py-4 sm:py-8 space-y-4 sm:space-y-6">
+      <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 sm:px-6">
+        <div className="mx-auto max-w-3xl py-6 sm:py-10 space-y-5">
           {isLoadingHistory ? (
             <div className="flex items-center justify-center py-24">
-              <p className="text-sm text-muted-foreground animate-pulse">Loading conversation...</p>
+              <p className="text-sm text-white/45 animate-pulse">Loading conversation...</p>
             </div>
           ) : messages.length === 0 ? (
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 14 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, ease: 'easeOut' }}
-              className="flex flex-col items-center justify-center text-center py-20 sm:py-28 gap-3"
+              transition={{ duration: 0.4, ease: 'easeOut' }}
+              className="flex flex-col items-center text-center py-12 sm:py-16 gap-3"
             >
-              <h2 className="text-2xl sm:text-3xl font-bold">Hi, I&apos;m {activeSavy.savyName}!</h2>
-              <p className="text-sm text-muted-foreground max-w-sm">
-                Ask me anything about will planning in <strong>{activeSavy.name}</strong>.
+              <div className="font-mono text-[10px] uppercase tracking-[1.5px] text-[var(--accent)]">
+                // {activeSavy.code}
+              </div>
+              <h2 className="text-2xl sm:text-[28px] font-medium text-[#ededed] tracking-[-0.02em]">
+                Hi, I&apos;m {activeSavy.savyName}.
+              </h2>
+              <p className="text-sm text-white/55 max-w-md">
+                Ask me anything about will planning in {activeSavy.name}. I&apos;ll guide
+                you to a prep sheet you can take to a solicitor.
               </p>
             </motion.div>
           ) : null}
 
           <AnimatePresence mode="popLayout">
-            {messages.map((message, index) => {
+            {messages.map((message) => {
               const targetCode =
                 message.role === 'assistant' ? redirectTargets.get(message.id) : undefined;
               const targetSavy = targetCode
@@ -404,7 +401,7 @@ export function ChatInterface({
               const showCTA = !!targetSavy && !!onSwitchSavy;
               return (
                 <React.Fragment key={message.id}>
-                  <ChatMessage message={message} isLatest={index === messages.length - 1} />
+                  <ChatMessage message={message} />
                   <AnimatePresence>
                     {showCTA && targetSavy && (
                       <SavyRedirectCTA
@@ -426,17 +423,19 @@ export function ChatInterface({
             })}
           </AnimatePresence>
 
-          {/* Typing indicator */}
           <AnimatePresence>
             {isLoading && messages[messages.length - 1]?.role === 'user' && (
               <motion.div
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                className="flex justify-start"
+                exit={{ opacity: 0, y: -8 }}
+                className="flex items-start gap-3"
               >
-                <div className="px-1 py-1 flex items-center gap-3">
-                  <span className="text-sm text-muted-foreground">Thinking</span>
+                <SwAvatar />
+                <div
+                  className="border border-[var(--border)] bg-white/[0.05] px-4 py-3"
+                  style={{ borderRadius: '14px 14px 14px 2px' }}
+                >
                   <TypingDots />
                 </div>
               </motion.div>
@@ -445,20 +444,36 @@ export function ChatInterface({
         </div>
       </div>
 
-      {/* Input */}
-      <div className="shrink-0 px-3 sm:px-6 py-3 sm:py-4 bg-background/90 backdrop-blur-md border-t border-border/40 z-10">
-        <div className="container mx-auto max-w-3xl">
+      {/* Input area */}
+      <div className="shrink-0 border-t border-[var(--border)] bg-[#0a0a0a] px-4 sm:px-6 py-4">
+        <div className="mx-auto max-w-3xl">
+          {showSuggestions && (
+            <div className="mb-3 flex flex-wrap gap-2">
+              {suggestions.map((s) => (
+                <button
+                  key={s}
+                  onClick={() => handleSend(s)}
+                  disabled={isLoading}
+                  className="rounded-[8px] border border-[var(--border)] bg-white/[0.03] px-3 py-1.5 text-xs text-white/70 transition-colors hover:border-white/15 hover:bg-white/[0.06] hover:text-[#ededed] disabled:opacity-40"
+                >
+                  {s}
+                </button>
+              ))}
+            </div>
+          )}
+
           <PromptBox
-            placeholder={`Ask about will planning in ${activeSavy.name}...`}
+            placeholder={`Message ${activeSavy.savyName}...`}
             onSend={handleSend}
             isLoading={isLoading}
           />
-          <p className="text-[10px] sm:text-xs text-muted-foreground mt-2 text-center">
-            AI SmartWills provides general guidance only. Consult a legal professional for specific advice.
+
+          <p className="mt-2.5 text-center font-mono text-[10px] tracking-[0.5px] text-white/35">
+            SmartWills.ai provides general guidance only. For binding advice, consult a
+            licensed solicitor.
           </p>
         </div>
       </div>
     </div>
   );
 }
-

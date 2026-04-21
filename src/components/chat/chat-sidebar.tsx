@@ -1,23 +1,11 @@
 'use client';
 
 import { useRef } from 'react';
-import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import {
-  Plus,
-  Trash2,
-  MessageSquare,
-  LogOut,
-  X,
-  Sparkles,
-  Settings,
-  Crown,
-  ChevronUp,
-} from 'lucide-react';
+import { Plus, Trash2, MessageSquare, LogOut, X, Settings } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
-import { ThemeToggle } from '@/components/theme-toggle';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -26,25 +14,28 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { SessionSummary } from '@/hooks/use-chat-sessions';
+import { SAVY_COUNTRIES, type SavyCountry } from '@/lib/constants';
 import { cn } from '@/lib/utils';
 
 interface ChatSidebarProps {
-  /** Authenticated user metadata */
   userName: string;
   userEmail: string;
-  /** Currently active session (for highlight) */
   currentSessionId: string | null;
-  /** Session list from useChatSessions hook */
   sessions: SessionSummary[];
   isSidebarOpen: boolean;
   onClose: () => void;
   onNewChat: () => void;
   onSelectSession: (id: string) => void;
   onDeleteSession: (id: string) => void;
+  /** Currently active Savy (highlighted in the jurisdiction grid). null when on selector screen. */
+  activeSavy: SavyCountry | null;
+  /** Switch to a different Savy from inside the chat */
+  onSelectSavy: (code: string) => void;
 }
 
-/** Group sessions by relative date label */
-function groupSessionsByDate(sessions: SessionSummary[]): { label: string; items: SessionSummary[] }[] {
+function groupSessionsByDate(
+  sessions: SessionSummary[],
+): { label: string; items: SessionSummary[] }[] {
   const now = new Date();
   const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const yesterdayStart = new Date(todayStart.getTime() - 86_400_000);
@@ -73,10 +64,26 @@ function groupSessionsByDate(sessions: SessionSummary[]): { label: string; items
     .map(([label, items]) => ({ label, items }));
 }
 
-/**
- * Reusable sidebar component — mirrors ChatGPT's left panel.
- * Controlled: parent manages open/close state for mobile responsiveness.
- */
+function SwLogo() {
+  return (
+    <Link
+      href="/"
+      className="flex items-center gap-2.5 px-1 transition-opacity hover:opacity-80"
+    >
+      <div
+        className="flex h-7 w-7 items-center justify-center rounded-[6px]"
+        style={{ background: 'linear-gradient(135deg, var(--accent), #ededed)' }}
+      >
+        <span className="font-mono text-[10px] font-bold text-[#0a0a0a]">sw</span>
+      </div>
+      <span className="text-sm font-medium text-[#ededed]">SmartWills</span>
+      <span className="ml-auto font-mono text-[10px] uppercase tracking-[1.5px] text-white/40">
+        .ai
+      </span>
+    </Link>
+  );
+}
+
 export function ChatSidebar({
   userName,
   userEmail,
@@ -87,6 +94,8 @@ export function ChatSidebar({
   onNewChat,
   onSelectSession,
   onDeleteSession,
+  activeSavy,
+  onSelectSavy,
 }: ChatSidebarProps) {
   const router = useRouter();
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -101,127 +110,160 @@ export function ChatSidebar({
   const grouped = groupSessionsByDate(sessions);
 
   const sidebarContent = (
-    <div className="flex flex-col h-full w-64 bg-sidebar border-r border-sidebar-border">
-      {/* ── Top: logo + close (mobile) ─────────────────────────── */}
-      <div className="flex items-center justify-between px-3 py-3 shrink-0">
-        <Link
-          href="/"
-          className="flex items-center gap-2 font-bold tracking-tight hover:opacity-80 transition-opacity"
-        >
-          <Image
-            src="/logo.png"
-            alt="AI SmartWills"
-            width={28}
-            height={28}
-            className="h-7 w-7 object-contain"
-          />
-          <span className="text-sm">AI SmartWills</span>
-        </Link>
+    <div className="flex h-full w-[260px] flex-col border-r border-[var(--border)] bg-[#0a0a0a]">
+      {/* Logo */}
+      <div className="flex items-center justify-between px-3 pt-4 pb-3 shrink-0">
+        <SwLogo />
         <button
           onClick={onClose}
-          className="md:hidden p-1.5 rounded hover:bg-sidebar-accent text-muted-foreground"
+          className="md:hidden rounded p-1.5 text-white/55 transition-colors hover:bg-white/[0.06]"
           aria-label="Close sidebar"
         >
           <X className="h-4 w-4" />
         </button>
       </div>
 
-      {/* ── New Chat button ─────────────────────────────────────── */}
-      <div className="px-2 mb-1 shrink-0">
+      {/* New conversation */}
+      <div className="px-3 pb-4 shrink-0">
         <button
-          onClick={() => { onNewChat(); onClose(); }}
-          className="w-full flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium
-            hover:bg-sidebar-accent transition-colors group"
+          onClick={() => {
+            onNewChat();
+            onClose();
+          }}
+          className="flex w-full items-center justify-between rounded-[8px] bg-[#ededed] px-3 py-2.5 text-sm font-medium text-[#0a0a0a] transition-opacity hover:opacity-90"
         >
-          <Plus className="h-4 w-4 shrink-0" />
-          New Chat
+          <span className="flex items-center gap-2">
+            <Plus className="h-4 w-4" />
+            New conversation
+          </span>
+          <span className="rounded-[3px] bg-[#0a0a0a]/15 px-1.5 py-[1px] font-mono text-[10px] text-[#0a0a0a]/70">
+            ⌘N
+          </span>
         </button>
       </div>
 
-      {/* ── Session list ────────────────────────────────────────── */}
+      {/* Jurisdiction grid */}
+      <div className="px-3 pb-4 shrink-0">
+        <div className="mb-2 px-1 font-mono text-[10px] uppercase tracking-[1.5px] text-white/45">
+          Jurisdiction
+        </div>
+        <div className="grid grid-cols-4 gap-1 rounded-[10px] border border-[var(--border)] p-1">
+          {SAVY_COUNTRIES.map((c) => {
+            const isActive = activeSavy?.code === c.code;
+            const isAvailable = c.isActive;
+            return (
+              <button
+                key={c.code}
+                onClick={() => isAvailable && onSelectSavy(c.code)}
+                disabled={!isAvailable}
+                title={`${c.savyName} — ${c.name}`}
+                aria-label={c.savyName}
+                className={cn(
+                  'flex h-8 items-center justify-center rounded-[6px] text-base transition-all',
+                  isActive
+                    ? 'bg-white/[0.12]'
+                    : isAvailable
+                      ? 'opacity-70 grayscale-[40%] hover:bg-white/[0.05] hover:grayscale-0 hover:opacity-100'
+                      : 'cursor-not-allowed opacity-30 grayscale',
+                )}
+              >
+                {c.flag}
+              </button>
+            );
+          })}
+        </div>
+        <div className="mt-2 flex items-center gap-1.5 px-1 font-mono text-[11px] text-white/55">
+          <span
+            className="h-1.5 w-1.5 rounded-full"
+            style={{ background: 'var(--accent)', boxShadow: '0 0 6px var(--accent)' }}
+          />
+          Active: {activeSavy ? activeSavy.savyName : 'Pick a Savy'}
+        </div>
+      </div>
+
+      {/* Conversations */}
       <div
         ref={scrollRef}
-        className="flex-1 overflow-y-auto px-2 space-y-4 py-1 scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent"
+        className="flex-1 overflow-y-auto px-3 pb-2"
       >
+        <div className="mb-2 px-1 font-mono text-[10px] uppercase tracking-[1.5px] text-white/45">
+          Conversations
+        </div>
         {sessions.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-8 text-center gap-2">
-            <MessageSquare className="h-8 w-8 text-muted-foreground/40" />
-            <p className="text-xs text-muted-foreground">No conversations yet</p>
+          <div className="flex flex-col items-center gap-2 py-6 text-center">
+            <MessageSquare className="h-7 w-7 text-white/15" />
+            <p className="text-xs text-white/40">No conversations yet</p>
           </div>
         ) : (
-          grouped.map(({ label, items }) => (
-            <div key={label}>
-              <p className="px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/60">
-                {label}
-              </p>
-              <ul className="space-y-0.5">
-                {items.map((session) => (
-                  <SessionItem
-                    key={session.id}
-                    session={session}
-                    isActive={session.id === currentSessionId}
-                    onSelect={() => { onSelectSession(session.id); onClose(); }}
-                    onDelete={() => onDeleteSession(session.id)}
-                  />
-                ))}
-              </ul>
-            </div>
-          ))
+          <div className="space-y-3">
+            {grouped.map(({ label, items }) => (
+              <div key={label}>
+                <p className="px-1 py-1 font-mono text-[10px] uppercase tracking-[1px] text-white/35">
+                  {label}
+                </p>
+                <ul className="space-y-0.5">
+                  {items.map((session) => (
+                    <SessionItem
+                      key={session.id}
+                      session={session}
+                      isActive={session.id === currentSessionId}
+                      onSelect={() => {
+                        onSelectSession(session.id);
+                        onClose();
+                      }}
+                      onDelete={() => onDeleteSession(session.id)}
+                    />
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
         )}
       </div>
 
-      {/* ── Bottom: upgrade + user info ─────────────────────────── */}
-      <div className="shrink-0 border-t border-sidebar-border px-2 pt-2 pb-3 space-y-0.5">
-        {/* Upgrade Plan */}
-        <button
-          disabled
-          className="w-full flex items-center gap-3 rounded-lg px-3 py-2 text-sm
-            hover:bg-sidebar-accent transition-colors opacity-60 cursor-not-allowed"
-        >
-          <Sparkles className="h-4 w-4 shrink-0 text-yellow-500" />
-          Upgrade Plan
-          <span className="ml-auto text-[10px] bg-muted rounded-full px-1.5 py-0.5">Soon</span>
-        </button>
-
-        {/* Theme */}
-        <div className="flex items-center gap-3 rounded-lg px-3 py-2">
-          <span className="text-sm text-muted-foreground flex-1">Theme</span>
-          <ThemeToggle />
-        </div>
-
-        {/* User menu */}
+      {/* User menu */}
+      <div className="shrink-0 border-t border-[var(--border)] px-3 py-3">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <button
-              className="w-full flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm
-                hover:bg-muted transition-colors group"
-            >
-              <div className="h-7 w-7 rounded-full bg-primary/15 flex items-center justify-center shrink-0 text-xs font-bold text-primary">
+            <button className="flex w-full items-center gap-3 rounded-[8px] px-2 py-2 text-left transition-colors hover:bg-white/[0.05]">
+              <div
+                className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-semibold text-[#0a0a0a]"
+                style={{ background: 'var(--accent)' }}
+              >
                 {(userName[0] ?? userEmail[0] ?? '?').toUpperCase()}
               </div>
-              <div className="flex-1 text-left min-w-0">
-                <p className="text-xs font-medium truncate">{userName || 'User'}</p>
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-[13px] font-medium text-[#ededed]">
+                  {userName || 'User'}
+                </p>
+                <p className="text-[11px] text-white/45">Free plan</p>
               </div>
-              <ChevronUp className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+              <Settings className="h-3.5 w-3.5 shrink-0 text-white/45" />
             </button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent side="top" align="start" className="w-[var(--radix-dropdown-menu-trigger-width)]">
+          <DropdownMenuContent
+            side="top"
+            align="start"
+            className="w-[var(--radix-dropdown-menu-trigger-width)]"
+          >
             <div className="px-2 py-1.5">
               <p className="text-sm font-medium">{userName || 'User'}</p>
               <p className="text-xs text-muted-foreground">{userEmail}</p>
             </div>
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="cursor-pointer" onClick={() => router.push('/upgrade')}>
-              <Crown className="h-4 w-4 mr-2 text-amber-500" />
-              Upgrade Plan
-            </DropdownMenuItem>
-            <DropdownMenuItem className="cursor-pointer" onClick={() => router.push('/settings')}>
-              <Settings className="h-4 w-4 mr-2" />
+            <DropdownMenuItem
+              className="cursor-pointer"
+              onClick={() => router.push('/settings')}
+            >
+              <Settings className="mr-2 h-4 w-4" />
               Settings
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="text-destructive cursor-pointer" onClick={handleSignOut}>
-              <LogOut className="h-4 w-4 mr-2" />
+            <DropdownMenuItem
+              className="cursor-pointer text-destructive"
+              onClick={handleSignOut}
+            >
+              <LogOut className="mr-2 h-4 w-4" />
               Sign Out
             </DropdownMenuItem>
           </DropdownMenuContent>
@@ -232,24 +274,20 @@ export function ChatSidebar({
 
   return (
     <>
-      {/* ── Desktop: always visible ───────────────────────────────── */}
       <aside className="hidden md:flex shrink-0">{sidebarContent}</aside>
 
-      {/* ── Mobile: slide-over with backdrop ─────────────────────── */}
       <AnimatePresence>
         {isSidebarOpen && (
           <>
-            {/* Backdrop */}
             <motion.div
               key="backdrop"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
-              className="fixed inset-0 z-40 bg-black/50 md:hidden"
+              className="fixed inset-0 z-40 bg-black/60 md:hidden"
               onClick={onClose}
             />
-            {/* Drawer */}
             <motion.aside
               key="drawer"
               initial={{ x: '-100%' }}
@@ -267,8 +305,6 @@ export function ChatSidebar({
   );
 }
 
-// ─── Reusable session list item ─────────────────────────────────────────────
-
 interface SessionItemProps {
   session: SessionSummary;
   isActive: boolean;
@@ -283,15 +319,25 @@ function SessionItem({ session, isActive, onSelect, onDelete }: SessionItemProps
         role="button"
         tabIndex={0}
         onClick={onSelect}
-        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onSelect(); } }}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            onSelect();
+          }
+        }}
         className={cn(
-          'w-full flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-left cursor-pointer',
-          'hover:bg-sidebar-accent transition-colors group',
-          isActive && 'bg-sidebar-accent font-medium',
+          'group flex w-full cursor-pointer items-center gap-2 rounded-[6px] px-2 py-2 text-left transition-colors',
+          isActive ? 'bg-white/[0.06]' : 'hover:bg-white/[0.04]',
         )}
       >
-        <MessageSquare className="h-3.5 w-3.5 shrink-0 text-muted-foreground/60" />
-        <span className="flex-1 truncate text-xs">{session.title}</span>
+        <span
+          className={cn(
+            'flex-1 truncate text-[13px]',
+            isActive ? 'font-medium text-[#ededed]' : 'text-white/75',
+          )}
+        >
+          {session.title}
+        </span>
         <button
           type="button"
           aria-label="Delete conversation"
@@ -299,10 +345,7 @@ function SessionItem({ session, isActive, onSelect, onDelete }: SessionItemProps
             e.stopPropagation();
             onDelete();
           }}
-          className={cn(
-            'shrink-0 p-1 rounded opacity-0 group-hover:opacity-100 transition-opacity',
-            'hover:bg-destructive/15 hover:text-destructive text-muted-foreground',
-          )}
+          className="shrink-0 rounded p-1 text-white/30 opacity-0 transition-opacity hover:bg-destructive/15 hover:text-destructive group-hover:opacity-100"
         >
           <Trash2 className="h-3 w-3" />
         </button>

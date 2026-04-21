@@ -109,7 +109,7 @@ export const PromptBox = React.forwardRef<HTMLTextAreaElement, PromptBoxProps>(
     return (
       <div
         className={cn(
-          "flex flex-col rounded-[28px] p-2 shadow-sm transition-colors bg-card border border-border dark:bg-card dark:border-border cursor-text",
+          "flex flex-col rounded-[12px] p-1.5 transition-colors bg-white/[0.03] border border-[var(--border)] cursor-text focus-within:border-white/15",
           className
         )}
         onClick={() => internalTextareaRef.current?.focus()}
@@ -120,7 +120,7 @@ export const PromptBox = React.forwardRef<HTMLTextAreaElement, PromptBoxProps>(
           value={value}
           onChange={handleInputChange}
           onKeyDown={handleKeyDown}
-          className="custom-scrollbar w-full resize-none border-0 bg-transparent p-3 text-foreground placeholder:text-muted-foreground focus:ring-0 focus-visible:outline-none min-h-12 text-sm"
+          className="custom-scrollbar w-full resize-none border-0 bg-transparent px-3 py-2.5 text-[#ededed] placeholder:text-white/35 focus:ring-0 focus-visible:outline-none min-h-11 text-sm"
           disabled={isLoading}
           {...props}
         />
@@ -134,7 +134,12 @@ export const PromptBox = React.forwardRef<HTMLTextAreaElement, PromptBoxProps>(
                     type="button"
                     onClick={handleSubmit}
                     disabled={!hasValue || isLoading}
-                    className="flex h-8 w-8 items-center justify-center rounded-full text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none bg-primary text-primary-foreground hover:bg-primary/80 disabled:opacity-50"
+                    className={cn(
+                      "flex h-8 w-8 items-center justify-center rounded-[8px] text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] disabled:pointer-events-none",
+                      hasValue && !isLoading
+                        ? "bg-[var(--accent)] text-[#0a0a0a] hover:opacity-90"
+                        : "bg-white/[0.06] text-white/35"
+                    )}
                   >
                     {isLoading ? (
                       <div className="h-5 w-5 border-2 border-current border-t-transparent rounded-full animate-spin" />

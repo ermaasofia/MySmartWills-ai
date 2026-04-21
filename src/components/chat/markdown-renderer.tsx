@@ -59,7 +59,7 @@ export const MarkdownRenderer = memo(function MarkdownRenderer({
             href={href}
             target="_blank"
             rel="noopener noreferrer"
-            className="underline underline-offset-2 hover:opacity-70 transition-opacity"
+            className="text-[var(--accent)] underline underline-offset-2 hover:opacity-80 transition-opacity"
           >
             {children}
           </a>
@@ -91,14 +91,14 @@ export const MarkdownRenderer = memo(function MarkdownRenderer({
           const isInline = !className;
           if (isInline) {
             return (
-              <code className="bg-muted px-1.5 py-0.5 rounded text-xs font-mono">
+              <code className="rounded bg-white/[0.06] px-1.5 py-0.5 font-mono text-xs text-[#ededed]">
                 {children}
               </code>
             );
           }
           return (
-            <pre className="bg-muted rounded-lg p-3 my-2 overflow-x-auto">
-              <code className="text-xs font-mono">{children}</code>
+            <pre className="my-2 overflow-x-auto rounded-[8px] border border-[var(--border)] bg-white/[0.04] p-3">
+              <code className="font-mono text-xs">{children}</code>
             </pre>
           );
         },

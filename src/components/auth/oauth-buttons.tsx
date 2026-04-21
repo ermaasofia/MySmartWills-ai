@@ -36,7 +36,7 @@ const PROVIDER_CONFIG: Record<
     loadingLabel: 'Connecting to Google…',
     icon: <GoogleIcon />,
     colorClass:
-      'border-border hover:bg-muted/60 text-foreground',
+      'border-[var(--border)] bg-white/[0.04] text-[#ededed] hover:bg-white/[0.08]',
   },
 };
 
@@ -82,14 +82,16 @@ export function OAuthButtons({ redirectTo = '/chat', mode = 'login' }: OAuthButt
     <div className="space-y-3">
       {/* Divider */}
       <div className="relative flex items-center gap-3">
-        <div className="flex-1 border-t border-border" />
-        <span className="text-xs text-muted-foreground whitespace-nowrap">{dividerText}</span>
-        <div className="flex-1 border-t border-border" />
+        <div className="flex-1 border-t border-[var(--border)]" />
+        <span className="font-mono text-[10px] uppercase tracking-[1.5px] text-white/45 whitespace-nowrap">
+          {dividerText}
+        </span>
+        <div className="flex-1 border-t border-[var(--border)]" />
       </div>
 
       {/* Error */}
       {error && (
-        <div className="p-3 text-sm text-destructive bg-destructive/10 border border-destructive/20 rounded-lg">
+        <div className="rounded-[10px] border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive">
           {error}
         </div>
       )}

@@ -16,7 +16,7 @@ const container = {
 };
 
 const item = {
-  hidden: { opacity: 0, y: 30 },
+  hidden: { opacity: 0, y: 24 },
   show: { opacity: 1, y: 0, transition: { duration: 0.45, ease: [0.25, 0.1, 0.25, 1] as const } },
 };
 
@@ -26,29 +26,38 @@ export function SavyCountrySelector({ onSelect }: SavyCountrySelectorProps) {
   const handleTap = (country: SavyCountry) => {
     if (!country.isActive || tappedCode) return;
     setTappedCode(country.code);
-    // Small delay for the pulse animation to play before transitioning
     setTimeout(() => onSelect(country), 300);
   };
 
   return (
-    <div className="flex-1 flex flex-col items-center justify-center px-4 py-8 overflow-y-auto">
-      {/* Ambient gradients */}
-      <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/5 rounded-full filter blur-[128px]" />
-        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-primary/5 rounded-full filter blur-[128px]" />
-      </div>
+    <div className="relative flex-1 flex flex-col items-center justify-center px-6 py-10 overflow-y-auto bg-[#0a0a0a] text-[#ededed]">
+      {/* Ambient gradients matching landing hero */}
+      <div
+        className="pointer-events-none absolute inset-0"
+        style={{
+          background:
+            'radial-gradient(ellipse at 80% 0%, var(--accent-soft) 0%, transparent 50%), radial-gradient(ellipse at 0% 60%, rgba(255,255,255,0.04) 0%, transparent 50%)',
+        }}
+      />
 
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, ease: 'easeOut' }}
-        className="relative text-center mb-8"
+        className="relative text-center mb-10"
       >
-        <h2 className="text-2xl sm:text-3xl font-bold font-[family-name:var(--font-crimson)]">
-          Choose Your Savy
+        <div className="mb-4 font-mono text-[11px] uppercase tracking-[1.5px] text-[var(--accent)]">
+          // CHOOSE YOUR SAVY
+        </div>
+        <h2
+          className="m-0 font-medium leading-[1.05]"
+          style={{ fontSize: 'clamp(28px, 4vw, 40px)', letterSpacing: '-0.025em' }}
+        >
+          Pick a jurisdiction <br className="hidden sm:block" />
+          <span style={{ color: 'var(--accent)' }}>to begin</span>.
         </h2>
-        <p className="text-sm text-muted-foreground mt-2">
-          Select your country to get started
+        <p className="mt-3 text-sm text-white/55">
+          Each Savy is trained on local statutes and inheritance rules.
         </p>
       </motion.div>
 
@@ -56,7 +65,7 @@ export function SavyCountrySelector({ onSelect }: SavyCountrySelectorProps) {
         variants={container}
         initial="hidden"
         animate="show"
-        className="relative grid grid-cols-3 sm:grid-cols-4 gap-4 sm:gap-6 max-w-xl"
+        className="relative grid grid-cols-3 sm:grid-cols-4 gap-3 sm:gap-4 max-w-[640px]"
       >
         {SAVY_COUNTRIES.map((country) => {
           const isActive = country.isActive;
@@ -66,38 +75,41 @@ export function SavyCountrySelector({ onSelect }: SavyCountrySelectorProps) {
             <motion.button
               key={country.code}
               variants={item}
-              whileHover={isActive ? { scale: 1.08 } : undefined}
-              whileTap={isActive ? { scale: 0.95 } : undefined}
-              animate={isTapped ? { scale: [1, 1.12, 1] } : undefined}
-              transition={isTapped ? { duration: 0.25 } : { type: 'spring', stiffness: 300, damping: 20 }}
+              whileHover={isActive ? { y: -2 } : undefined}
+              whileTap={isActive ? { scale: 0.97 } : undefined}
+              animate={isTapped ? { scale: [1, 1.08, 1] } : undefined}
+              transition={isTapped ? { duration: 0.25 } : { type: 'spring', stiffness: 320, damping: 22 }}
               onClick={() => handleTap(country)}
               disabled={!isActive}
-              className={`flex flex-col items-center gap-2 outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-2xl p-2 transition-colors ${
+              className={`group relative flex flex-col items-center gap-2 rounded-[12px] border border-[var(--border)] bg-white/[0.02] p-4 outline-none transition-colors focus-visible:ring-2 focus-visible:ring-[var(--accent)] ${
                 isActive
-                  ? 'cursor-pointer hover:bg-muted/50'
+                  ? 'cursor-pointer hover:bg-white/[0.05]'
                   : 'opacity-40 cursor-not-allowed'
               }`}
             >
-              {/* Circular flag */}
               <div
-                className={`w-16 h-16 sm:w-20 sm:h-20 rounded-full flex items-center justify-center text-3xl sm:text-4xl border-2 transition-colors ${
+                className={`flex h-14 w-14 sm:h-16 sm:w-16 items-center justify-center rounded-full text-2xl sm:text-3xl transition-all ${
                   isActive
-                    ? 'border-border bg-muted/30 shadow-sm'
-                    : 'border-border/50 bg-muted/10'
+                    ? 'bg-white/[0.06] grayscale-0 group-hover:bg-white/[0.1]'
+                    : 'bg-white/[0.03] grayscale opacity-70'
                 }`}
               >
                 {country.flag}
               </div>
 
-              {/* Label */}
               <span className="text-xs sm:text-sm font-medium leading-tight text-center">
                 {country.savyName}
               </span>
 
-              {/* Coming Soon badge */}
               {!isActive && (
-                <span className="text-[10px] px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
-                  Coming Soon
+                <span className="font-mono text-[9px] uppercase tracking-[1px] text-white/40">
+                  Coming soon
+                </span>
+              )}
+
+              {isActive && (
+                <span className="font-mono text-[10px] uppercase tracking-[1px] text-white/35">
+                  {country.code}
                 </span>
               )}
             </motion.button>

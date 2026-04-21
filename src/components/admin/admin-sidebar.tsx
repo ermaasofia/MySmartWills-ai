@@ -12,7 +12,6 @@ import {
   ArrowLeft,
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
-import { ThemeToggle } from '@/components/theme-toggle';
 import { cn } from '@/lib/utils';
 
 const NAV_ITEMS = [
@@ -108,12 +107,6 @@ export function AdminSidebar({ userEmail, isSidebarOpen, onClose }: AdminSidebar
           <ArrowLeft className="h-4 w-4 shrink-0" />
           Back to Chat
         </Link>
-
-        {/* Theme */}
-        <div className="flex items-center gap-3 rounded-lg px-3 py-2">
-          <span className="text-sm text-muted-foreground flex-1">Theme</span>
-          <ThemeToggle />
-        </div>
 
         {/* User info + sign out */}
         <button
