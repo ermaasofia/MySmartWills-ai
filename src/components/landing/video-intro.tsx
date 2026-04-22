@@ -11,8 +11,8 @@ export function VideoIntro({ onComplete }: VideoIntroProps) {
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    // Safety fallback: skip after 3s if video fails to load or autoplay is blocked
-    timerRef.current = setTimeout(onComplete, 3000);
+    // Safety fallback: skip after 7s if video fails to load or autoplay is blocked
+    timerRef.current = setTimeout(onComplete, 7000);
     return () => {
       if (timerRef.current) clearTimeout(timerRef.current);
     };
