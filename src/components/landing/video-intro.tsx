@@ -26,7 +26,7 @@ export function VideoIntro({ onComplete }: VideoIntroProps) {
       transition={{ duration: 0.6, ease: 'easeInOut' }}
     >
       <video
-        className="h-full w-full object-cover"
+        className="max-h-full max-w-full"
         autoPlay
         muted
         playsInline
