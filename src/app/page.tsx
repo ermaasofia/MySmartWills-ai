@@ -1,3 +1,4 @@
+import { LandingShell } from '@/components/landing/landing-shell';
 import { LandingNav } from '@/components/landing/landing-nav';
 import { Hero } from '@/components/landing/hero';
 import { EcosystemStrip } from '@/components/landing/ecosystem-strip';
@@ -13,6 +14,7 @@ import { LandingFooter } from '@/components/landing/landing-footer';
 
 export default function Home() {
   return (
+    <LandingShell>
     <div
       className="min-h-screen bg-[#0a0a0a] text-[#ededed]"
       style={{ fontFeatureSettings: '"ss01", "cv11", "tnum"' }}
@@ -30,5 +32,6 @@ export default function Home() {
       <LandingCTA />
       <LandingFooter />
     </div>
+    </LandingShell>
   );
 }
