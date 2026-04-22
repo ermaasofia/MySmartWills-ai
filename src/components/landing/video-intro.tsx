@@ -20,7 +20,7 @@ export function VideoIntro({ onComplete }: VideoIntroProps) {
 
   return (
     <motion.div
-      className="fixed inset-0 z-[100] flex items-center justify-center overflow-hidden bg-[#0a0a0a]"
+      className="fixed inset-0 z-[100] flex items-center justify-center overflow-hidden bg-black"
       initial={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.6, ease: 'easeInOut' }}
