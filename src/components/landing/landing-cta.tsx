@@ -4,7 +4,7 @@ import { Reveal } from './reveal';
 export function LandingCTA() {
   return (
     <section className="border-t border-[var(--border)]">
-      <div className="mx-auto max-w-[1280px] px-8 py-[120px] text-center">
+      <div className="mx-auto max-w-[1280px] px-4 py-16 text-center sm:px-6 lg:px-8 lg:py-[120px]">
         <Reveal>
           <h2
             className="m-0 font-medium leading-[1]"
@@ -18,7 +18,7 @@ export function LandingCTA() {
           </h2>
         </Reveal>
         <Reveal delay={100}>
-          <div className="mt-10 flex justify-center gap-2.5">
+          <div className="mt-10 flex flex-wrap justify-center gap-2.5">
             <Link
               href="/signup"
               className="rounded-[8px] bg-[#ededed] px-[22px] py-[14px] text-sm font-medium text-[#0a0a0a] transition-opacity hover:opacity-90"

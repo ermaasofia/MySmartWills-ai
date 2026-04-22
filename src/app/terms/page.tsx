@@ -14,7 +14,7 @@ export const metadata: Metadata = {
 
 export default function TermsPage() {
   return (
-    <div className="flex min-h-screen flex-col bg-[#0a0a0a] text-[#ededed]">
+    <div className="flex min-h-dvh flex-col bg-[#0a0a0a] text-[#ededed]">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd('Terms of Service', '/terms')) }}

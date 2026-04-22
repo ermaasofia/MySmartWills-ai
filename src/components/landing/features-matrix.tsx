@@ -11,7 +11,7 @@ const FEATURES = [
 
 export function FeaturesMatrix() {
   return (
-    <section id="features" className="mx-auto max-w-[1280px] px-8 py-[120px]">
+    <section id="features" className="mx-auto max-w-[1280px] px-4 py-16 sm:px-6 lg:px-8 lg:py-[120px]">
       <div className="grid grid-cols-1 gap-15 lg:grid-cols-[300px_1fr] lg:gap-[60px]">
         <Reveal>
           <div className="lg:sticky lg:top-[100px]">
@@ -19,8 +19,8 @@ export function FeaturesMatrix() {
               // FEATURES
             </div>
             <h2
-              className="m-0 text-[44px] font-medium leading-[1.05]"
-              style={{ letterSpacing: '-0.025em' }}
+              className="m-0 font-medium leading-[1.05]"
+              style={{ fontSize: 'clamp(30px, 4.8vw, 44px)', letterSpacing: '-0.025em' }}
             >
               Engineered for<br />legal precision.
             </h2>

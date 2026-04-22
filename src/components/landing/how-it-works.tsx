@@ -24,14 +24,14 @@ const STEPS = [
 export function HowItWorks() {
   return (
     <section className="border-t border-[var(--border)] bg-[var(--raised-1)]">
-      <div className="mx-auto max-w-[1280px] px-8 py-[120px]">
+      <div className="mx-auto max-w-[1280px] px-4 py-16 sm:px-6 lg:px-8 lg:py-[120px]">
         <Reveal>
           <div className="mb-5 font-mono text-[11px] uppercase tracking-[1.5px] text-[var(--accent)]">
             // FLOW
           </div>
           <h2
-            className="m-0 max-w-[700px] text-[44px] font-medium leading-[1.05]"
-            style={{ letterSpacing: '-0.025em' }}
+            className="m-0 max-w-[700px] font-medium leading-[1.05]"
+            style={{ fontSize: 'clamp(30px, 4.8vw, 44px)', letterSpacing: '-0.025em' }}
           >
             Three steps. One afternoon. Your estate sorted.
           </h2>

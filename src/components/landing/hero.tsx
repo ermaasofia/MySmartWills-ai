@@ -20,7 +20,7 @@ export function Hero() {
             'radial-gradient(ellipse at 80% 0%, var(--accent-soft) 0%, transparent 50%), radial-gradient(ellipse at 0% 60%, rgba(255,255,255,0.04) 0%, transparent 50%)',
         }}
       />
-      <div className="relative mx-auto grid max-w-[1280px] grid-cols-1 items-center gap-20 px-8 py-20 pb-[120px] lg:grid-cols-[1fr_560px]">
+      <div className="relative mx-auto grid max-w-[1280px] grid-cols-1 items-center gap-12 px-4 py-16 pb-20 sm:px-6 lg:grid-cols-[1fr_560px] lg:gap-20 lg:px-8 lg:py-20 lg:pb-[120px]">
         <div>
           <Reveal>
             <div className="mb-7 inline-flex items-center gap-2 rounded-full border border-[var(--border)] px-2.5 py-[5px] text-[12px] text-white/70">
@@ -56,7 +56,7 @@ export function Hero() {
             </p>
           </Reveal>
           <Reveal delay={260}>
-            <div className="mt-9 flex gap-2.5">
+            <div className="mt-9 flex flex-wrap gap-2.5">
               <Link
                 href="/signup"
                 className="rounded-[8px] bg-[#ededed] px-[18px] py-3 text-sm font-medium text-[#0a0a0a] transition-opacity hover:opacity-90"
@@ -72,7 +72,7 @@ export function Hero() {
             </div>
           </Reveal>
           <Reveal delay={340}>
-            <div className="mt-12 flex gap-8 font-mono text-[12px] text-white/55">
+            <div className="mt-12 flex flex-wrap gap-x-6 gap-y-3 font-mono text-[12px] text-white/55 sm:gap-8">
               {STATS.map(([k, v]) => (
                 <div key={k}>
                   <span className="block text-[18px] font-medium text-[#ededed]" style={{ fontFamily: 'var(--font-sans)' }}>

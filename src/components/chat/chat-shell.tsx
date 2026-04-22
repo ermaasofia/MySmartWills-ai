@@ -125,7 +125,7 @@ export function ChatShell({
     : sessions;
 
   return (
-    <div className="flex h-screen overflow-hidden bg-background">
+    <div className="flex h-dvh overflow-hidden bg-background">
       <ChatSidebar
         userName={userName}
         userEmail={userEmail}

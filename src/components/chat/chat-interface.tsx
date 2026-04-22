@@ -445,7 +445,7 @@ export function ChatInterface({
       </div>
 
       {/* Input area */}
-      <div className="shrink-0 border-t border-[var(--border)] bg-[#0a0a0a] px-4 sm:px-6 py-4">
+      <div className="shrink-0 border-t border-[var(--border)] bg-[#0a0a0a] px-4 sm:px-6 pt-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
         <div className="mx-auto max-w-3xl">
           {showSuggestions && (
             <div className="mb-3 flex flex-wrap gap-2">

@@ -13,7 +13,7 @@ interface AuthShellProps {
 
 export function AuthShell({ title, description, children, footer, error }: AuthShellProps) {
   return (
-    <div className="flex min-h-screen flex-col bg-[#0a0a0a] text-[#ededed]">
+    <div className="flex min-h-dvh flex-col bg-[#0a0a0a] text-[#ededed]">
       {/* Header */}
       <header className="border-b border-[var(--border)]">
         <div className="mx-auto flex max-w-[1280px] items-center justify-between px-6 py-3.5 sm:px-8">
@@ -77,7 +77,7 @@ export function AuthShell({ title, description, children, footer, error }: AuthS
 
       {/* Footer */}
       <footer className="border-t border-[var(--border)] px-6 py-5">
-        <div className="mx-auto flex max-w-[1280px] items-center justify-between font-mono text-[11px] text-white/40">
+        <div className="mx-auto flex max-w-[1280px] flex-col items-center gap-2 font-mono text-[11px] text-white/40 sm:flex-row sm:justify-between">
           <span>© 2026 SmartWills.ai</span>
           <div className="flex items-center gap-4">
             <Link href="/privacy" className="hover:text-white/70">privacy</Link>

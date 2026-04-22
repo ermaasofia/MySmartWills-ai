@@ -33,15 +33,15 @@ const FAQ = [
 export function FaqAccordion() {
   return (
     <section id="faq" className="border-t border-[var(--border)] bg-[var(--raised-1)]">
-      <div className="mx-auto max-w-[960px] px-8 py-[120px]">
+      <div className="mx-auto max-w-[960px] px-4 py-16 sm:px-6 lg:px-8 lg:py-[120px]">
         <Reveal>
           <div className="mb-12">
             <div className="mb-5 font-mono text-[11px] uppercase tracking-[1.5px] text-[var(--accent)]">
               // FAQ
             </div>
             <h2
-              className="m-0 text-[44px] font-medium leading-[1.05]"
-              style={{ letterSpacing: '-0.025em' }}
+              className="m-0 font-medium leading-[1.05]"
+              style={{ fontSize: 'clamp(30px, 4.8vw, 44px)', letterSpacing: '-0.025em' }}
             >
               Honest answers<br />before you begin.
             </h2>
