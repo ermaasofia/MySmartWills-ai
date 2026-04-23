@@ -1,6 +1,7 @@
 'use client';
 
 import { useRef } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -70,16 +71,14 @@ function SwLogo() {
       href="/"
       className="flex items-center gap-2.5 px-1 transition-opacity hover:opacity-80"
     >
-      <div
-        className="flex h-7 w-7 items-center justify-center rounded-[6px]"
-        style={{ background: 'linear-gradient(135deg, var(--accent), #ededed)' }}
-      >
-        <span className="font-mono text-[10px] font-bold text-[#0a0a0a]">sw</span>
-      </div>
+      <Image
+        src="/logo.png"
+        alt="SmartWills"
+        width={28}
+        height={28}
+        className="rounded-[4px]"
+      />
       <span className="text-sm font-medium text-[#ededed]">SmartWills</span>
-      <span className="ml-auto font-mono text-[10px] uppercase tracking-[1.5px] text-white/40">
-        .ai
-      </span>
     </Link>
   );
 }
@@ -130,14 +129,11 @@ export function ChatSidebar({
             onNewChat();
             onClose();
           }}
-          className="flex w-full items-center justify-between rounded-[8px] bg-[#ededed] px-3 py-2.5 text-sm font-medium text-[#0a0a0a] transition-opacity hover:opacity-90"
+          className="flex w-full items-center rounded-[8px] bg-[#ededed] px-3 py-2.5 text-sm font-medium text-[#0a0a0a] transition-opacity hover:opacity-90"
         >
           <span className="flex items-center gap-2">
             <Plus className="h-4 w-4" />
             New conversation
-          </span>
-          <span className="rounded-[3px] bg-[#0a0a0a]/15 px-1.5 py-[1px] font-mono text-[10px] text-[#0a0a0a]/70">
-            ⌘N
           </span>
         </button>
       </div>
