@@ -96,7 +96,7 @@ export function SavyCountrySelector({ onSelect }: SavyCountrySelectorProps) {
                     muted
                     loop
                     playsInline
-                    preload="none"
+                    preload="metadata"
                   >
                     <source src={country.video} type="video/mp4" />
                   </video>

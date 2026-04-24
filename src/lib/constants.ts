@@ -131,6 +131,7 @@ export type SavyCountry = {
   video?: string; // public path to looping mp4, only set for active countries
 };
 
+// MY_WK is a synthetic code not in COUNTRIES, so it is handled by the explicit entry above — intentionally absent here.
 const ACTIVE_CODES = ['MY', 'SG', 'HK'];
 
 export const SAVY_COUNTRIES: SavyCountry[] = [
