@@ -81,37 +81,43 @@ export function SavyCountrySelector({ onSelect }: SavyCountrySelectorProps) {
               transition={isTapped ? { duration: 0.25 } : { type: 'spring', stiffness: 320, damping: 22 }}
               onClick={() => handleTap(country)}
               disabled={!isActive}
-              className={`group relative flex flex-col items-center gap-2 rounded-[12px] border border-[var(--border)] bg-white/[0.02] p-4 outline-none transition-colors focus-visible:ring-2 focus-visible:ring-[var(--accent)] ${
+              className={`group relative flex flex-col rounded-[12px] border border-[var(--border)] bg-white/[0.02] overflow-hidden outline-none transition-colors focus-visible:ring-2 focus-visible:ring-[var(--accent)] ${
                 isActive
                   ? 'cursor-pointer hover:bg-white/[0.05]'
                   : 'opacity-40 cursor-not-allowed'
               }`}
             >
-              <div
-                className={`flex h-14 w-14 sm:h-16 sm:w-16 items-center justify-center rounded-full text-2xl sm:text-3xl transition-all ${
-                  isActive
-                    ? 'bg-white/[0.06] grayscale-0 group-hover:bg-white/[0.1]'
-                    : 'bg-white/[0.03] grayscale opacity-70'
-                }`}
-              >
-                {country.flag}
+              {/* Top area — video for active, flag for inactive */}
+              <div className="w-full aspect-[4/3] overflow-hidden bg-black flex items-center justify-center">
+                {isActive && country.video ? (
+                  <video
+                    className="w-full h-full object-cover"
+                    autoPlay
+                    muted
+                    loop
+                    playsInline
+                  >
+                    <source src={country.video} type="video/mp4" />
+                  </video>
+                ) : (
+                  <span className="text-3xl sm:text-4xl">{country.flag}</span>
+                )}
               </div>
 
-              <span className="text-xs sm:text-sm font-medium leading-tight text-center">
-                {country.savyName}
-              </span>
-
-              {!isActive && (
-                <span className="font-mono text-[9px] uppercase tracking-[1px] text-white/40">
-                  Coming soon
-                </span>
-              )}
-
-              {isActive && (
-                <span className="font-mono text-[10px] uppercase tracking-[1px] text-white/35">
-                  {country.code}
-                </span>
-              )}
+              {/* Bottom strip — name + flag (active) or name + coming soon (inactive) */}
+              <div className="flex items-center gap-2 px-3 py-2">
+                {isActive && (
+                  <span className="text-sm leading-none">{country.flag}</span>
+                )}
+                <div className="flex flex-col min-w-0">
+                  <span className="text-xs sm:text-sm font-medium leading-tight text-left truncate">
+                    {country.savyName}
+                  </span>
+                  <span className="font-mono text-[9px] uppercase tracking-[1px] text-white/35 leading-tight">
+                    {isActive ? country.code : 'Coming soon'}
+                  </span>
+                </div>
+              </div>
             </motion.button>
           );
         })}
