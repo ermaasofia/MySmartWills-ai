@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { Reveal } from './reveal';
-import { LiveChatCard } from './live-chat-card';
+import { ApacGlobe } from './apac-globe';
 
 const STATS = [
   ['12', 'jurisdictions'],
@@ -86,7 +86,7 @@ export function Hero() {
         </div>
 
         <Reveal delay={180}>
-          <LiveChatCard />
+          <ApacGlobe />
         </Reveal>
       </div>
     </section>
