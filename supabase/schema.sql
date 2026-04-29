@@ -1,9 +1,6 @@
 -- AI SmartWills Database Schema for Supabase
 -- Run this in your Supabase SQL Editor
 
--- Enable the pgvector extension for RAG (future use)
-CREATE EXTENSION IF NOT EXISTS vector;
-
 -- User profiles table (extends Supabase auth.users)
 CREATE TABLE IF NOT EXISTS public.profiles (
   id UUID REFERENCES auth.users(id) ON DELETE CASCADE PRIMARY KEY,
@@ -34,19 +31,6 @@ CREATE TABLE IF NOT EXISTS public.chat_messages (
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Knowledge base documents (for RAG - future use)
-CREATE TABLE IF NOT EXISTS public.documents (
-  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  title TEXT NOT NULL,
-  content TEXT NOT NULL,
-  country_code TEXT,
-  source_url TEXT,
-  metadata JSONB DEFAULT '{}',
-  embedding VECTOR(384), -- For all-MiniLM-L6-v2 embeddings
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ DEFAULT NOW()
-);
-
 -- AI Prompts/Instructions table (admin-configurable AI behavior, per-country)
 CREATE TABLE IF NOT EXISTS public.ai_prompts (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
@@ -63,20 +47,13 @@ CREATE TABLE IF NOT EXISTS public.ai_prompts (
 -- Create indexes for better query performance
 CREATE INDEX IF NOT EXISTS idx_chat_sessions_user_id ON public.chat_sessions(user_id);
 CREATE INDEX IF NOT EXISTS idx_chat_messages_session_id ON public.chat_messages(session_id);
-CREATE INDEX IF NOT EXISTS idx_documents_country ON public.documents(country_code);
 CREATE INDEX IF NOT EXISTS idx_ai_prompts_type ON public.ai_prompts(prompt_type);
 CREATE INDEX IF NOT EXISTS idx_ai_prompts_country_code ON public.ai_prompts(country_code);
-
--- Create index for vector similarity search
-CREATE INDEX IF NOT EXISTS idx_documents_embedding ON public.documents 
-  USING ivfflat (embedding vector_cosine_ops)
-  WITH (lists = 100);
 
 -- Enable Row Level Security
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.chat_sessions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.chat_messages ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.documents ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.ai_prompts ENABLE ROW LEVEL SECURITY;
 
 -- Helper function: check if current user is admin (used in RLS policies)
@@ -149,11 +126,6 @@ CREATE POLICY "Users can create messages in their sessions"
     )
   );
 
--- Documents policies (public read for RAG)
-CREATE POLICY "Anyone can read documents"
-  ON public.documents FOR SELECT
-  USING (true);
-
 -- AI Prompts policies (authenticated read, admin write)
 CREATE POLICY "Authenticated users can read active AI prompts"
   ON public.ai_prompts FOR SELECT
@@ -202,10 +174,6 @@ CREATE TRIGGER update_profiles_updated_at
 
 CREATE TRIGGER update_chat_sessions_updated_at
   BEFORE UPDATE ON public.chat_sessions
-  FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
-
-CREATE TRIGGER update_documents_updated_at
-  BEFORE UPDATE ON public.documents
   FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
 
 CREATE TRIGGER update_ai_prompts_updated_at
@@ -281,39 +249,6 @@ CREATE TRIGGER update_conversation_summaries_updated_at
   BEFORE UPDATE ON public.conversation_summaries
   FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
 
--- Function for semantic search (RAG)
-CREATE OR REPLACE FUNCTION match_documents(
-  query_embedding VECTOR(384),
-  match_threshold FLOAT DEFAULT 0.7,
-  match_count INT DEFAULT 5,
-  filter_country TEXT DEFAULT NULL
-)
-RETURNS TABLE (
-  id UUID,
-  title TEXT,
-  content TEXT,
-  country_code TEXT,
-  similarity FLOAT
-)
-LANGUAGE plpgsql
-AS $$
-BEGIN
-  RETURN QUERY
-  SELECT
-    d.id,
-    d.title,
-    d.content,
-    d.country_code,
-    1 - (d.embedding <=> query_embedding) AS similarity
-  FROM public.documents d
-  WHERE 
-    (filter_country IS NULL OR d.country_code = filter_country)
-    AND 1 - (d.embedding <=> query_embedding) > match_threshold
-  ORDER BY d.embedding <=> query_embedding
-  LIMIT match_count;
-END;
-$$;
-
 -- ─── Admin Audit Logs ──────────────────────────────────────────────────────
 
 -- Tracks admin actions for security auditing
@@ -344,32 +279,3 @@ CREATE POLICY "Admins can insert audit logs"
 
 -- Bootstrap: run this manually in Supabase SQL Editor to grant yourself admin
 -- UPDATE public.profiles SET role = 'admin' WHERE email = '<your-email>';
-
--- ─── Migration: Country-specific AI prompts ──────────────────────────────────
--- Run this in Supabase SQL Editor if the ai_prompts table already exists:
---
--- ALTER TABLE public.ai_prompts ADD COLUMN country_code TEXT NOT NULL DEFAULT 'MY';
--- ALTER TABLE public.ai_prompts DROP CONSTRAINT ai_prompts_prompt_type_key;
--- ALTER TABLE public.ai_prompts ADD CONSTRAINT ai_prompts_country_prompt_unique UNIQUE (country_code, prompt_type);
--- CREATE INDEX IF NOT EXISTS idx_ai_prompts_country_code ON public.ai_prompts(country_code);
-
--- ─── Migration: Add country_name column to ai_prompts ────────────────────────
--- Run this in Supabase SQL Editor if the ai_prompts table already exists:
---
--- ALTER TABLE public.ai_prompts ADD COLUMN country_name TEXT NOT NULL DEFAULT 'Malaysia (Conventional Will)';
--- UPDATE public.ai_prompts SET country_name = CASE country_code
---   WHEN 'MY' THEN 'Malaysia (Conventional Will)'
---   WHEN 'MY_WK' THEN 'Malaysia / WasiatKu (Islamic Will)'
---   WHEN 'SG' THEN 'Singapore'
---   WHEN 'HK' THEN 'Hong Kong'
---   WHEN 'CN' THEN 'China'
---   WHEN 'TW' THEN 'Taiwan'
---   WHEN 'ID' THEN 'Indonesia'
---   WHEN 'TH' THEN 'Thailand'
---   WHEN 'AU' THEN 'Australia'
---   WHEN 'NZ' THEN 'New Zealand'
---   WHEN 'BN' THEN 'Brunei'
---   WHEN 'VN' THEN 'Vietnam'
---   WHEN 'PH' THEN 'Philippines'
---   ELSE country_code
--- END;

@@ -23,7 +23,7 @@ No test framework is configured.
 - **Framework:** Next.js 16 (App Router) with React 19, TypeScript 5
 - **Styling:** Tailwind CSS 4 + shadcn/ui (New York style) + Framer Motion
 - **Auth:** Supabase Auth (email/password + Google OAuth), middleware-protected routes
-- **Database:** Supabase PostgreSQL with Row Level Security, pgvector for embeddings
+- **Database:** Supabase PostgreSQL with Row Level Security
 - **AI:** Vercel AI SDK v6 with Groq — `gpt-oss-120b` (chat, reasoning model) + `llama-3.1-8b-instant` (memory extraction), streaming responses
 - **Rate Limiting:** Upstash Redis (distributed) with in-memory fallback
 - **CAPTCHA:** Cloudflare Turnstile on signup
@@ -129,7 +129,6 @@ Schema defined in `supabase/schema.sql`. All tables have RLS policies.
 - **ai_prompts** — Admin-configurable AI behavior per country (`country_code` + `prompt_type` composite unique). Prompt types: character, sop, company_info, services, other. Includes `country_name` for dashboard readability. Admins write via `is_admin()` RLS function
 - **user_memories** — Cross-session persistent facts (JSONB), per user
 - **conversation_summaries** — Rolling per-session summaries for context management
-- **documents** — Knowledge base with pgvector embeddings (384-dim, for future RAG)
 
 ## Environment Variables
 
