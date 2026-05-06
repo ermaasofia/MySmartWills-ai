@@ -1,12 +1,17 @@
 import { createClient } from '@/lib/supabase/server';
 import { getSessionMessages, deleteSession, updateSessionTitle } from '@/lib/chat';
+import { isAllowedOrigin } from '@/lib/validation';
 
 // GET /api/chat/sessions/[id] — fetch all messages for a session
 export async function GET(
-  _req: Request,
+  req: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
+    if (!isAllowedOrigin(req.headers.get('origin'))) {
+      return Response.json({ error: 'Forbidden' }, { status: 403 });
+    }
+
     const supabase = await createClient();
     const { data: { user }, error: authError } = await supabase.auth.getUser();
 
@@ -47,6 +52,10 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
+    if (!isAllowedOrigin(req.headers.get('origin'))) {
+      return Response.json({ error: 'Forbidden' }, { status: 403 });
+    }
+
     const supabase = await createClient();
     const { data: { user }, error: authError } = await supabase.auth.getUser();
 
@@ -87,10 +96,14 @@ export async function PATCH(
 
 // DELETE /api/chat/sessions/[id] — delete a session and all its messages
 export async function DELETE(
-  _req: Request,
+  req: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
+    if (!isAllowedOrigin(req.headers.get('origin'))) {
+      return Response.json({ error: 'Forbidden' }, { status: 403 });
+    }
+
     const supabase = await createClient();
     const { data: { user }, error: authError } = await supabase.auth.getUser();
 

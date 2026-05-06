@@ -49,23 +49,9 @@ const nextConfig: NextConfig = {
             key: 'X-XSS-Protection',
             value: '1; mode=block',
           },
-          {
-            key: 'Content-Security-Policy',
-            value: [
-              "default-src 'self'",
-              "script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com https://static.cloudflareinsights.com",
-              "style-src 'self' 'unsafe-inline'",
-              "font-src 'self'",
-              "img-src 'self' data: blob: https://lh3.googleusercontent.com",
-              "connect-src 'self' https://*.supabase.co https://api.groq.com https://generativelanguage.googleapis.com https://challenges.cloudflare.com https://*.upstash.io",
-              "frame-src https://challenges.cloudflare.com",
-              "frame-ancestors 'none'",
-              "object-src 'none'",
-              "base-uri 'self'",
-              "form-action 'self'",
-              "upgrade-insecure-requests",
-            ].join('; '),
-          },
+          // Content-Security-Policy is set per-request in middleware
+          // (src/lib/supabase/middleware.ts) so script-src can include a
+          // per-request nonce instead of 'unsafe-inline'.
         ],
       },
     ];

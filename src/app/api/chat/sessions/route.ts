@@ -1,10 +1,15 @@
 import { createClient } from '@/lib/supabase/server';
 import { rateLimitAsync } from '@/lib/rate-limit';
 import { createChatSession, getUserSessions } from '@/lib/chat';
+import { isAllowedOrigin } from '@/lib/validation';
 
 // GET /api/chat/sessions — list all sessions for the authenticated user
-export async function GET() {
+export async function GET(req: Request) {
   try {
+    if (!isAllowedOrigin(req.headers.get('origin'))) {
+      return Response.json({ error: 'Forbidden' }, { status: 403 });
+    }
+
     const supabase = await createClient();
     const { data: { user }, error: authError } = await supabase.auth.getUser();
 
@@ -36,6 +41,10 @@ export async function GET() {
 // POST /api/chat/sessions — explicitly create a new session
 export async function POST(req: Request) {
   try {
+    if (!isAllowedOrigin(req.headers.get('origin'))) {
+      return Response.json({ error: 'Forbidden' }, { status: 403 });
+    }
+
     const supabase = await createClient();
     const { data: { user }, error: authError } = await supabase.auth.getUser();
 

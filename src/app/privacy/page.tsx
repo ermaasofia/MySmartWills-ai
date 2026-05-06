@@ -1,5 +1,6 @@
 import { Metadata } from "next";
 import Link from "next/link";
+import { headers } from "next/headers";
 import { Breadcrumb, breadcrumbJsonLd } from "@/components/layout/breadcrumb";
 
 export const metadata: Metadata = {
@@ -12,11 +13,14 @@ export const metadata: Metadata = {
   },
 };
 
-export default function PrivacyPolicyPage() {
+export default async function PrivacyPolicyPage() {
+  const nonce = (await headers()).get('x-nonce') ?? undefined;
   return (
     <div className="flex min-h-dvh flex-col bg-[#0a0a0a] text-[#ededed]">
       <script
         type="application/ld+json"
+        nonce={nonce}
+        suppressHydrationWarning
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd('Privacy Policy', '/privacy')) }}
       />
       <header className="border-b border-[var(--border)]">

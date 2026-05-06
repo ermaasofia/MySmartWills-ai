@@ -1,5 +1,6 @@
 import { Metadata } from "next";
 import Link from "next/link";
+import { headers } from "next/headers";
 import { SignupForm } from "@/components/auth/signup-form";
 import { AuthShell } from "@/components/auth/auth-shell";
 import { breadcrumbJsonLd } from "@/components/layout/breadcrumb";
@@ -14,11 +15,14 @@ export const metadata: Metadata = {
   },
 };
 
-export default function SignupPage() {
+export default async function SignupPage() {
+  const nonce = (await headers()).get('x-nonce') ?? undefined;
   return (
     <>
       <script
         type="application/ld+json"
+        nonce={nonce}
+        suppressHydrationWarning
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd('Sign Up', '/signup')) }}
       />
       <AuthShell

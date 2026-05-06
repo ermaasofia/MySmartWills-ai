@@ -9,10 +9,32 @@ function getAdminEmails(): string[] {
     .filter(Boolean);
 }
 
+// Cached once an admin row is observed in profiles. Once true, ADMIN_EMAILS
+// env-var fallback is permanently disabled for this process — `profiles.role`
+// becomes the sole source of truth. A server restart is required to re-enable
+// the env-var path (e.g. if every admin row is deleted).
+let adminRowExists: boolean | null = null;
+
+export async function isBootstrapMode(supabase: SupabaseClient): Promise<boolean> {
+  if (adminRowExists === true) return false;
+
+  const { count } = await supabase
+    .from('profiles')
+    .select('id', { count: 'exact', head: true })
+    .eq('role', 'admin');
+
+  if ((count ?? 0) > 0) {
+    adminRowExists = true;
+    return false;
+  }
+  return true;
+}
+
 /**
  * Check if the current authenticated user is an admin.
  * 1. Queries profiles.role in the database
- * 2. Falls back to ADMIN_EMAILS env var (bootstrap convenience)
+ * 2. Falls back to ADMIN_EMAILS env var ONLY when no admin row exists yet
+ *    (bootstrap mode — first admin must self-promote then the env var stops mattering)
  */
 export async function isAdmin(
   supabase: SupabaseClient
@@ -26,7 +48,6 @@ export async function isAdmin(
     return { isAdmin: false, user: null };
   }
 
-  // Check database role first
   const { data: profile } = await supabase
     .from('profiles')
     .select('role')
@@ -37,10 +58,11 @@ export async function isAdmin(
     return { isAdmin: true, user: { id: user.id, email: user.email } };
   }
 
-  // Fallback: check ADMIN_EMAILS environment variable
-  const adminEmails = getAdminEmails();
-  if (adminEmails.includes(user.email.toLowerCase())) {
-    return { isAdmin: true, user: { id: user.id, email: user.email } };
+  if (await isBootstrapMode(supabase)) {
+    const adminEmails = getAdminEmails();
+    if (adminEmails.includes(user.email.toLowerCase())) {
+      return { isAdmin: true, user: { id: user.id, email: user.email } };
+    }
   }
 
   return { isAdmin: false, user: { id: user.id, email: user.email } };

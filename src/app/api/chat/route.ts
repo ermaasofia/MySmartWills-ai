@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server';
 import { rateLimitAsync } from '@/lib/rate-limit';
 import { createChatSession, saveChatMessage, updateSessionTitle } from '@/lib/chat';
 import { COUNTRIES, EMPTY_PROMPTS } from '@/lib/constants';
+import { isAllowedOrigin } from '@/lib/validation';
 import { PromptData } from '@/types';
 import {
   getUserMemory,
@@ -148,15 +149,8 @@ Be helpful, professional, empathetic. Will planning is sensitive — be respectf
 
 export async function POST(req: Request) {
   try {
-    // SECURITY: Reject non-POST or suspicious origins
-    const origin = req.headers.get('origin');
-    const appUrl = (process.env.NEXT_PUBLIC_APP_URL || 'https://smartwills.ai').replace(/\/+$/, '');
-    const allowedOrigins = [
-      appUrl,
-      appUrl.replace('://', '://www.'),
-      ...(process.env.NODE_ENV === 'development' ? ['http://localhost:3000'] : []),
-    ];
-    if (origin && !allowedOrigins.includes(origin)) {
+    // SECURITY: Reject suspicious cross-origin requests
+    if (!isAllowedOrigin(req.headers.get('origin'))) {
       return new Response(
         JSON.stringify({ error: 'Forbidden' }),
         { status: 403, headers: { 'Content-Type': 'application/json' } }

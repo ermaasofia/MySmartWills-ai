@@ -1,4 +1,21 @@
 /**
+ * Returns true if the request origin is allowed (or absent — non-browser callers).
+ * Mirrors the allowlist used originally on /api/chat: NEXT_PUBLIC_APP_URL, its
+ * www. variant, and localhost in development. Use for state-changing endpoints
+ * to block cross-origin requests that ride along on the user's auth cookie.
+ */
+export function isAllowedOrigin(origin: string | null): boolean {
+  if (!origin) return true;
+  const appUrl = (process.env.NEXT_PUBLIC_APP_URL || 'https://smartwills.ai').replace(/\/+$/, '');
+  const allowed = [
+    appUrl,
+    appUrl.replace('://', '://www.'),
+    ...(process.env.NODE_ENV === 'development' ? ['http://localhost:3000'] : []),
+  ];
+  return allowed.includes(origin);
+}
+
+/**
  * Validates password strength requirements.
  * Returns an error message string if invalid, or null if valid.
  */

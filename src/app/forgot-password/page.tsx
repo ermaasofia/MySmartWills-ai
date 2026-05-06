@@ -1,5 +1,6 @@
 import { Metadata } from "next";
 import Link from "next/link";
+import { headers } from "next/headers";
 import { ForgotPasswordForm } from "@/components/auth/forgot-password-form";
 import { AuthShell } from "@/components/auth/auth-shell";
 import { breadcrumbJsonLd } from "@/components/layout/breadcrumb";
@@ -21,11 +22,14 @@ export default async function ForgotPasswordPage({
 }) {
   const params = await searchParams;
   const errorMessage = params.error;
+  const nonce = (await headers()).get('x-nonce') ?? undefined;
 
   return (
     <>
       <script
         type="application/ld+json"
+        nonce={nonce}
+        suppressHydrationWarning
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd('Forgot Password', '/forgot-password')) }}
       />
       <AuthShell

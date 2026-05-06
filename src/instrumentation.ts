@@ -1,22 +1,43 @@
 export async function register() {
-  if (process.env.NEXT_RUNTIME === 'nodejs') {
-    const required = [
-      'NEXT_PUBLIC_SUPABASE_URL',
-      'NEXT_PUBLIC_SUPABASE_ANON_KEY',
-    ];
+  if (process.env.NEXT_RUNTIME !== 'nodejs') return;
 
-    const missing = required.filter((key) => !process.env[key]);
+  const isProd = process.env.NODE_ENV === 'production';
+  const errors: string[] = [];
+  const warnings: string[] = [];
 
-    if (missing.length > 0) {
-      console.warn(
-        `[AI SmartWills] Missing required environment variables: ${missing.join(', ')}`
-      );
-    }
+  const requireOrCollect = (key: string, list: string[], extra?: string) => {
+    if (!process.env[key]) list.push(extra ? `${key} (${extra})` : key);
+  };
 
-    if (!process.env.GROQ_API_KEY) {
-      console.warn(
-        '[AI SmartWills] GROQ_API_KEY is not set — chat API will be unavailable'
-      );
-    }
+  // Always-required: app cannot function without these
+  requireOrCollect('NEXT_PUBLIC_SUPABASE_URL', errors);
+  requireOrCollect('NEXT_PUBLIC_SUPABASE_ANON_KEY', errors);
+  requireOrCollect('GROQ_API_KEY', errors, 'chat API depends on this');
+
+  // Production-required: signup CAPTCHA must be configured
+  requireOrCollect(
+    'CLOUDFLARE_TURNSTILE_SECRET_KEY',
+    isProd ? errors : warnings,
+    'signup is unprotected without CAPTCHA verification',
+  );
+
+  // Distributed rate limit — opt-in to in-memory fallback if Redis is intentionally absent
+  const hasUpstash =
+    process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN;
+  const allowInMemory = process.env.RATE_LIMIT_ALLOW_INMEMORY === '1';
+  if (!hasUpstash && !allowInMemory) {
+    (isProd ? errors : warnings).push(
+      'UPSTASH_REDIS_REST_URL/TOKEN missing and RATE_LIMIT_ALLOW_INMEMORY!=1 — distributed rate limiting disabled',
+    );
+  }
+
+  for (const w of warnings) {
+    console.warn(`[AI SmartWills] ${w}`);
+  }
+
+  if (errors.length > 0) {
+    const msg = `[AI SmartWills] Refusing to start — missing required configuration:\n  - ${errors.join('\n  - ')}`;
+    if (isProd) throw new Error(msg);
+    console.warn(msg);
   }
 }

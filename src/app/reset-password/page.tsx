@@ -1,5 +1,6 @@
 import { Metadata } from "next";
 import Link from "next/link";
+import { headers } from "next/headers";
 import { ResetPasswordForm } from "@/components/auth/reset-password-form";
 import { AuthShell } from "@/components/auth/auth-shell";
 import { breadcrumbJsonLd } from "@/components/layout/breadcrumb";
@@ -14,11 +15,14 @@ export const metadata: Metadata = {
   },
 };
 
-export default function ResetPasswordPage() {
+export default async function ResetPasswordPage() {
+  const nonce = (await headers()).get('x-nonce') ?? undefined;
   return (
     <>
       <script
         type="application/ld+json"
+        nonce={nonce}
+        suppressHydrationWarning
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd('Reset Password', '/reset-password')) }}
       />
       <AuthShell
