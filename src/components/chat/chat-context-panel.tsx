@@ -96,27 +96,8 @@ export function ChatContextPanel({ activeSavy, refreshKey, sessionTitle }: ChatC
   return (
     <aside className="hidden lg:flex w-[320px] shrink-0 flex-col overflow-y-auto border-l border-[var(--border)] bg-[var(--raised-1)]">
       <div className="p-5">
-        {/* Legal references */}
-        <div className="mb-3 font-mono text-[10px] uppercase tracking-[1.5px] text-[var(--accent)]">
-          // LEGAL REFERENCES
-        </div>
-        <div className="flex flex-col gap-2.5">
-          {refs.map((r) => (
-            <div
-              key={r.title}
-              className="rounded-[8px] border border-[var(--border)] bg-white/[0.03] p-3"
-            >
-              <div className="text-[13px] font-medium text-[#ededed]">{r.title}</div>
-              <div className="mt-0.5 font-mono text-[10px] text-[var(--accent)]">
-                {r.statute}
-              </div>
-              <p className="mt-2 text-[12px] leading-[1.55] text-white/60">{r.description}</p>
-            </div>
-          ))}
-        </div>
-
         {/* Your plan so far */}
-        <div className="mt-7 mb-3 font-mono text-[10px] uppercase tracking-[1.5px] text-[var(--accent)]">
+        <div className="mb-3 font-mono text-[10px] uppercase tracking-[1.5px] text-[var(--accent)]">
           // YOUR PLAN SO FAR
         </div>
         <div className="rounded-[10px] border border-[var(--border)] bg-white/[0.03] p-4">
