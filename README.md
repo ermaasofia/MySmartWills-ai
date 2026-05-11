@@ -1,176 +1,66 @@
 # AI SmartWills
 
-Your intelligent legal will planning assistant for 12 countries across Asia-Pacific.
+Country-specific AI chat assistant for will planning and inheritance guidance across Asia-Pacific.
 
-## Features
+Live at **https://smartwills.ai**.
 
-- Multi-country support (Malaysia, Singapore, Hong Kong, China, Taiwan, Indonesia, Thailand, Australia, New Zealand, Brunei, Vietnam, Philippines)
-- AI-powered chat with country-specific legal knowledge
-- Dark/Light mode with system sync
-- Secure authentication via Supabase
-- RAG-ready architecture for knowledge base integration
-- Modern, minimal black & white design with Crimson Text font
+## What it does
 
-## Tech Stack
+Users sign up, pick their jurisdiction, and ask questions about wills in plain language. The AI responds with relevant legal context for that country and points them toward the SmartWills wills-drafting service.
 
-- **Frontend**: Next.js 16+ with App Router, TypeScript, Tailwind CSS, shadcn/ui
-- **Backend**: Supabase (Auth, Database, Vector Store)
-- **AI**: Vercel AI SDK with Groq (Llama 3.1) and Google Gemini (free tiers)
-- **Deployment**: Vercel (free tier compatible)
+The product is organized around **Savys** — country-specific AI personas, each with their own admin-editable behavior.
 
-## Getting Started
+### Active Savys
 
-### Prerequisites
+| Savy | Code | Scope |
+|---|---|---|
+| Savy MY | `MY` | Malaysia — conventional (non-Muslim) wills |
+| Savy WasiatKu | `MY_WK` | Malaysia — Islamic wills (Faraid, Hibah, Wasiat) |
+| Savy SG | `SG` | Singapore wills |
+| Savy HK | `HK` | Hong Kong wills |
 
-- Node.js 18+ 
-- pnpm (recommended) or npm
-- Supabase account (free tier)
-- Groq API key (free) and/or Google AI API key (free)
+8 more countries (`CN`, `TW`, `ID`, `TH`, `AU`, `NZ`, `BN`, `VN`, `PH`) are wired up in code as dormant placeholders — ready to activate when the company expands.
 
-### 1. Clone and Install Dependencies
+## Tech stack
+
+- **Framework:** Next.js 16 (App Router) + React 19 + TypeScript
+- **Styling:** Tailwind CSS 4 + shadcn/ui + Framer Motion
+- **Auth + Database:** Supabase (Postgres with RLS)
+- **AI:** Vercel AI SDK + Groq (`gpt-oss-120b` for chat, `llama-3.1-8b-instant` for background memory extraction)
+- **Email:** Amazon SES (via Supabase SMTP)
+- **Rate limiting:** Upstash Redis
+- **CAPTCHA:** Cloudflare Turnstile
+- **Hosting:** Vercel (auto-deploy from `main`)
+
+## Getting started
 
 ```bash
-cd aismartwills
 pnpm install
+pnpm dev          # http://localhost:3000
 ```
 
-### 2. Set Up Supabase
+You'll need a `.env.local` with credentials (Supabase, Groq, Upstash, Turnstile). Pull the values from the Vercel project's environment variables.
 
-1. Create a new project at [supabase.com](https://supabase.com)
-2. Go to Project Settings > API and copy:
-   - Project URL
-   - Anon public key
-3. Go to SQL Editor and run the schema from `supabase/schema.sql`
-4. Enable Email Auth in Authentication > Providers
+## Documentation
 
-### 3. Get Free AI API Keys
+- **[ONBOARDING.md](./ONBOARDING.md)** — full intern onboarding guide. **Start here.**
+- **[CLAUDE.md](./CLAUDE.md)** — detailed architecture notes for AI coding assistants and humans alike.
+- **[docs/DOMAIN_SETUP.md](./docs/DOMAIN_SETUP.md)** — DNS, hosting, infrastructure reference.
+- **[docs/EMAIL_SETUP.md](./docs/EMAIL_SETUP.md)** — SES + Supabase SMTP setup and email templates.
+- **[docs/OAUTH_SETUP.md](./docs/OAUTH_SETUP.md)** — Google OAuth configuration.
+- **[docs/SECURITY_AUDIT.md](./docs/SECURITY_AUDIT.md)** — Production security review (2026-04-01).
 
-#### Groq (Recommended - Fast & Free)
-1. Go to [console.groq.com](https://console.groq.com)
-2. Sign up for free
-3. Create an API key
-
-#### Google Gemini (Alternative)
-1. Go to [aistudio.google.com](https://aistudio.google.com)
-2. Sign in with Google
-3. Create an API key
-
-### 4. Configure Environment Variables
-
-Create `.env.local` from the example:
+## Commands
 
 ```bash
-cp .env.local.example .env.local
+pnpm dev          # Dev server
+pnpm build        # Production build (also runs type-check)
+pnpm start        # Run production build locally
+pnpm lint         # ESLint
 ```
 
-Fill in your credentials:
-
-```env
-# Supabase Configuration
-NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
-
-# AI Provider API Keys (at least one required)
-GROQ_API_KEY=your_groq_api_key
-GOOGLE_GENERATIVE_AI_API_KEY=your_google_ai_api_key
-
-# App Configuration
-NEXT_PUBLIC_APP_URL=http://localhost:3000
-```
-
-### 5. Run Development Server
-
-```bash
-pnpm dev
-```
-
-Open [http://localhost:3000](http://localhost:3000) to see the landing page.
-
-## Project Structure
-
-```
-aismartwills/
-├── src/
-│   ├── app/
-│   │   ├── api/
-│   │   │   └── chat/           # AI chat API route
-│   │   ├── auth/
-│   │   │   └── callback/       # OAuth callback handler
-│   │   ├── chat/               # Protected chat page
-│   │   ├── login/              # Login page
-│   │   ├── signup/             # Signup page
-│   │   ├── globals.css         # Global styles & theme
-│   │   ├── layout.tsx          # Root layout
-│   │   └── page.tsx            # Landing page
-│   ├── components/
-│   │   ├── auth/               # Auth forms
-│   │   ├── chat/               # Chat interface components
-│   │   ├── providers/          # Theme provider
-│   │   └── ui/                 # shadcn/ui components
-│   ├── lib/
-│   │   ├── supabase/           # Supabase clients
-│   │   ├── constants.ts        # App constants & countries
-│   │   └── utils.ts            # Utility functions
-│   ├── types/                  # TypeScript types
-│   └── middleware.ts           # Auth middleware
-├── supabase/
-│   └── schema.sql              # Database schema
-└── public/                     # Static assets
-```
-
-## Deployment to Vercel
-
-1. Push your code to GitHub
-2. Go to [vercel.com](https://vercel.com) and import your repository
-3. Add environment variables in Vercel dashboard
-4. Deploy!
-
-### Environment Variables for Vercel
-
-Add these in your Vercel project settings:
-
-- `NEXT_PUBLIC_SUPABASE_URL`
-- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-- `GROQ_API_KEY`
-- `GOOGLE_GENERATIVE_AI_API_KEY`
-- `NEXT_PUBLIC_APP_URL` (set to your production URL)
-
-## Security Features
-
-- Row Level Security (RLS) on all database tables
-- Secure session management with Supabase Auth
-- Protected routes via middleware
-- HTTP-only cookies for session tokens
-- CSRF protection built into Supabase
-
-## Supported Countries
-
-| Country | Code | Languages | SmartWills Domain |
-|---------|------|-----------|-------------------|
-| Malaysia | MY | Malay/English | smartwills.com.my |
-| Singapore | SG | English | smartwills.com.sg |
-| Hong Kong | HK | Chinese/English | smartwills.com.hk |
-| China | CN | Chinese | - |
-| Taiwan | TW | Chinese | - |
-| Indonesia | ID | Indonesian | - |
-| Thailand | TH | Thai | - |
-| Australia | AU | English | - |
-| New Zealand | NZ | English | - |
-| Brunei | BN | Malay/English | - |
-| Vietnam | VN | Vietnamese | - |
-| Philippines | PH | Filipino/English | - |
-
-## Future Enhancements (Phase 2+)
-
-- [ ] RAG implementation with SmartWills knowledge base
-- [ ] Chat history persistence
-- [ ] Multi-language UI localization
-- [ ] Website content scraping for knowledge base
-- [ ] Document generation assistance
-- [ ] Email verification flow
-- [ ] Password reset functionality
+No test framework is configured.
 
 ## License
 
-Private - All rights reserved.
-
+Private — all rights reserved.
