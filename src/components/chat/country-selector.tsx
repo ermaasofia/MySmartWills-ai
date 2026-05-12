@@ -10,6 +10,7 @@ import {
 import { COUNTRIES } from '@/lib/constants';
 import { Country } from '@/types';
 import { ChevronDown } from 'lucide-react';
+import { CountryFlag } from '@/components/ui/country-flag';
 
 interface CountrySelectorProps {
   selectedCountry: Country;
@@ -22,7 +23,7 @@ export function CountrySelector({ selectedCountry, onSelect }: CountrySelectorPr
       <DropdownMenuTrigger asChild>
         <Button variant="outline" size="sm" className="gap-1.5 sm:gap-2 min-w-[130px] sm:min-w-[180px] justify-between">
           <span className="flex items-center gap-1.5 sm:gap-2 truncate">
-            <span className="text-sm sm:text-base">{selectedCountry.flag}</span>
+            <CountryFlag code={selectedCountry.code} className="h-3.5 w-5 object-cover" />
             <span className="text-xs sm:text-sm truncate">{selectedCountry.name}</span>
           </span>
           <ChevronDown className="h-3 w-3 sm:h-4 sm:w-4 opacity-50 shrink-0" />
@@ -35,7 +36,7 @@ export function CountrySelector({ selectedCountry, onSelect }: CountrySelectorPr
             onClick={() => onSelect(country)}
             className="cursor-pointer gap-3"
           >
-            <span className="text-base">{country.flag}</span>
+            <CountryFlag code={country.code} name={country.name} className="h-4 w-6 object-cover" />
             <div className="flex flex-col">
               <span className="font-medium">{country.name}</span>
               <span className="text-xs text-muted-foreground">{country.language}</span>

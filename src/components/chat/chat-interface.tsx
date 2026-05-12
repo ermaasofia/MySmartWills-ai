@@ -7,6 +7,7 @@ import { EditableTitle } from '@/components/chat/editable-title';
 import { PromptBox } from '@/components/ui/chatgpt-prompt-input';
 import { SAVY_COUNTRIES, type SavyCountry } from '@/lib/constants';
 import { Menu, Settings, Lock, MoreHorizontal } from 'lucide-react';
+import { CountryFlag } from '@/components/ui/country-flag';
 import { MarkdownRenderer } from '@/components/chat/markdown-renderer';
 import { SavyRedirectCTA } from '@/components/chat/savy-redirect-cta';
 import { SessionSummary } from '@/hooks/use-chat-sessions';
@@ -337,7 +338,7 @@ export function ChatInterface({
             <span className="text-sm font-medium text-[#ededed]">New conversation</span>
           )}
           <div className="mt-0.5 flex items-center gap-2 font-mono text-[11px] text-white/45">
-            <span>{activeSavy.flag}</span>
+            <CountryFlag code={activeSavy.code} className="h-3 w-[18px] object-cover" />
             <span>{activeSavy.savyName}</span>
             <span className="text-white/25">·</span>
             <Lock className="h-2.5 w-2.5" />

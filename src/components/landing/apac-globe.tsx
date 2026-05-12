@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef } from 'react';
 import createGlobe from 'cobe';
 import { COUNTRIES } from '@/lib/constants';
+import { CountryFlag } from '@/components/ui/country-flag';
 
 const CAPITAL_COORDS: Record<string, [number, number]> = {
   MY: [3.139, 101.687],
@@ -22,7 +23,6 @@ const CAPITAL_COORDS: Record<string, [number, number]> = {
 const MARKERS = COUNTRIES.map((c) => ({
   id: `apac-${c.code.toLowerCase()}`,
   code: c.code,
-  flag: c.flag,
   location: CAPITAL_COORDS[c.code],
 }));
 
@@ -190,9 +190,13 @@ export function ApacGlobe() {
               letterSpacing: '0.05em',
               whiteSpace: 'nowrap',
               boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 4,
             }}
           >
-            {m.flag} {m.code}
+            <CountryFlag code={m.code} className="h-2.5 w-[15px] object-cover" />
+            {m.code}
           </span>
         </div>
       ))}

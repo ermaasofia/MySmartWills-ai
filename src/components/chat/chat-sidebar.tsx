@@ -17,6 +17,7 @@ import {
 import { SessionSummary } from '@/hooks/use-chat-sessions';
 import { SAVY_COUNTRIES, type SavyCountry } from '@/lib/constants';
 import { cn } from '@/lib/utils';
+import { CountryFlag } from '@/components/ui/country-flag';
 
 interface ChatSidebarProps {
   userName: string;
@@ -155,7 +156,7 @@ export function ChatSidebar({
                 title={`${c.savyName} — ${c.name}`}
                 aria-label={c.savyName}
                 className={cn(
-                  'flex h-8 items-center justify-center rounded-[6px] text-base transition-all',
+                  'flex h-8 items-center justify-center rounded-[6px] transition-all',
                   isActive
                     ? 'bg-white/[0.12]'
                     : isAvailable
@@ -163,7 +164,7 @@ export function ChatSidebar({
                       : 'cursor-not-allowed opacity-30 grayscale',
                 )}
               >
-                {c.flag}
+                <CountryFlag code={c.code} name={c.name} className="h-4 w-6 object-cover" />
               </button>
             );
           })}

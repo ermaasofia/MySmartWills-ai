@@ -1,5 +1,6 @@
 import { COUNTRIES } from '@/lib/constants';
 import { Reveal } from './reveal';
+import { CountryFlag } from '@/components/ui/country-flag';
 
 export function CountriesGrid() {
   return (
@@ -22,7 +23,7 @@ export function CountriesGrid() {
           {COUNTRIES.map((c, i) => (
             <Reveal key={c.code} delay={i * 30}>
               <div className="flex flex-col gap-1 border-r border-b border-[var(--border)] p-5 last:border-r-0">
-                <span className="text-[28px]">{c.flag}</span>
+                <CountryFlag code={c.code} name={c.name} className="h-7 w-10 object-cover" />
                 <div className="mt-1 text-sm font-medium">{c.name}</div>
                 <div className="font-mono text-[11px] text-white/45">{c.locale}</div>
               </div>

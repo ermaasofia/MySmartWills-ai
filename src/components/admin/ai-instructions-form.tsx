@@ -15,6 +15,7 @@ import {
 import { useRouter, useSearchParams } from 'next/navigation';
 import { type PromptType, AI_INSTRUCTION_COUNTRIES, PROMPT_TYPES } from '@/lib/constants';
 import { Plus, Trash2 } from 'lucide-react';
+import { CountryFlag } from '@/components/ui/country-flag';
 
 interface SaveStatus {
   [key: string]: 'idle' | 'saving' | 'success' | 'error';
@@ -245,7 +246,10 @@ export function AIInstructionsForm() {
           <SelectContent>
             {AI_INSTRUCTION_COUNTRIES.map((c) => (
               <SelectItem key={c.code} value={c.code}>
-                {c.flag} {c.name}
+                <span className="inline-flex items-center gap-2">
+                  <CountryFlag code={c.code} className="h-3 w-[18px] object-cover" />
+                  {c.name}
+                </span>
               </SelectItem>
             ))}
           </SelectContent>

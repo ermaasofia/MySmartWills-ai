@@ -3,6 +3,7 @@
 import { motion } from 'framer-motion';
 import { X, ArrowRight } from 'lucide-react';
 import type { SavyCountry } from '@/lib/constants';
+import { CountryFlag } from '@/components/ui/country-flag';
 
 interface SavyRedirectCTAProps {
   target: SavyCountry;
@@ -24,8 +25,9 @@ export function SavyRedirectCTA({ target, onNavigate, onDismiss }: SavyRedirectC
           <div className="font-mono text-[10px] uppercase tracking-[1.5px] text-[var(--accent)]">
             // SAVY HANDOFF
           </div>
-          <p className="mt-1.5 text-sm font-medium leading-snug text-[#ededed]">
-            {target.flag} Mungkin {target.savyName} lebih sesuai?
+          <p className="mt-1.5 inline-flex items-center gap-1.5 text-sm font-medium leading-snug text-[#ededed]">
+            <CountryFlag code={target.code} className="h-3 w-[18px] object-cover" />
+            <span>Mungkin {target.savyName} lebih sesuai?</span>
           </p>
           <p className="mt-0.5 text-xs text-white/55">{target.name}</p>
         </div>

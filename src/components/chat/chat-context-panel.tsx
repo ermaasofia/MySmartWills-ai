@@ -1,9 +1,10 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, type ReactNode } from 'react';
 import { ArrowRight } from 'lucide-react';
 import type { SavyCountry } from '@/lib/constants';
 import { getReferencesForCountry } from '@/lib/references';
+import { CountryFlag } from '@/components/ui/country-flag';
 
 interface PlanData {
   marital_status: string | null;
@@ -56,16 +57,26 @@ export function ChatContextPanel({ activeSavy, refreshKey, sessionTitle }: ChatC
       : NOT_CHOSEN
     : NOT_CHOSEN;
 
-  const rows: Array<[string, string]> = [
-    ['Jurisdiction', `${activeSavy.flag} ${activeSavy.name}`],
-    ['Marital status', plan?.marital_status ? capitalize(plan.marital_status) : NOT_CHOSEN],
-    ['Dependents', dependents],
-    ['Executor', plan?.preferred_executor ?? NOT_CHOSEN],
-    ['Guardian', plan?.preferred_guardian ?? NOT_CHOSEN],
+  type Row = { key: string; value: string; node?: ReactNode };
+  const rows: Row[] = [
+    {
+      key: 'Jurisdiction',
+      value: `${activeSavy.flag} ${activeSavy.name}`,
+      node: (
+        <span className="inline-flex items-center gap-1.5">
+          <CountryFlag code={activeSavy.code} className="h-3 w-[18px] object-cover" />
+          {activeSavy.name}
+        </span>
+      ),
+    },
+    { key: 'Marital status', value: plan?.marital_status ? capitalize(plan.marital_status) : NOT_CHOSEN },
+    { key: 'Dependents', value: dependents },
+    { key: 'Executor', value: plan?.preferred_executor ?? NOT_CHOSEN },
+    { key: 'Guardian', value: plan?.preferred_guardian ?? NOT_CHOSEN },
   ];
 
   if (plan?.religion) {
-    rows.splice(1, 0, ['Religion', capitalize(plan.religion)]);
+    rows.splice(1, 0, { key: 'Religion', value: capitalize(plan.religion) });
   }
 
   const handleExport = useCallback(() => {
@@ -76,7 +87,7 @@ export function ChatContextPanel({ activeSavy, refreshKey, sessionTitle }: ChatC
     lines.push(`Generated: ${new Date().toISOString().slice(0, 10)}`);
     lines.push('');
     lines.push(`## Your plan so far`);
-    rows.forEach(([k, v]) => lines.push(`- **${k}:** ${v}`));
+    rows.forEach((r) => lines.push(`- **${r.key}:** ${r.value}`));
     lines.push('');
     lines.push(`## Statutes to take to your solicitor`);
     refs.forEach((r) => {
@@ -101,17 +112,17 @@ export function ChatContextPanel({ activeSavy, refreshKey, sessionTitle }: ChatC
           // YOUR PLAN SO FAR
         </div>
         <div className="rounded-[10px] border border-[var(--border)] bg-white/[0.03] p-4">
-          {rows.map(([k, v], i) => {
-            const isPlaceholder = v === NOT_CHOSEN;
+          {rows.map((r, i) => {
+            const isPlaceholder = r.value === NOT_CHOSEN;
             return (
               <div
-                key={k}
+                key={r.key}
                 className="flex items-center justify-between py-2 text-[13px]"
                 style={{
                   borderBottom: i === rows.length - 1 ? 'none' : '1px solid var(--border)',
                 }}
               >
-                <span className="text-white/55">{k}</span>
+                <span className="text-white/55">{r.key}</span>
                 <span
                   className={
                     isPlaceholder
@@ -119,7 +130,7 @@ export function ChatContextPanel({ activeSavy, refreshKey, sessionTitle }: ChatC
                       : 'font-medium text-[#ededed]'
                   }
                 >
-                  {v}
+                  {r.node ?? r.value}
                 </span>
               </div>
             );
