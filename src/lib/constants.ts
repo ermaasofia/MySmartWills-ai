@@ -132,13 +132,14 @@ export type SavyCountry = {
 };
 
 // MY_WK is a synthetic code not in COUNTRIES, so it is handled by the explicit entry above — intentionally absent here.
-const ACTIVE_CODES = ['MY', 'SG', 'HK'];
+const ACTIVE_CODES = ['MY', 'SG', 'HK', 'TH'];
 
 export const SAVY_COUNTRIES: SavyCountry[] = [
   { code: 'MY', savyName: 'Savy MY', name: 'Malaysia', flag: '🇲🇾', isActive: true, video: '/savy-my.mp4' },
   { code: 'MY_WK', savyName: 'Savy WasiatKu', name: 'Malaysia (Islamic Will)', flag: '🇲🇾', isActive: true, video: '/savy-my-wk.mp4' },
   { code: 'SG', savyName: 'Savy SG', name: 'Singapore', flag: '🇸🇬', isActive: true, video: '/savy-sg.mp4' },
   { code: 'HK', savyName: 'Savy HK', name: 'Hong Kong', flag: '🇭🇰', isActive: true, video: '/savy-hk.mp4' },
+  { code: 'TH', savyName: 'Savy TH', name: 'Thailand', flag: '🇹🇭', isActive: true },
   ...COUNTRIES.filter((c) => !ACTIVE_CODES.includes(c.code)).map((c) => ({
     code: c.code,
     savyName: `Savy ${c.code}`,
