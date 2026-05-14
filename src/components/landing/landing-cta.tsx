@@ -23,13 +23,13 @@ export function LandingCTA() {
               href="/signup"
               className="rounded-[8px] bg-[#ededed] px-[22px] py-[14px] text-sm font-medium text-[#0a0a0a] transition-opacity hover:opacity-90"
             >
-              Start free →
+              Start for free →
             </Link>
             <Link
-              href="#features"
+              href="#how"
               className="rounded-[8px] border border-[var(--border)] bg-transparent px-[22px] py-[14px] text-sm font-medium text-[#ededed] transition-colors hover:bg-white/[0.04]"
             >
-              Read the docs
+              See how it works
             </Link>
           </div>
         </Reveal>

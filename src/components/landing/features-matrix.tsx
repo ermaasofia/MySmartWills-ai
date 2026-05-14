@@ -1,12 +1,12 @@
 import { Reveal } from './reveal';
 
 const FEATURES = [
-  { k: 'jurisdiction', t: 'Country-aware', d: 'Auto-indexes to local statute the moment you pick your country. 12 supported today.' },
-  { k: 'privacy', t: 'End-to-end encrypted', d: 'Your conversations never leave your account. We never train on your data.' },
-  { k: 'faraid', t: 'Faraid-ready', d: 'For Muslim users, we handle Wasiat requirements alongside conventional wills.' },
-  { k: 'executors', t: 'Executor workflows', d: 'Walk through executor selection, witness rules, and beneficiary designations.' },
-  { k: 'revisit', t: 'Stateful history', d: 'Your estate plan evolves as life does. Come back and pick up where you left off.' },
-  { k: 'handoff', t: 'Lawyer-ready output', d: 'Export a prep document to hand your solicitor so you only pay for the work that matters.' },
+  { k: '01', t: 'Knows your country', d: 'Pick where you live, and we’ll guide you using the laws that apply to your family. 12 countries supported.' },
+  { k: '02', t: 'Private and secure', d: 'Your conversations stay between you and us. We will never share or sell your data.' },
+  { k: '03', t: 'Wasiat and Faraid', d: 'For Muslim families, we help with Wasiat and Faraid alongside regular will planning.' },
+  { k: '04', t: 'The hard parts, simplified', d: 'We’ll walk you through choosing executors, witnesses, and who inherits what — step by step.' },
+  { k: '05', t: 'Comes back when you do', d: 'Life changes, and your plan can too. Come back any time and pick up where you left off.' },
+  { k: '06', t: 'Ready for your lawyer', d: 'Walk into your lawyer’s office prepared. Bring a clear summary so they focus on what matters most.' },
 ] as const;
 
 export function FeaturesMatrix() {
@@ -15,17 +15,17 @@ export function FeaturesMatrix() {
       <div className="grid grid-cols-1 gap-15 lg:grid-cols-[300px_1fr] lg:gap-[60px]">
         <Reveal>
           <div className="lg:sticky lg:top-[100px]">
-            <div className="mb-5 font-mono text-[11px] uppercase tracking-[1.5px] text-[var(--accent)]">
-              // FEATURES
+            <div className="mb-5 text-[11px] uppercase tracking-[2px] text-[var(--accent)]">
+              What we do
             </div>
             <h2
               className="m-0 font-medium leading-[1.05]"
               style={{ fontSize: 'clamp(30px, 4.8vw, 44px)', letterSpacing: '-0.025em' }}
             >
-              Engineered for<br />legal precision.
+              Made to look after<br />the people you love.
             </h2>
             <p className="mt-5 text-[15px] leading-[1.55] text-white/60">
-              Every answer is grounded in a specific country&apos;s statute. We cite. We disclaim. We don&apos;t guess.
+              Every answer is based on your country&apos;s laws. We&apos;re honest about what we know &mdash; and what needs a lawyer&apos;s eye.
             </p>
           </div>
         </Reveal>
@@ -42,8 +42,8 @@ export function FeaturesMatrix() {
                     borderBottom: !isLastRow ? '1px solid var(--border)' : undefined,
                   }}
                 >
-                  <div className="mb-3.5 font-mono text-[11px] text-[var(--accent)]">
-                    .{f.k}
+                  <div className="mb-3.5 text-[11px] tracking-[2px] text-[var(--accent)]">
+                    {f.k}
                   </div>
                   <div className="mb-2 text-[17px] font-medium">{f.t}</div>
                   <div className="text-[13px] leading-[1.55] text-white/60">{f.d}</div>

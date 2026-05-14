@@ -17,9 +17,9 @@ export function LandingNav() {
             <span className="text-sm font-semibold">SmartWills</span>
           </Link>
           <div className="hidden items-center gap-5 text-[13px] text-white/65 md:flex">
-            <Link href="#features" className="hover:text-white">Product</Link>
-            <Link href="#countries" className="hover:text-white">Jurisdictions</Link>
-            <Link href="#faq" className="hover:text-white">FAQ</Link>
+            <Link href="#features" className="hover:text-white">What we do</Link>
+            <Link href="#countries" className="hover:text-white">Countries</Link>
+            <Link href="#faq" className="hover:text-white">Questions</Link>
           </div>
         </div>
         <div className="flex items-center gap-3.5 text-[13px]">

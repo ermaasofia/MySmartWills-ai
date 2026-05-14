@@ -6,7 +6,7 @@ import { Reveal } from './reveal';
 const FAQ = [
   {
     q: 'Is the guidance considered legal advice?',
-    a: "No. SmartWills.ai provides general information. For binding legal advice, consult a qualified solicitor — we'll generate a prep sheet to take to them.",
+    a: "No. SmartWills.ai gives you general information to help you understand your options. For binding legal advice, please speak with a qualified lawyer — we'll prepare a clear summary you can bring to them.",
   },
   {
     q: 'Which countries are supported?',
@@ -14,19 +14,19 @@ const FAQ = [
   },
   {
     q: 'Is my conversation private and secure?',
-    a: 'Yes. End-to-end encrypted. We never sell your data, share with third parties, or train on your conversations.',
+    a: 'Yes. Your conversations stay private and secure. We will never sell your data, share it with third parties, or use it to train our AI.',
   },
   {
     q: 'Can I use SmartWills for Islamic wills (Wasiat)?',
-    a: 'Yes. For Malaysian Muslim users, the assistant handles Wasiat and Faraid. For document drafting we hand off to WasiatKu (wasiatku.com.my).',
+    a: 'Yes. For Malaysian Muslim families, our assistant helps with Wasiat and Faraid. When you’re ready to draft the document, we’ll guide you to WasiatKu (wasiatku.com.my).',
   },
   {
     q: 'Is SmartWills free?',
-    a: 'The AI assistant is free. Drafting the actual document happens on ecosystem platforms (smartwills.com.my/.sg/.hk or MySmartWills), each with its own pricing.',
+    a: 'Yes — the AI assistant is completely free to use. Writing the actual will document happens on our trusted platforms (smartwills.com.my, .sg, .hk, or MySmartWills), each with its own pricing.',
   },
   {
     q: 'What happens to my conversation history?',
-    a: 'Saved under your account so you can revisit your plan as life changes. Delete anytime.',
+    a: 'Your conversations are saved in your account so you can come back any time as life changes. You can delete them whenever you want.',
   },
 ] as const;
 
@@ -36,8 +36,8 @@ export function FaqAccordion() {
       <div className="mx-auto max-w-[960px] px-4 py-16 sm:px-6 lg:px-8 lg:py-[120px]">
         <Reveal>
           <div className="mb-12">
-            <div className="mb-5 font-mono text-[11px] uppercase tracking-[1.5px] text-[var(--accent)]">
-              // FAQ
+            <div className="mb-5 text-[11px] uppercase tracking-[2px] text-[var(--accent)]">
+              Common questions
             </div>
             <h2
               className="m-0 font-medium leading-[1.05]"
@@ -65,10 +65,7 @@ function FaqItem({ q, a, last }: { q: string; a: string; last: boolean }) {
         onClick={() => setOpen((o) => !o)}
         className="flex w-full cursor-pointer items-center justify-between border-0 bg-transparent px-6 py-5 text-left text-[#ededed]"
       >
-        <span className="text-base font-medium">
-          <span className="mr-3 font-mono text-[11px] text-[var(--accent)]">Q</span>
-          {q}
-        </span>
+        <span className="text-base font-medium">{q}</span>
         <span
           className="font-mono text-sm transition-transform duration-200"
           style={{

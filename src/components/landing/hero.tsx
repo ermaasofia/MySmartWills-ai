@@ -3,10 +3,10 @@ import { Reveal } from './reveal';
 import { ApacGlobe } from './apac-globe';
 
 const STATS = [
-  ['12', 'jurisdictions'],
-  ['E2E', 'encrypted'],
-  ['~8s', 'avg. response'],
-  ['24/7', 'no booking'],
+  ['12', 'countries'],
+  ['100%', 'private'],
+  ['24/7', 'available'],
+  ['Free', 'to use'],
 ] as const;
 
 export function Hero() {
@@ -23,7 +23,7 @@ export function Hero() {
       <div className="relative mx-auto grid max-w-[1280px] grid-cols-1 items-center gap-12 px-4 py-16 pb-20 sm:px-6 lg:grid-cols-[1fr_560px] lg:gap-20 lg:px-8 lg:py-20 lg:pb-[120px]">
         <div>
           <Reveal>
-            <div className="mb-7 inline-flex items-center gap-2 rounded-full border border-[var(--border)] px-2.5 py-[5px] text-[12px] text-white/70">
+            <div className="mb-7 inline-flex items-center gap-2 rounded-full border border-[var(--border)] px-3 py-[5px] text-[12px] text-white/70">
               <span
                 className="h-1.5 w-1.5 rounded-full"
                 style={{
@@ -31,9 +31,7 @@ export function Hero() {
                   boxShadow: '0 0 8px var(--accent)',
                 }}
               />
-              <span className="font-mono">v2.4</span>
-              <span className="h-3 w-px bg-white/15" />
-              <span>Now with Australian probate coverage</span>
+              <span>Now helping families in Australia</span>
             </div>
           </Reveal>
           <Reveal delay={80}>
@@ -44,15 +42,15 @@ export function Hero() {
                 letterSpacing: '-0.035em',
               }}
             >
-              Estate planning<br />
-              <span style={{ color: 'var(--accent)' }}>engineered</span> for Asia-Pacific.
+              Plan your will,<br />
+              <span style={{ color: 'var(--accent)' }}>protect</span> your family.
             </h1>
           </Reveal>
           <Reveal delay={180}>
             <p className="mt-7 max-w-[500px] text-[17px] leading-[1.55] text-white/65">
-              Ask anything about wills, inheritance or probate. The assistant
-              is trained on 12 jurisdictions and answers in plain English —
-              not legal boilerplate.
+              Ask anything about your will, your family&apos;s inheritance, or
+              what happens to your home and savings. Get clear answers based
+              on your country&apos;s laws — no legal jargon, no appointments.
             </p>
           </Reveal>
           <Reveal delay={260}>
@@ -61,21 +59,21 @@ export function Hero() {
                 href="/signup"
                 className="rounded-[8px] bg-[#ededed] px-[18px] py-3 text-sm font-medium text-[#0a0a0a] transition-opacity hover:opacity-90"
               >
-                Start free chat →
+                Start for free →
               </Link>
               <Link
-                href="/chat"
-                className="flex items-center gap-2 rounded-[8px] border border-[var(--border)] bg-white/[0.04] px-[18px] py-3 font-mono text-sm font-medium text-[#ededed] transition-colors hover:bg-white/[0.06]"
+                href="#how"
+                className="rounded-[8px] border border-[var(--border)] bg-white/[0.04] px-[18px] py-3 text-sm font-medium text-[#ededed] transition-colors hover:bg-white/[0.06]"
               >
-                <span className="text-white/50">$</span> view live demo
+                See how it works
               </Link>
             </div>
           </Reveal>
           <Reveal delay={340}>
-            <div className="mt-12 flex flex-wrap gap-x-6 gap-y-3 font-mono text-[12px] text-white/55 sm:gap-8">
+            <div className="mt-12 flex flex-wrap gap-x-6 gap-y-3 text-[12px] text-white/55 sm:gap-8">
               {STATS.map(([k, v]) => (
                 <div key={k}>
-                  <span className="block text-[18px] font-medium text-[#ededed]" style={{ fontFamily: 'var(--font-sans)' }}>
+                  <span className="block text-[18px] font-medium text-[#ededed]">
                     {k}
                   </span>
                   {v}
