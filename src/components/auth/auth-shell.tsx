@@ -19,19 +19,19 @@ export function AuthShell({ title, description, children, footer, error }: AuthS
         <div className="mx-auto flex max-w-[1280px] items-center justify-between px-6 py-3.5 sm:px-8">
           <Link href="/" className="flex items-center gap-2">
             <span
-              className="flex h-5 w-5 items-center justify-center rounded-[4px] font-mono text-[11px] font-bold text-[#0a0a0a]"
+              className="flex h-5 w-5 items-center justify-center rounded-[4px] font-mono text-[13px] font-bold text-[#0a0a0a]"
               style={{ background: 'linear-gradient(135deg, var(--accent), #ededed)' }}
             >
               sw
             </span>
-            <span className="text-sm font-semibold">SmartWills</span>
-            <span className="rounded-[3px] bg-white/[0.05] px-1.5 py-0.5 font-mono text-[10px] text-white/50">
+            <span className="text-base font-semibold">SmartWills</span>
+            <span className="rounded-[3px] bg-white/[0.05] px-1.5 py-0.5 font-mono text-[12px] text-white/50">
               .ai
             </span>
           </Link>
           <Link
             href="/"
-            className="font-mono text-[11px] uppercase tracking-[1.5px] text-white/45 hover:text-white/80"
+            className="font-mono text-[13px] uppercase tracking-[1.5px] text-white/45 hover:text-white/80"
           >
             ← Back
           </Link>
@@ -50,17 +50,17 @@ export function AuthShell({ title, description, children, footer, error }: AuthS
       <main className="flex flex-1 items-center justify-center px-4 py-10 sm:px-6 sm:py-16">
         <div className="w-full max-w-md">
           <div className="mb-7 text-center">
-            <div className="mb-3 font-mono text-[10px] uppercase tracking-[1.5px] text-[var(--accent)]">
+            <div className="mb-3 font-mono text-[12px] uppercase tracking-[1.5px] text-[var(--accent)]">
               // {title.toLowerCase().replace(/\s+/g, '_')}
             </div>
             <h1 className="text-[26px] font-medium tracking-[-0.02em] text-[#ededed] sm:text-[28px]">
               {title}
             </h1>
-            <p className="mt-2 text-sm text-white/55">{description}</p>
+            <p className="mt-2 text-base text-white/55">{description}</p>
           </div>
 
           {error && (
-            <div className="mb-4 rounded-[10px] border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive">
+            <div className="mb-4 rounded-[10px] border border-destructive/30 bg-destructive/10 p-3 text-base text-destructive">
               {error}
             </div>
           )}
@@ -70,14 +70,14 @@ export function AuthShell({ title, description, children, footer, error }: AuthS
           </div>
 
           {footer && (
-            <p className="mt-6 text-center text-sm text-white/55">{footer}</p>
+            <p className="mt-6 text-center text-base text-white/55">{footer}</p>
           )}
         </div>
       </main>
 
       {/* Footer */}
       <footer className="border-t border-[var(--border)] px-6 py-5">
-        <div className="mx-auto flex max-w-[1280px] flex-col items-center gap-2 font-mono text-[11px] text-white/40 sm:flex-row sm:justify-between">
+        <div className="mx-auto flex max-w-[1280px] flex-col items-center gap-2 font-mono text-[13px] text-white/40 sm:flex-row sm:justify-between">
           <span>© 2026 SmartWills.ai</span>
           <div className="flex items-center gap-4">
             <Link href="/privacy" className="hover:text-white/70">privacy</Link>

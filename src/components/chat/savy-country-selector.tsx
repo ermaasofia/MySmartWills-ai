@@ -48,7 +48,7 @@ export function SavyCountrySelector({ onSelect }: SavyCountrySelectorProps) {
           transition={{ duration: 0.5, ease: 'easeOut' }}
           className="relative text-center mb-10"
         >
-          <div className="mb-4 font-mono text-[11px] uppercase tracking-[1.5px] text-[var(--accent)]">
+          <div className="mb-4 font-mono text-[13px] uppercase tracking-[1.5px] text-[var(--accent)]">
             // CHOOSE YOUR SAVY
           </div>
           <h2
@@ -58,7 +58,7 @@ export function SavyCountrySelector({ onSelect }: SavyCountrySelectorProps) {
             Pick a jurisdiction <br className="hidden sm:block" />
             <span style={{ color: 'var(--accent)' }}>to begin</span>.
           </h2>
-          <p className="mt-3 text-sm text-white/55">
+          <p className="mt-3 text-base text-white/55">
             Each Savy is trained on local statutes and inheritance rules.
           </p>
         </motion.div>
@@ -117,10 +117,10 @@ export function SavyCountrySelector({ onSelect }: SavyCountrySelectorProps) {
                   <CountryFlag code={country.code} className="h-3.5 w-5 object-cover" />
                 )}
                 <div className="flex flex-col min-w-0">
-                  <span className="text-xs sm:text-sm font-medium leading-tight text-left truncate">
+                  <span className="text-sm sm:text-base font-medium leading-tight text-left truncate">
                     {country.savyName}
                   </span>
-                  <span className="font-mono text-[9px] uppercase tracking-[1px] text-white/35 leading-tight">
+                  <span className="font-mono text-[13px] uppercase tracking-[1px] text-white/35 leading-tight">
                     {isActive ? country.code : 'Coming soon'}
                   </span>
                 </div>

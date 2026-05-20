@@ -7,7 +7,7 @@ export function Testimonial() {
       <Reveal>
         <div className="grid grid-cols-1 items-center gap-12 rounded-[14px] border border-[var(--border)] bg-white/[0.02] p-12 md:grid-cols-[1fr_240px]">
           <div>
-            <div className="mb-4 text-[11px] uppercase tracking-[2px] text-[var(--accent)]">
+            <div className="mb-4 text-[13px] uppercase tracking-[2px] text-[var(--accent)]">
               A customer story
             </div>
             <div
@@ -18,7 +18,7 @@ export function Testimonial() {
               advice. When I eventually met with my lawyer, I already knew
               the right questions to ask.&rdquo;
             </div>
-            <div className="mt-6 text-sm text-white/65">
+            <div className="mt-6 text-base text-white/65">
               <strong className="text-[#ededed]">Mei Yin C.</strong> · Hong Kong
             </div>
           </div>

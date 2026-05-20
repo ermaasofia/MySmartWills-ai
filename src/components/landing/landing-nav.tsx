@@ -14,21 +14,21 @@ export function LandingNav() {
               height={28}
               className="rounded-[4px]"
             />
-            <span className="text-sm font-semibold">SmartWills</span>
+            <span className="text-base font-semibold">SmartWills</span>
           </Link>
-          <div className="hidden items-center gap-5 text-[13px] text-white/65 md:flex">
+          <div className="hidden items-center gap-5 text-[15px] text-white/65 md:flex">
             <Link href="#features" className="hover:text-white">What we do</Link>
             <Link href="#countries" className="hover:text-white">Countries</Link>
             <Link href="#faq" className="hover:text-white">Questions</Link>
           </div>
         </div>
-        <div className="flex items-center gap-3.5 text-[13px]">
+        <div className="flex items-center gap-3.5 text-[15px]">
           <Link href="/login" className="text-white/65 hover:text-white">
             Sign in
           </Link>
           <Link
             href="/signup"
-            className="rounded-[6px] bg-[#ededed] px-3.5 py-[7px] text-[13px] font-medium text-[#0a0a0a] transition-opacity hover:opacity-90"
+            className="rounded-[6px] bg-[#ededed] px-3.5 py-[7px] text-[15px] font-medium text-[#0a0a0a] transition-opacity hover:opacity-90"
           >
             Get started
           </Link>

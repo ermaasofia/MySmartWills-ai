@@ -27,7 +27,7 @@ export function ServicesGrid() {
       <div className="mx-auto max-w-[1280px] px-4 py-16 sm:px-6 lg:px-8 lg:py-[120px]">
         <Reveal>
           <div className="mb-12 max-w-[700px]">
-            <div className="mb-5 text-[11px] uppercase tracking-[2px] text-[var(--accent)]">
+            <div className="mb-5 text-[13px] uppercase tracking-[2px] text-[var(--accent)]">
               What we offer
             </div>
             <h2
@@ -43,18 +43,18 @@ export function ServicesGrid() {
             <Reveal key={s.k} delay={i * 80}>
               <div className="flex h-full flex-col rounded-[10px] border border-[var(--border)] bg-white/[0.02] p-7">
                 <div className="mb-5 flex items-center justify-between">
-                  <div className="text-[11px] tracking-[2px] text-[var(--accent)]">{s.k}</div>
-                  <span className="rounded-full border border-[var(--border)] px-2 py-0.5 text-[10px] uppercase tracking-[1.5px] text-white/45">
+                  <div className="text-[13px] tracking-[2px] text-[var(--accent)]">{s.k}</div>
+                  <span className="rounded-full border border-[var(--border)] px-2 py-0.5 text-[12px] uppercase tracking-[1.5px] text-white/45">
                     {s.p}
                   </span>
                 </div>
                 <div
-                  className="mb-2.5 text-[20px] font-medium"
+                  className="mb-2.5 text-[23px] font-medium"
                   style={{ letterSpacing: '-0.2px' }}
                 >
                   {s.t}
                 </div>
-                <div className="flex-1 text-[13px] leading-[1.55] text-white/60">{s.d}</div>
+                <div className="flex-1 text-[15px] leading-[1.55] text-white/60">{s.d}</div>
               </div>
             </Reveal>
           ))}

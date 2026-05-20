@@ -71,7 +71,7 @@ export function EditableTitle({ title, onSave, className }: EditableTitleProps) 
           disabled={isSaving}
           maxLength={100}
           className={cn(
-            'flex-1 min-w-0 bg-transparent border-b border-primary/60 outline-none text-sm font-semibold',
+            'flex-1 min-w-0 bg-transparent border-b border-primary/60 outline-none text-base font-semibold',
             'px-0.5 py-0.5 text-foreground',
             className,
           )}
@@ -103,7 +103,7 @@ export function EditableTitle({ title, onSave, className }: EditableTitleProps) 
     >
       <span
         className={cn(
-          'text-sm font-semibold truncate max-w-[240px] select-none',
+          'text-base font-semibold truncate max-w-[240px] select-none',
           className,
         )}
         title={title}

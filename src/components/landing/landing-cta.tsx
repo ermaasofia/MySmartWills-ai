@@ -21,13 +21,13 @@ export function LandingCTA() {
           <div className="mt-10 flex flex-wrap justify-center gap-2.5">
             <Link
               href="/signup"
-              className="rounded-[8px] bg-[#ededed] px-[22px] py-[14px] text-sm font-medium text-[#0a0a0a] transition-opacity hover:opacity-90"
+              className="rounded-[8px] bg-[#ededed] px-[22px] py-[14px] text-base font-medium text-[#0a0a0a] transition-opacity hover:opacity-90"
             >
               Start for free →
             </Link>
             <Link
               href="#how"
-              className="rounded-[8px] border border-[var(--border)] bg-transparent px-[22px] py-[14px] text-sm font-medium text-[#ededed] transition-colors hover:bg-white/[0.04]"
+              className="rounded-[8px] border border-[var(--border)] bg-transparent px-[22px] py-[14px] text-base font-medium text-[#ededed] transition-colors hover:bg-white/[0.04]"
             >
               See how it works
             </Link>

@@ -24,7 +24,7 @@ export function CountrySelector({ selectedCountry, onSelect }: CountrySelectorPr
         <Button variant="outline" size="sm" className="gap-1.5 sm:gap-2 min-w-[130px] sm:min-w-[180px] justify-between">
           <span className="flex items-center gap-1.5 sm:gap-2 truncate">
             <CountryFlag code={selectedCountry.code} className="h-3.5 w-5 object-cover" />
-            <span className="text-xs sm:text-sm truncate">{selectedCountry.name}</span>
+            <span className="text-sm sm:text-base truncate">{selectedCountry.name}</span>
           </span>
           <ChevronDown className="h-3 w-3 sm:h-4 sm:w-4 opacity-50 shrink-0" />
         </Button>
@@ -39,7 +39,7 @@ export function CountrySelector({ selectedCountry, onSelect }: CountrySelectorPr
             <CountryFlag code={country.code} name={country.name} className="h-4 w-6 object-cover" />
             <div className="flex flex-col">
               <span className="font-medium">{country.name}</span>
-              <span className="text-xs text-muted-foreground">{country.language}</span>
+              <span className="text-sm text-muted-foreground">{country.language}</span>
             </div>
           </DropdownMenuItem>
         ))}

@@ -16,22 +16,22 @@ export const MarkdownRenderer = memo(function MarkdownRenderer({
       remarkPlugins={[remarkGfm]}
       components={{
         h1: ({ children }) => (
-          <h3 className="text-base font-bold mt-4 mb-2 first:mt-0">
+          <h3 className="text-lg font-bold mt-4 mb-2 first:mt-0">
             {children}
           </h3>
         ),
         h2: ({ children }) => (
-          <h3 className="text-base font-bold mt-4 mb-2 first:mt-0">
+          <h3 className="text-lg font-bold mt-4 mb-2 first:mt-0">
             {children}
           </h3>
         ),
         h3: ({ children }) => (
-          <h4 className="text-sm font-semibold mt-3 mb-1.5 first:mt-0">
+          <h4 className="text-base font-semibold mt-3 mb-1.5 first:mt-0">
             {children}
           </h4>
         ),
         h4: ({ children }) => (
-          <h5 className="text-sm font-semibold mt-2 mb-1 first:mt-0">
+          <h5 className="text-base font-semibold mt-2 mb-1 first:mt-0">
             {children}
           </h5>
         ),
@@ -71,7 +71,7 @@ export const MarkdownRenderer = memo(function MarkdownRenderer({
         ),
         table: ({ children }) => (
           <div className="my-2 overflow-x-auto">
-            <table className="min-w-full text-sm border-collapse">
+            <table className="min-w-full text-base border-collapse">
               {children}
             </table>
           </div>
@@ -91,14 +91,14 @@ export const MarkdownRenderer = memo(function MarkdownRenderer({
           const isInline = !className;
           if (isInline) {
             return (
-              <code className="rounded bg-white/[0.06] px-1.5 py-0.5 font-mono text-xs text-[#ededed]">
+              <code className="rounded bg-white/[0.06] px-1.5 py-0.5 font-mono text-sm text-[#ededed]">
                 {children}
               </code>
             );
           }
           return (
             <pre className="my-2 overflow-x-auto rounded-[8px] border border-[var(--border)] bg-white/[0.04] p-3">
-              <code className="font-mono text-xs">{children}</code>
+              <code className="font-mono text-sm">{children}</code>
             </pre>
           );
         },

@@ -15,7 +15,7 @@ export function FeaturesMatrix() {
       <div className="grid grid-cols-1 gap-15 lg:grid-cols-[300px_1fr] lg:gap-[60px]">
         <Reveal>
           <div className="lg:sticky lg:top-[100px]">
-            <div className="mb-5 text-[11px] uppercase tracking-[2px] text-[var(--accent)]">
+            <div className="mb-5 text-[13px] uppercase tracking-[2px] text-[var(--accent)]">
               What we do
             </div>
             <h2
@@ -24,7 +24,7 @@ export function FeaturesMatrix() {
             >
               Made to look after<br />the people you love.
             </h2>
-            <p className="mt-5 text-[15px] leading-[1.55] text-white/60">
+            <p className="mt-5 text-[17px] leading-[1.55] text-white/60">
               Every answer is based on your country&apos;s laws. We&apos;re honest about what we know &mdash; and what needs a lawyer&apos;s eye.
             </p>
           </div>
@@ -42,11 +42,11 @@ export function FeaturesMatrix() {
                     borderBottom: !isLastRow ? '1px solid var(--border)' : undefined,
                   }}
                 >
-                  <div className="mb-3.5 text-[11px] tracking-[2px] text-[var(--accent)]">
+                  <div className="mb-3.5 text-[13px] tracking-[2px] text-[var(--accent)]">
                     {f.k}
                   </div>
-                  <div className="mb-2 text-[17px] font-medium">{f.t}</div>
-                  <div className="text-[13px] leading-[1.55] text-white/60">{f.d}</div>
+                  <div className="mb-2 text-[19px] font-medium">{f.t}</div>
+                  <div className="text-[15px] leading-[1.55] text-white/60">{f.d}</div>
                 </div>
               </Reveal>
             );

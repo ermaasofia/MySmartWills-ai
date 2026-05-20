@@ -83,7 +83,7 @@ export function OAuthButtons({ redirectTo = '/chat', mode = 'login' }: OAuthButt
       {/* Divider */}
       <div className="relative flex items-center gap-3">
         <div className="flex-1 border-t border-[var(--border)]" />
-        <span className="font-mono text-[10px] uppercase tracking-[1.5px] text-white/45 whitespace-nowrap">
+        <span className="font-mono text-[12px] uppercase tracking-[1.5px] text-white/45 whitespace-nowrap">
           {dividerText}
         </span>
         <div className="flex-1 border-t border-[var(--border)]" />

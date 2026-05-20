@@ -36,7 +36,7 @@ export function FaqAccordion() {
       <div className="mx-auto max-w-[960px] px-4 py-16 sm:px-6 lg:px-8 lg:py-[120px]">
         <Reveal>
           <div className="mb-12">
-            <div className="mb-5 text-[11px] uppercase tracking-[2px] text-[var(--accent)]">
+            <div className="mb-5 text-[13px] uppercase tracking-[2px] text-[var(--accent)]">
               Common questions
             </div>
             <h2
@@ -65,9 +65,9 @@ function FaqItem({ q, a, last }: { q: string; a: string; last: boolean }) {
         onClick={() => setOpen((o) => !o)}
         className="flex w-full cursor-pointer items-center justify-between border-0 bg-transparent px-6 py-5 text-left text-[#ededed]"
       >
-        <span className="text-base font-medium">{q}</span>
+        <span className="text-lg font-medium">{q}</span>
         <span
-          className="font-mono text-sm transition-transform duration-200"
+          className="font-mono text-base transition-transform duration-200"
           style={{
             color: open ? 'var(--accent)' : 'rgba(255,255,255,0.4)',
             transform: open ? 'rotate(45deg)' : 'rotate(0)',
@@ -84,7 +84,7 @@ function FaqItem({ q, a, last }: { q: string; a: string; last: boolean }) {
           transition: 'max-height 280ms cubic-bezier(.2,.7,.2,1), opacity 200ms',
         }}
       >
-        <p className="m-0 px-6 pb-6 pl-12 text-sm leading-[1.6] text-white/65">{a}</p>
+        <p className="m-0 px-6 pb-6 pl-12 text-base leading-[1.6] text-white/65">{a}</p>
       </div>
     </div>
   );

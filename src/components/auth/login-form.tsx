@@ -82,7 +82,7 @@ export function LoginForm() {
 
       <form onSubmit={handleSubmit} className="space-y-4">
       {error && (
-        <div className="p-3 text-sm text-destructive bg-destructive/10 border border-destructive/20 rounded-lg">
+        <div className="p-3 text-base text-destructive bg-destructive/10 border border-destructive/20 rounded-lg">
           {error}
         </div>
       )}
@@ -132,7 +132,7 @@ export function LoginForm() {
       <div className="text-center">
         <Link
           href="/forgot-password"
-          className="text-sm text-muted-foreground underline underline-offset-4 hover:text-foreground"
+          className="text-base text-muted-foreground underline underline-offset-4 hover:text-foreground"
         >
           Forgot your password?
         </Link>

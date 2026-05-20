@@ -12,7 +12,7 @@ export function AboutSection() {
       <div className="mx-auto grid max-w-[1280px] grid-cols-1 gap-12 px-4 py-16 sm:px-6 lg:grid-cols-[1fr_1.3fr] lg:gap-20 lg:px-8 lg:py-[100px]">
         <Reveal>
           <div>
-            <div className="mb-5 text-[11px] uppercase tracking-[2px] text-[var(--accent)]">
+            <div className="mb-5 text-[13px] uppercase tracking-[2px] text-[var(--accent)]">
               About us
             </div>
             <h2
@@ -25,7 +25,7 @@ export function AboutSection() {
         </Reveal>
         <Reveal delay={120}>
           <div>
-            <p className="m-0 text-[17px] leading-[1.55] text-white/75">
+            <p className="m-0 text-[19px] leading-[1.55] text-white/75">
               SmartWills.ai is where your will journey begins. We&apos;re part of
               a trusted family of will services helping people across Asia plan
               for what matters most. Our assistant speaks in plain language,
@@ -39,12 +39,12 @@ export function AboutSection() {
                   className="rounded-[10px] border border-[var(--border)] bg-[#0a0a0a] p-3 sm:p-5"
                 >
                   <div
-                    className="text-[22px] font-medium text-[var(--accent)] sm:text-[28px]"
+                    className="text-[25px] font-medium text-[var(--accent)] sm:text-[28px]"
                     style={{ letterSpacing: '-0.02em' }}
                   >
                     {k}
                   </div>
-                  <div className="mt-1 text-[11px] uppercase tracking-[1.5px] text-white/55 sm:text-[12px]">{v}</div>
+                  <div className="mt-1 text-[13px] uppercase tracking-[1.5px] text-white/55 sm:text-[14px]">{v}</div>
                 </div>
               ))}
             </div>

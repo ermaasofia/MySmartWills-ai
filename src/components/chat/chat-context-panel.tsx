@@ -108,7 +108,7 @@ export function ChatContextPanel({ activeSavy, refreshKey, sessionTitle }: ChatC
     <aside className="hidden lg:flex w-[320px] shrink-0 flex-col overflow-y-auto border-l border-[var(--border)] bg-[var(--raised-1)]">
       <div className="p-5">
         {/* Your plan so far */}
-        <div className="mb-3 font-mono text-[10px] uppercase tracking-[1.5px] text-[var(--accent)]">
+        <div className="mb-3 font-mono text-[12px] uppercase tracking-[1.5px] text-[var(--accent)]">
           // YOUR PLAN SO FAR
         </div>
         <div className="rounded-[10px] border border-[var(--border)] bg-white/[0.03] p-4">

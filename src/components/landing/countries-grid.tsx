@@ -8,7 +8,7 @@ export function CountriesGrid() {
       <div className="mx-auto max-w-[1280px] px-4 py-16 sm:px-6 lg:px-8 lg:py-[120px]">
         <Reveal>
           <div className="mb-12 max-w-[700px]">
-            <div className="mb-5 text-[11px] uppercase tracking-[2px] text-[var(--accent)]">
+            <div className="mb-5 text-[13px] uppercase tracking-[2px] text-[var(--accent)]">
               Countries we cover
             </div>
             <h2
@@ -24,8 +24,8 @@ export function CountriesGrid() {
             <Reveal key={c.code} delay={i * 30}>
               <div className="flex flex-col gap-1 border-r border-b border-[var(--border)] p-5 last:border-r-0">
                 <CountryFlag code={c.code} name={c.name} className="h-7 w-10 object-cover" />
-                <div className="mt-1 text-sm font-medium">{c.name}</div>
-                <div className="text-[11px] text-white/45">{c.language}</div>
+                <div className="mt-1 text-base font-medium">{c.name}</div>
+                <div className="text-[13px] text-white/45">{c.language}</div>
               </div>
             </Reveal>
           ))}

@@ -27,19 +27,19 @@ export default async function TermsPage() {
         <div className="mx-auto flex max-w-[1280px] items-center justify-between px-6 py-3.5 sm:px-8">
           <Link href="/" className="flex items-center gap-2">
             <span
-              className="flex h-5 w-5 items-center justify-center rounded-[4px] font-mono text-[11px] font-bold text-[#0a0a0a]"
+              className="flex h-5 w-5 items-center justify-center rounded-[4px] font-mono text-[13px] font-bold text-[#0a0a0a]"
               style={{ background: 'linear-gradient(135deg, var(--accent), #ededed)' }}
             >
               sw
             </span>
-            <span className="text-sm font-semibold">SmartWills</span>
-            <span className="rounded-[3px] bg-white/[0.05] px-1.5 py-0.5 font-mono text-[10px] text-white/50">
+            <span className="text-base font-semibold">SmartWills</span>
+            <span className="rounded-[3px] bg-white/[0.05] px-1.5 py-0.5 font-mono text-[12px] text-white/50">
               .ai
             </span>
           </Link>
           <Link
             href="/"
-            className="font-mono text-[11px] uppercase tracking-[1.5px] text-white/45 hover:text-white/80"
+            className="font-mono text-[13px] uppercase tracking-[1.5px] text-white/45 hover:text-white/80"
           >
             ← Back
           </Link>
@@ -50,16 +50,16 @@ export default async function TermsPage() {
         <div className="mx-auto max-w-3xl">
           <Breadcrumb currentPage="Terms of Service" />
           <div className="mb-8">
-            <div className="mb-3 font-mono text-[10px] uppercase tracking-[1.5px] text-[var(--accent)]">
+            <div className="mb-3 font-mono text-[12px] uppercase tracking-[1.5px] text-[var(--accent)]">
               // terms_of_service
             </div>
             <h1 className="text-3xl font-medium tracking-[-0.02em] text-[#ededed] sm:text-4xl">
               Terms of Service
             </h1>
-            <p className="mt-2 font-mono text-[11px] text-white/45">Last updated: February 7, 2026</p>
+            <p className="mt-2 font-mono text-[13px] text-white/45">Last updated: February 7, 2026</p>
           </div>
 
-          <div className="prose prose-invert max-w-none prose-headings:font-medium prose-headings:tracking-[-0.01em] prose-h2:mt-8 prose-h2:text-xl prose-a:text-[var(--accent)] prose-a:no-underline hover:prose-a:underline prose-strong:text-[#ededed] prose-li:text-white/70 prose-p:text-white/70">
+          <div className="prose prose-invert max-w-none prose-headings:font-medium prose-headings:tracking-[-0.01em] prose-h2:mt-8 prose-h2:text-xl prose-a:text-[var(--accent)] prose-a:no-underline hover:prose-a:underline prose-strong:text-[#ededed] prose-li:text-lg prose-li:text-white/70 prose-p:text-lg prose-p:text-white/70">
             <h2>1. Acceptance of Terms</h2>
             <p>
               By accessing or using SmartWills.ai (&ldquo;the Service&rdquo;), you agree to be bound
@@ -156,7 +156,7 @@ export default async function TermsPage() {
       </main>
 
       <footer className="border-t border-[var(--border)] px-6 py-5">
-        <div className="mx-auto flex max-w-[1280px] items-center justify-between font-mono text-[11px] text-white/40">
+        <div className="mx-auto flex max-w-[1280px] items-center justify-between font-mono text-[13px] text-white/40">
           <span>© 2026 SmartWills.ai</span>
           <div className="flex items-center gap-4">
             <Link href="/privacy" className="hover:text-white/70">privacy</Link>

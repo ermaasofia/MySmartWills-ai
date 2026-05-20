@@ -79,7 +79,7 @@ function SwLogo() {
         height={28}
         className="rounded-[4px]"
       />
-      <span className="text-sm font-medium text-[#ededed]">SmartWills</span>
+      <span className="text-base font-medium text-[#ededed]">SmartWills</span>
     </Link>
   );
 }
@@ -130,7 +130,7 @@ export function ChatSidebar({
             onNewChat();
             onClose();
           }}
-          className="flex w-full items-center rounded-[8px] bg-[#ededed] px-3 py-2.5 text-sm font-medium text-[#0a0a0a] transition-opacity hover:opacity-90"
+          className="flex w-full items-center rounded-[8px] bg-[#ededed] px-3 py-2.5 text-base font-medium text-[#0a0a0a] transition-opacity hover:opacity-90"
         >
           <span className="flex items-center gap-2">
             <Plus className="h-4 w-4" />
@@ -141,7 +141,7 @@ export function ChatSidebar({
 
       {/* Jurisdiction grid */}
       <div className="px-3 pb-4 shrink-0">
-        <div className="mb-2 px-1 font-mono text-[10px] uppercase tracking-[1.5px] text-white/45">
+        <div className="mb-2 px-1 font-mono text-[12px] uppercase tracking-[1.5px] text-white/45">
           Jurisdiction
         </div>
         <div className="grid grid-cols-4 gap-1 rounded-[10px] border border-[var(--border)] p-1">
@@ -169,7 +169,7 @@ export function ChatSidebar({
             );
           })}
         </div>
-        <div className="mt-2 flex items-center gap-1.5 px-1 font-mono text-[11px] text-white/55">
+        <div className="mt-2 flex items-center gap-1.5 px-1 font-mono text-[13px] text-white/55">
           <span
             className="h-1.5 w-1.5 rounded-full"
             style={{ background: 'var(--accent)', boxShadow: '0 0 6px var(--accent)' }}
@@ -183,19 +183,19 @@ export function ChatSidebar({
         ref={scrollRef}
         className="flex-1 overflow-y-auto px-3 pb-2"
       >
-        <div className="mb-2 px-1 font-mono text-[10px] uppercase tracking-[1.5px] text-white/45">
+        <div className="mb-2 px-1 font-mono text-[12px] uppercase tracking-[1.5px] text-white/45">
           Conversations
         </div>
         {sessions.length === 0 ? (
           <div className="flex flex-col items-center gap-2 py-6 text-center">
             <MessageSquare className="h-7 w-7 text-white/15" />
-            <p className="text-xs text-white/40">No conversations yet</p>
+            <p className="text-sm text-white/40">No conversations yet</p>
           </div>
         ) : (
           <div className="space-y-3">
             {grouped.map(({ label, items }) => (
               <div key={label}>
-                <p className="px-1 py-1 font-mono text-[10px] uppercase tracking-[1px] text-white/35">
+                <p className="px-1 py-1 font-mono text-[12px] uppercase tracking-[1px] text-white/35">
                   {label}
                 </p>
                 <ul className="space-y-0.5">
@@ -224,16 +224,16 @@ export function ChatSidebar({
           <DropdownMenuTrigger asChild>
             <button className="flex w-full items-center gap-3 rounded-[8px] px-2 py-2 text-left transition-colors hover:bg-white/[0.05]">
               <div
-                className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-semibold text-[#0a0a0a]"
+                className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-sm font-semibold text-[#0a0a0a]"
                 style={{ background: 'var(--accent)' }}
               >
                 {(userName[0] ?? userEmail[0] ?? '?').toUpperCase()}
               </div>
               <div className="min-w-0 flex-1">
-                <p className="truncate text-[13px] font-medium text-[#ededed]">
+                <p className="truncate text-[15px] font-medium text-[#ededed]">
                   {userName || 'User'}
                 </p>
-                <p className="text-[11px] text-white/45">Free plan</p>
+                <p className="text-[13px] text-white/45">Free plan</p>
               </div>
               <Settings className="h-3.5 w-3.5 shrink-0 text-white/45" />
             </button>
@@ -244,8 +244,8 @@ export function ChatSidebar({
             className="w-[var(--radix-dropdown-menu-trigger-width)]"
           >
             <div className="px-2 py-1.5">
-              <p className="text-sm font-medium">{userName || 'User'}</p>
-              <p className="text-xs text-muted-foreground">{userEmail}</p>
+              <p className="text-base font-medium">{userName || 'User'}</p>
+              <p className="text-sm text-muted-foreground">{userEmail}</p>
             </div>
             <DropdownMenuSeparator />
             <DropdownMenuItem
@@ -329,7 +329,7 @@ function SessionItem({ session, isActive, onSelect, onDelete }: SessionItemProps
       >
         <span
           className={cn(
-            'flex-1 truncate text-[13px]',
+            'flex-1 truncate text-[15px]',
             isActive ? 'font-medium text-[#ededed]' : 'text-white/75',
           )}
         >

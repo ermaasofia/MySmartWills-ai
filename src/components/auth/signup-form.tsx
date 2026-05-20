@@ -99,7 +99,7 @@ export function SignupForm() {
 
       <form onSubmit={handleSubmit} className="space-y-4">
       {error && (
-        <div className="p-3 text-sm text-destructive bg-destructive/10 border border-destructive/20 rounded-lg">
+        <div className="p-3 text-base text-destructive bg-destructive/10 border border-destructive/20 rounded-lg">
           {error}
         </div>
       )}
@@ -143,7 +143,7 @@ export function SignupForm() {
           minLength={8}
           autoComplete="new-password"
         />
-        <p className="text-xs text-muted-foreground">
+        <p className="text-sm text-muted-foreground">
           Min 8 chars with uppercase, lowercase, and number
         </p>
       </div>

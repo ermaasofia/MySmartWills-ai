@@ -38,7 +38,7 @@ export default async function LoginPage() {
           </>
         }
       >
-        <Suspense fallback={<div className="h-48 flex items-center justify-center text-sm text-white/45">Loading...</div>}>
+        <Suspense fallback={<div className="h-48 flex items-center justify-center text-base text-white/45">Loading...</div>}>
           <LoginForm />
         </Suspense>
       </AuthShell>

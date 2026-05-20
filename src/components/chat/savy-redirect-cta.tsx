@@ -22,14 +22,14 @@ export function SavyRedirectCTA({ target, onNavigate, onDismiss }: SavyRedirectC
     >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <div className="font-mono text-[10px] uppercase tracking-[1.5px] text-[var(--accent)]">
+          <div className="font-mono text-[12px] uppercase tracking-[1.5px] text-[var(--accent)]">
             // SAVY HANDOFF
           </div>
-          <p className="mt-1.5 inline-flex items-center gap-1.5 text-sm font-medium leading-snug text-[#ededed]">
+          <p className="mt-1.5 inline-flex items-center gap-1.5 text-base font-medium leading-snug text-[#ededed]">
             <CountryFlag code={target.code} className="h-3 w-[18px] object-cover" />
             <span>Mungkin {target.savyName} lebih sesuai?</span>
           </p>
-          <p className="mt-0.5 text-xs text-white/55">{target.name}</p>
+          <p className="mt-0.5 text-sm text-white/55">{target.name}</p>
         </div>
         <button
           onClick={onDismiss}
@@ -41,7 +41,7 @@ export function SavyRedirectCTA({ target, onNavigate, onDismiss }: SavyRedirectC
       </div>
       <button
         onClick={onNavigate}
-        className="mt-3 inline-flex items-center gap-1.5 rounded-[6px] border border-[var(--accent)] bg-[var(--accent-soft)] px-3 py-1.5 text-xs font-medium text-[#ededed] transition-colors hover:bg-[var(--accent)] hover:text-[#0a0a0a]"
+        className="mt-3 inline-flex items-center gap-1.5 rounded-[6px] border border-[var(--accent)] bg-[var(--accent-soft)] px-3 py-1.5 text-sm font-medium text-[#ededed] transition-colors hover:bg-[var(--accent)] hover:text-[#0a0a0a]"
       >
         Pergi ke {target.savyName}
         <ArrowRight className="h-3 w-3" />

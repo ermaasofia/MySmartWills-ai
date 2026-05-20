@@ -66,7 +66,7 @@ export function ForgotPasswordForm() {
           If an account exists with that email, we&apos;ve sent a password reset link.
           Please check your inbox and spam folder.
         </p>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-base text-muted-foreground">
           The link will expire in 1 hour.
         </p>
       </div>
@@ -76,7 +76,7 @@ export function ForgotPasswordForm() {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       {error && (
-        <div className="p-3 text-sm text-destructive bg-destructive/10 border border-destructive/20 rounded-lg">
+        <div className="p-3 text-base text-destructive bg-destructive/10 border border-destructive/20 rounded-lg">
           {error}
         </div>
       )}

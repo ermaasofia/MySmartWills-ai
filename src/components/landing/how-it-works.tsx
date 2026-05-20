@@ -26,7 +26,7 @@ export function HowItWorks() {
     <section id="how" className="border-t border-[var(--border)] bg-[var(--raised-1)]">
       <div className="mx-auto max-w-[1280px] px-4 py-16 sm:px-6 lg:px-8 lg:py-[120px]">
         <Reveal>
-          <div className="mb-5 text-[11px] uppercase tracking-[2px] text-[var(--accent)]">
+          <div className="mb-5 text-[13px] uppercase tracking-[2px] text-[var(--accent)]">
             How it works
           </div>
           <h2
@@ -41,17 +41,17 @@ export function HowItWorks() {
             <Reveal key={s.n} delay={i * 120}>
               <div className="relative min-h-[240px] rounded-[10px] border border-[var(--border)] bg-[#0a0a0a] p-6">
                 <div className="mb-5 flex items-center justify-between">
-                  <div className="text-[12px] uppercase tracking-[2px] text-white/45">Step {s.n}</div>
+                  <div className="text-[14px] uppercase tracking-[2px] text-white/45">Step {s.n}</div>
                   <div className="h-1.5 w-1.5 rounded-full bg-[var(--accent)]" />
                 </div>
                 <div
-                  className="mb-2.5 text-[20px] font-medium"
+                  className="mb-2.5 text-[23px] font-medium"
                   style={{ letterSpacing: '-0.2px' }}
                 >
                   {s.t}
                 </div>
-                <div className="mb-5 text-[13px] leading-[1.55] text-white/60">{s.d}</div>
-                <div className="rounded-[5px] bg-white/[0.03] px-3 py-2 text-[12px] italic text-white/55">
+                <div className="mb-5 text-[15px] leading-[1.55] text-white/60">{s.d}</div>
+                <div className="rounded-[5px] bg-white/[0.03] px-3 py-2 text-[14px] italic text-white/55">
                   {s.hint}
                 </div>
               </div>

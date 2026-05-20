@@ -36,7 +36,7 @@ interface ChatInterfaceProps {
 function SwAvatar() {
   return (
     <div
-      className="flex h-7 w-7 shrink-0 items-center justify-center rounded-[8px] font-mono text-[10px] font-bold text-[#0a0a0a]"
+      className="flex h-7 w-7 shrink-0 items-center justify-center rounded-[8px] font-mono text-[12px] font-bold text-[#0a0a0a]"
       style={{ background: 'linear-gradient(135deg, var(--accent), #ededed)' }}
     >
       sw
@@ -73,7 +73,7 @@ function ChatMessage({ message }: { message: Message }) {
         className="flex justify-end"
       >
         <div
-          className="max-w-[78%] px-4 py-2.5 text-sm leading-relaxed text-[#0a0a0a]"
+          className="max-w-[78%] px-4 py-2.5 text-base leading-relaxed text-[#0a0a0a]"
           style={{
             background: 'var(--accent)',
             borderRadius: '14px 14px 2px 14px',
@@ -94,7 +94,7 @@ function ChatMessage({ message }: { message: Message }) {
     >
       <SwAvatar />
       <div
-        className="max-w-[82%] min-w-0 border border-[var(--border)] bg-white/[0.05] px-4 py-3 text-sm text-[#ededed]"
+        className="max-w-[82%] min-w-0 border border-[var(--border)] bg-white/[0.05] px-4 py-3 text-base text-[#ededed]"
         style={{ borderRadius: '14px 14px 14px 2px' }}
       >
         <MarkdownRenderer content={message.content} />
@@ -335,9 +335,9 @@ export function ChatInterface({
           {currentSessionId ? (
             <EditableTitle title={sessionTitle} onSave={handleTitleSave} />
           ) : (
-            <span className="text-sm font-medium text-[#ededed]">New conversation</span>
+            <span className="text-base font-medium text-[#ededed]">New conversation</span>
           )}
-          <div className="mt-0.5 flex items-center gap-2 font-mono text-[11px] text-white/45">
+          <div className="mt-0.5 flex items-center gap-2 font-mono text-[13px] text-white/45">
             <CountryFlag code={activeSavy.code} className="h-3 w-[18px] object-cover" />
             <span>{activeSavy.savyName}</span>
             <span className="text-white/25">·</span>
@@ -349,7 +349,7 @@ export function ChatInterface({
         {isAdmin && (
           <Link
             href={`/admin/ai-instructions?country=${activeSavy.code}`}
-            className="hidden sm:inline-flex items-center gap-1.5 rounded-[8px] border border-[var(--border)] px-2.5 py-1.5 text-xs text-white/70 transition-colors hover:bg-white/[0.05]"
+            className="hidden sm:inline-flex items-center gap-1.5 rounded-[8px] border border-[var(--border)] px-2.5 py-1.5 text-sm text-white/70 transition-colors hover:bg-white/[0.05]"
             aria-label="AI Settings"
           >
             <Settings className="h-3.5 w-3.5" />
@@ -370,7 +370,7 @@ export function ChatInterface({
         <div className="mx-auto max-w-3xl py-6 sm:py-10 space-y-5">
           {isLoadingHistory ? (
             <div className="flex items-center justify-center py-24">
-              <p className="text-sm text-white/45 animate-pulse">Loading conversation...</p>
+              <p className="text-base text-white/45 animate-pulse">Loading conversation...</p>
             </div>
           ) : messages.length === 0 ? (
             <motion.div
@@ -379,13 +379,13 @@ export function ChatInterface({
               transition={{ duration: 0.4, ease: 'easeOut' }}
               className="flex flex-col items-center text-center py-12 sm:py-16 gap-3"
             >
-              <div className="font-mono text-[10px] uppercase tracking-[1.5px] text-[var(--accent)]">
+              <div className="font-mono text-[12px] uppercase tracking-[1.5px] text-[var(--accent)]">
                 // {activeSavy.code}
               </div>
               <h2 className="text-2xl sm:text-[28px] font-medium text-[#ededed] tracking-[-0.02em]">
                 Hi, I&apos;m {activeSavy.savyName}.
               </h2>
-              <p className="text-sm text-white/55 max-w-md">
+              <p className="text-base text-white/55 max-w-md">
                 Ask me anything about will planning in {activeSavy.name}. I&apos;ll guide
                 you to a prep sheet you can take to a solicitor.
               </p>
@@ -455,7 +455,7 @@ export function ChatInterface({
                   key={s}
                   onClick={() => handleSend(s)}
                   disabled={isLoading}
-                  className="rounded-[8px] border border-[var(--border)] bg-white/[0.03] px-3 py-1.5 text-xs text-white/70 transition-colors hover:border-white/15 hover:bg-white/[0.06] hover:text-[#ededed] disabled:opacity-40"
+                  className="rounded-[8px] border border-[var(--border)] bg-white/[0.03] px-3 py-1.5 text-sm text-white/70 transition-colors hover:border-white/15 hover:bg-white/[0.06] hover:text-[#ededed] disabled:opacity-40"
                 >
                   {s}
                 </button>
@@ -469,7 +469,7 @@ export function ChatInterface({
             isLoading={isLoading}
           />
 
-          <p className="mt-2.5 text-center font-mono text-[10px] tracking-[0.5px] text-white/35">
+          <p className="mt-2.5 text-center font-mono text-[12px] tracking-[0.5px] text-white/35">
             SmartWills.ai provides general guidance only. For binding advice, consult a
             licensed solicitor.
           </p>
