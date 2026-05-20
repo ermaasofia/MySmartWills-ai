@@ -139,7 +139,7 @@ export const SAVY_COUNTRIES: SavyCountry[] = [
   { code: 'MY_WK', savyName: 'Savy WasiatKu', name: 'Malaysia (Islamic Will)', flag: '🇲🇾', isActive: true, video: '/savy-my-wk.mp4' },
   { code: 'SG', savyName: 'Savy SG', name: 'Singapore', flag: '🇸🇬', isActive: true, video: '/savy-sg.mp4' },
   { code: 'HK', savyName: 'Savy HK', name: 'Hong Kong', flag: '🇭🇰', isActive: true, video: '/savy-hk.mp4' },
-  { code: 'TH', savyName: 'Savy TH', name: 'Thailand', flag: '🇹🇭', isActive: true },
+  { code: 'TH', savyName: 'Savy TH', name: 'Thailand', flag: '🇹🇭', isActive: true, video: '/savy-th.mp4' },
   ...COUNTRIES.filter((c) => !ACTIVE_CODES.includes(c.code)).map((c) => ({
     code: c.code,
     savyName: `Savy ${c.code}`,
