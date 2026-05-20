@@ -67,7 +67,7 @@ export function SavyCountrySelector({ onSelect }: SavyCountrySelectorProps) {
           variants={container}
           initial="hidden"
           animate="show"
-          className="relative grid grid-cols-3 sm:grid-cols-4 gap-3 sm:gap-4 max-w-[640px]"
+          className="relative grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 sm:gap-4 max-w-[640px]"
         >
         {SAVY_COUNTRIES.map((country) => {
           const isActive = country.isActive;

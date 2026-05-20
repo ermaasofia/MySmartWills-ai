@@ -149,7 +149,7 @@ export function ChatShell({
               animate={{ opacity: 1 }}
               exit={{ opacity: 0, scale: 0.97 }}
               transition={{ duration: 0.25 }}
-              className="flex-1 flex flex-col"
+              className="flex-1 flex flex-col min-h-0"
             >
               <SavyCountrySelector onSelect={handleCountrySelect} />
             </motion.div>
