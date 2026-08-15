@@ -1,9 +1,7 @@
 import { verifyTurnstileToken } from '@/lib/turnstile';
 import { getClientIp } from '@/lib/ip';
+import { rateLimitAsync } from '@/lib/rate-limit';
 import { NextResponse } from 'next/server';
-
-// Rate limit for Turnstile verification to prevent abuse
-const verifyAttempts = new Map<string, { count: number; resetAt: number }>();
 
 export async function POST(req: Request) {
   try {
@@ -22,27 +20,18 @@ export async function POST(req: Request) {
       );
     }
 
-    // Basic IP-based rate limiting for this endpoint
+    // Rate limit Turnstile verification: 10 attempts per minute per IP
     const ip = getClientIp(req.headers);
-    const now = Date.now();
-    const attempt = verifyAttempts.get(ip);
+    const { success: rateLimitOk } = await rateLimitAsync(`turnstile-verify:${ip}`, {
+      maxRequests: 10,
+      windowMs: 60 * 1000,
+    });
 
-    if (attempt && now < attempt.resetAt && attempt.count >= 10) {
+    if (!rateLimitOk) {
       return NextResponse.json(
         { error: 'Too many verification attempts' },
         { status: 429 }
       );
-    }
-
-    if (!attempt || now >= attempt.resetAt) {
-      verifyAttempts.set(ip, { count: 1, resetAt: now + 60_000 });
-    } else {
-      attempt.count++;
-    }
-
-    // Cap map size
-    if (verifyAttempts.size > 5000) {
-      verifyAttempts.clear();
     }
 
     const body = await req.json();

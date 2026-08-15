@@ -8,10 +8,7 @@ import { headers } from 'next/headers';
 /**
  * POST /api/auth/login
  *
- * Server-side login with rate limiting.
- * - Rate limited per IP: 5 attempts / 5 minutes
- * - Validates input before forwarding to Supabase
- * - Returns generic error messages to prevent user enumeration
+ * Server-side login using Supabase Auth with rate limiting.
  */
 export async function POST(request: Request) {
   // ── Rate limiting ─────────────────────────────────────────────────
@@ -71,20 +68,28 @@ export async function POST(request: Request) {
     );
   }
 
-  // ── Authenticate via Supabase ───────────────────────────────────
-  const supabase = await createClient();
-  const { error } = await supabase.auth.signInWithPassword({
-    email,
-    password,
-  });
+  // ── Authenticate via Supabase Auth ────────────────────────────────
+  try {
+    const supabase = await createClient();
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
 
-  if (error) {
-    // Generic message to prevent user enumeration
+    if (error) {
+      return NextResponse.json(
+        { error: 'Invalid email or password' },
+        { status: 401 }
+      );
+    }
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error('Login error:', error);
     return NextResponse.json(
       { error: 'Invalid email or password' },
       { status: 401 }
     );
   }
-
-  return NextResponse.json({ success: true });
 }
+

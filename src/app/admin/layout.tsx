@@ -1,5 +1,4 @@
 import { redirect } from 'next/navigation';
-import { createClient } from '@/lib/supabase/server';
 import { isAdmin } from '@/lib/admin';
 import { AdminShell } from '@/components/admin/admin-shell';
 
@@ -8,8 +7,7 @@ export default async function AdminLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const supabase = await createClient();
-  const { isAdmin: adminStatus, user } = await isAdmin(supabase);
+  const { isAdmin: adminStatus, user } = await isAdmin();
 
   if (!adminStatus || !user) {
     redirect('/chat');

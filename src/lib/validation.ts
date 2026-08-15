@@ -10,8 +10,12 @@ export function isAllowedOrigin(origin: string | null): boolean {
   const allowed = [
     appUrl,
     appUrl.replace('://', '://www.'),
-    ...(process.env.NODE_ENV === 'development' ? ['http://localhost:3000'] : []),
+    ...(process.env.NODE_ENV === 'development' ? ['http://localhost:3000', 'http://localhost:3001'] : []),
   ];
+  // Also allow any localhost origin in development (covers dynamic ports)
+  if (process.env.NODE_ENV === 'development' && origin.startsWith('http://localhost:')) {
+    return true;
+  }
   return allowed.includes(origin);
 }
 

@@ -1,7 +1,15 @@
 'use client';
 
-import { Turnstile, TurnstileInstance } from '@marsidev/react-turnstile';
-import { forwardRef, useImperativeHandle, useRef } from 'react';
+import {
+  Turnstile,
+  TurnstileInstance,
+} from '@marsidev/react-turnstile';
+
+import {
+  forwardRef,
+  useImperativeHandle,
+  useRef,
+} from 'react';
 
 interface TurnstileWidgetProps {
   onSuccess: (token: string) => void;
@@ -12,35 +20,46 @@ export interface TurnstileWidgetRef {
   reset: () => void;
 }
 
-export const TurnstileWidget = forwardRef<TurnstileWidgetRef, TurnstileWidgetProps>(
-  ({ onSuccess, onError }, ref) => {
-    const turnstileRef = useRef<TurnstileInstance>(null);
-    const siteKey = process.env.NEXT_PUBLIC_CLOUDFLARE_TURNSTILE_SITE_KEY;
+export const TurnstileWidget = forwardRef<
+  TurnstileWidgetRef,
+  TurnstileWidgetProps
+>(({ onSuccess, onError }, ref) => {
+  const turnstileRef =
+    useRef<TurnstileInstance>(null);
 
-    useImperativeHandle(ref, () => ({
-      reset: () => {
-        turnstileRef.current?.reset();
-      },
-    }));
+  const siteKey =
+    process.env
+      .NEXT_PUBLIC_CLOUDFLARE_TURNSTILE_SITE_KEY;
 
-    if (!siteKey) {
-      console.error('Cloudflare Turnstile site key is not configured');
-      return null;
-    }
+  useImperativeHandle(ref, () => ({
+    reset: () => {
+      turnstileRef.current?.reset();
+    },
+  }));
 
-    return (
+  if (!siteKey) {
+    console.error(
+      'Cloudflare Turnstile site key is not configured'
+    );
+
+    return null;
+  }
+
+  return (
+    <div className="flex w-full justify-center">
       <Turnstile
         ref={turnstileRef}
         siteKey={siteKey}
         onSuccess={onSuccess}
         onError={onError}
         options={{
-          theme: 'dark',
+          theme: 'light',
           size: 'normal',
         }}
       />
-    );
-  }
-);
+    </div>
+  );
+});
 
-TurnstileWidget.displayName = 'TurnstileWidget';
+TurnstileWidget.displayName =
+  'TurnstileWidget';

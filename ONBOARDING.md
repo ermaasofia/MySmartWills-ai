@@ -43,7 +43,7 @@ It is **not** a legal advice platform. The AI explains general legal concepts an
 | Styling | Tailwind CSS 4 + shadcn/ui | Utility-first CSS + a library of pre-built components |
 | Auth | Supabase Auth | Login, signup, Google OAuth, password reset |
 | Database | Supabase Postgres + Row Level Security (RLS) | Stores users, chat sessions, messages, AI prompts |
-| AI | Vercel AI SDK + Groq | Streams AI responses from Groq's `gpt-oss-120b` model |
+| AI | Vercel AI SDK + OpenRouter | Streams AI responses via OpenRouter's `deepseek/deepseek-chat:free` model |
 | Email | Amazon SES (via Supabase SMTP) | Sends signup confirmation, password reset emails |
 | Rate limiting | Upstash Redis | Prevents abuse of API endpoints |
 | Hosting | Vercel | Deploys the app, manages the production domain |
@@ -67,7 +67,7 @@ You need login access (or shared credentials) to **all** of these before you can
 - [ ] **Vercel** — invited to the SmartWills team, can view production project + env vars
 - [ ] **Supabase** — invited to the project, can read/write SQL and manage auth settings
 - [ ] **Cloudflare** — access to manage DNS for `smartwills.ai` and the Turnstile site
-- [ ] **Groq Console** — can view/regenerate the API key
+- [ ] **OpenRouter** — can view/regenerate the API key
 - [ ] **Upstash** — can view/regenerate Redis credentials
 - [ ] **Google Cloud Console** — can manage the OAuth client used for "Login with Google"
 - [ ] **AWS** (held by CTO) — only needed if SES email starts failing; the CTO controls this
@@ -134,8 +134,7 @@ NEXT_PUBLIC_SUPABASE_URL=<from Vercel>
 NEXT_PUBLIC_SUPABASE_ANON_KEY=<from Vercel>
 
 # AI provider
-GROQ_API_KEY=<from Vercel>
-GOOGLE_GENERATIVE_AI_API_KEY=<optional fallback, from Vercel>
+OPENROUTER_API_KEY=<from Vercel>
 
 # App URL — for local dev use localhost
 NEXT_PUBLIC_APP_URL=http://localhost:3000
@@ -258,10 +257,11 @@ User types a message in the chat UI
   │    - Hardcoded country legal context (COUNTRY_CONTEXTS)│
   │    - Admin-edited prompts from `ai_prompts` table      │
   │    - User's long-term memory (from `user_memories`)    │
-  │ 6. Call Groq (`gpt-oss-120b`) and stream the response  │
+│ 6. Call OpenRouter (`deepseek/deepseek-chat:free`) and │
+  │    stream the response                               │
   │ 7. Save user + assistant messages to Supabase          │
   │ 8. In the background, extract new memory facts using   │
-  │    a smaller, cheaper model (`llama-3.1-8b-instant`)   │
+  │    the same `deepseek/deepseek-chat:free` model        │
   └────────────────────────────────────────────────────────┘
         │
         ▼
@@ -269,7 +269,7 @@ User types a message in the chat UI
   word-by-word as markdown in the chat window.
 ```
 
-**Why two AI models?** Groq's free tier has a limit of 8,000 tokens per minute on the big model. Memory extraction is a background task — using the small model for it keeps the big model's quota free for actual chat replies.
+**Why reuse the same model for memory extraction?** Fact extraction is a background task — reusing the lightweight `deepseek/deepseek-chat:free` model keeps everything consistent and avoids burning extra quota.
 
 **Why so much sanitization?** The AI is exposed to anything the user types. Caps on length and message count prevent abuse and runaway token costs.
 
@@ -337,7 +337,7 @@ The moment any admin row exists in `profiles`, bootstrap mode is permanently dis
 
 ### Prompt length cap
 
-The combined length of all prompts per Savy is capped at **6,000 characters** (~1,500 tokens). This is because the Groq free tier limits us to 8,000 tokens per minute, and the reasoning model also burns tokens for internal thinking. If you exceed the cap, the system auto-truncates with a `[...truncated for token limit]` marker.
+The combined length of all prompts per Savy is capped at **6,000 characters** (~1,500 tokens). This keeps each request within the OpenRouter free-tier model limits and controls token costs. If you exceed the cap, the system auto-truncates with a `[...truncated for token limit]` marker.
 
 ---
 

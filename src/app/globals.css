@@ -8,11 +8,27 @@
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-surface: var(--surface);
+
   --color-raised-1: var(--raised-1);
   --color-raised-2: var(--raised-2);
   --color-raised-3: var(--raised-3);
-  --font-sans: var(--font-geist), 'Geist', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
-  --font-mono: var(--font-geist-mono), 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --font-sans:
+    var(--font-geist),
+    'Geist',
+    -apple-system,
+    BlinkMacSystemFont,
+    system-ui,
+    sans-serif;
+
+  --font-mono:
+    var(--font-geist-mono),
+    'Geist Mono',
+    ui-monospace,
+    SFMono-Regular,
+    Menlo,
+    monospace;
+
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -21,28 +37,37 @@
   --color-sidebar-primary: var(--sidebar-primary);
   --color-sidebar-foreground: var(--sidebar-foreground);
   --color-sidebar: var(--sidebar);
+
   --color-chart-5: var(--chart-5);
   --color-chart-4: var(--chart-4);
   --color-chart-3: var(--chart-3);
   --color-chart-2: var(--chart-2);
   --color-chart-1: var(--chart-1);
+
   --color-ring: var(--ring);
   --color-input: var(--input);
   --color-border: var(--border);
   --color-destructive: var(--destructive);
+
   --color-accent-foreground: var(--accent-foreground);
   --color-accent: var(--accent);
   --color-accent-soft: var(--accent-soft);
+
   --color-muted-foreground: var(--muted-foreground);
   --color-muted: var(--muted);
+
   --color-secondary-foreground: var(--secondary-foreground);
   --color-secondary: var(--secondary);
+
   --color-primary-foreground: var(--primary-foreground);
   --color-primary: var(--primary);
+
   --color-popover-foreground: var(--popover-foreground);
   --color-popover: var(--popover);
+
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
+
   --radius-xs: 6px;
   --radius-sm: 8px;
   --radius-md: 10px;
@@ -51,60 +76,135 @@
   --radius-2xl: 16px;
 }
 
-/* Direction B — dark-mode-only. Both :root and .dark resolve identical so
-   Tailwind `dark:` variants keep working AND a missing class never breaks. */
+/* =========================================================
+   SMARTWILLS LIGHT THEME
+   Brand:
+   HEX #a42025
+   RGB 164, 32, 37
+========================================================= */
+
 :root,
 .dark {
   --radius: 12px;
-  --background: #0a0a0a;
-  --foreground: #ededed;
-  --surface: rgba(20, 20, 20, 0.6);
-  --raised-1: rgba(255, 255, 255, 0.02);
-  --raised-2: rgba(255, 255, 255, 0.04);
-  --raised-3: rgba(255, 255, 255, 0.05);
-  --card: #0a0a0a;
-  --card-foreground: #ededed;
-  --popover: #0f0f0f;
-  --popover-foreground: #ededed;
-  --primary: #ededed;
-  --primary-foreground: #0a0a0a;
-  --secondary: rgba(255, 255, 255, 0.04);
-  --secondary-foreground: #ededed;
-  --muted: rgba(255, 255, 255, 0.04);
-  --muted-foreground: rgba(255, 255, 255, 0.6);
-  --accent: #be185d;
-  --accent-soft: rgba(190, 24, 93, 0.12);
-  --accent-foreground: #0a0a0a;
-  --destructive: #dc2626;
-  --border: rgba(255, 255, 255, 0.08);
-  --input: rgba(255, 255, 255, 0.08);
-  --ring: #be185d;
-  --chart-1: #be185d;
-  --chart-2: #ededed;
-  --chart-3: rgba(255, 255, 255, 0.6);
-  --chart-4: rgba(255, 255, 255, 0.4);
-  --chart-5: rgba(255, 255, 255, 0.2);
-  --sidebar: #0a0a0a;
-  --sidebar-foreground: #ededed;
-  --sidebar-primary: #ededed;
-  --sidebar-primary-foreground: #0a0a0a;
-  --sidebar-accent: rgba(255, 255, 255, 0.04);
-  --sidebar-accent-foreground: #ededed;
-  --sidebar-border: rgba(255, 255, 255, 0.08);
-  --sidebar-ring: #be185d;
+
+  /* Main */
+  --background: #ffffff;
+  --foreground: #171717;
+
+  /* Surfaces */
+  --surface: rgba(255, 255, 255, 0.92);
+
+  --raised-1: rgba(0, 0, 0, 0.015);
+  --raised-2: rgba(0, 0, 0, 0.025);
+  --raised-3: rgba(0, 0, 0, 0.04);
+
+  /* Cards */
+  --card: #ffffff;
+  --card-foreground: #171717;
+
+  /* Popover */
+  --popover: #ffffff;
+  --popover-foreground: #171717;
+
+  /* =====================================================
+     SMARTWILLS PRIMARY
+  ===================================================== */
+
+  --primary: #a42025;
+  --primary-foreground: #ffffff;
+
+  /* Secondary */
+  --secondary: #f5f5f5;
+  --secondary-foreground: #252525;
+
+  /* Muted */
+  --muted: #f5f5f5;
+  --muted-foreground: #737373;
+
+  /* =====================================================
+     SMARTWILLS ACCENT
+  ===================================================== */
+
+  --accent: #a42025;
+
+  --accent-soft: rgba(
+    164,
+    32,
+    37,
+    0.08
+  );
+
+  --accent-foreground: #ffffff;
+
+  /* Destructive */
+  --destructive: #a42025;
+
+  /* Border */
+  --border: #e5e5e5;
+
+  /* Inputs */
+  --input: #dedede;
+
+  /* Focus ring */
+  --ring: #a42025;
+
+  /* =====================================================
+     CHART
+  ===================================================== */
+
+  --chart-1: #a42025;
+  --chart-2: #891b1f;
+  --chart-3: #666666;
+  --chart-4: #999999;
+  --chart-5: #cccccc;
+
+  /* =====================================================
+     SIDEBAR
+  ===================================================== */
+
+  --sidebar: #fafafa;
+  --sidebar-foreground: #252525;
+
+  --sidebar-primary: #a42025;
+  --sidebar-primary-foreground: #ffffff;
+
+  --sidebar-accent: rgba(
+    164,
+    32,
+    37,
+    0.06
+  );
+
+  --sidebar-accent-foreground: #a42025;
+
+  --sidebar-border: #e8e8e8;
+
+  --sidebar-ring: #a42025;
 }
+
+/* =========================================================
+   BASE
+========================================================= */
 
 @layer base {
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground font-sans antialiased;
-    font-feature-settings: "ss01", "cv11", "tnum";
+
+    font-feature-settings:
+      "ss01",
+      "cv11",
+      "tnum";
   }
 }
 
-/* Lenis smooth scroll — only affects landing page */
+/* =========================================================
+   LENIS SMOOTH SCROLL
+========================================================= */
+
 html.lenis,
 html.lenis body {
   height: auto;
@@ -126,13 +226,19 @@ html.lenis body {
   pointer-events: none;
 }
 
-/* Prevent double-scroll on app-shell pages (admin, chat) that manage their own scroll containers */
+/* =========================================================
+   APP SHELL
+========================================================= */
+
 .overflow-locked {
   height: 100%;
   overflow: hidden;
 }
 
-/* Hide scrollbar but keep scrolling */
+/* =========================================================
+   SCROLLBAR
+========================================================= */
+
 ::-webkit-scrollbar {
   display: none;
 }
@@ -142,17 +248,32 @@ html {
   scrollbar-width: none;
 }
 
-/* Direction B animations — typing cursor + 3-dot pulse */
+/* =========================================================
+   SMARTWILLS ANIMATIONS
+========================================================= */
+
 @keyframes sw-blink {
-  50% { opacity: 0; }
+  50% {
+    opacity: 0;
+  }
 }
 
 @keyframes sw-pulse {
-  0%, 80%, 100% { opacity: 0.3; }
-  40% { opacity: 1; }
+  0%,
+  80%,
+  100% {
+    opacity: 0.3;
+  }
+
+  40% {
+    opacity: 1;
+  }
 }
 
-/* Card shine hover effect (kept for landing) */
+/* =========================================================
+   CARD SHINE
+========================================================= */
+
 .card-shine {
   position: relative;
   overflow: hidden;
@@ -160,12 +281,26 @@ html {
 
 .card-shine::before {
   content: '';
+
   position: absolute;
   inset: 0;
-  background: linear-gradient(105deg, transparent 40%, rgba(255, 255, 255, 0.03) 45%, rgba(255, 255, 255, 0.05) 50%, rgba(255, 255, 255, 0.03) 55%, transparent 60%);
+
+  background: linear-gradient(
+    105deg,
+    transparent 40%,
+    rgba(164, 32, 37, 0.015) 45%,
+    rgba(164, 32, 37, 0.035) 50%,
+    rgba(164, 32, 37, 0.015) 55%,
+    transparent 60%
+  );
+
   transform: translateX(-100%);
-  transition: transform 0.6s ease;
+
+  transition:
+    transform 0.6s ease;
+
   pointer-events: none;
+
   z-index: 1;
 }
 

@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server';
+import { getSessionUser } from '@/lib/auth';
 import { rateLimitAsync } from '@/lib/rate-limit';
 import { createChatSession, getUserSessions } from '@/lib/chat';
 import { isAllowedOrigin } from '@/lib/validation';
@@ -10,14 +10,11 @@ export async function GET(req: Request) {
       return Response.json({ error: 'Forbidden' }, { status: 403 });
     }
 
-    const supabase = await createClient();
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-
-    if (authError || !user) {
+    const user = await getSessionUser();
+    if (!user) {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Rate limit session listing: 30 requests per minute per user
     const { success: rateLimitOk } = await rateLimitAsync(`session-list:${user.id}`, {
       maxRequests: 30,
       windowMs: 60 * 1000,
@@ -30,7 +27,7 @@ export async function GET(req: Request) {
       );
     }
 
-    const sessions = await getUserSessions(supabase);
+    const sessions = await getUserSessions(user.id);
     return Response.json({ sessions });
   } catch (error) {
     console.error('GET /api/chat/sessions error:', error);
@@ -45,17 +42,14 @@ export async function POST(req: Request) {
       return Response.json({ error: 'Forbidden' }, { status: 403 });
     }
 
-    const supabase = await createClient();
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-
-    if (authError || !user) {
+    const user = await getSessionUser();
+    if (!user) {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Rate limit session creation: 10 sessions per hour per user
     const { success: rateLimitOk } = await rateLimitAsync(`session-create:${user.id}`, {
       maxRequests: 10,
-      windowMs: 60 * 60 * 1000, // 1 hour
+      windowMs: 60 * 60 * 1000,
     });
 
     if (!rateLimitOk) {
@@ -71,7 +65,7 @@ export async function POST(req: Request) {
     const title =
       typeof body.title === 'string' ? body.title.slice(0, 100) : 'New Chat';
 
-    const session = await createChatSession(supabase, user.id, countryCode, title);
+    const session = await createChatSession(user.id, countryCode, title);
     return Response.json({ session }, { status: 201 });
   } catch (error) {
     console.error('POST /api/chat/sessions error:', error);

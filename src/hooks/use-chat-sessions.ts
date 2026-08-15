@@ -10,14 +10,56 @@ export interface SessionSummary {
   updated_at: string;
 }
 
+// Exponential backoff retry helper
+async function fetchWithRetry(
+  url: string,
+  options?: RequestInit,
+  maxRetries: number = 3
+): Promise<Response> {
+  let lastError: Error | null = null;
+
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    try {
+      const response = await fetch(url, options);
+      
+      // Don't retry on 429 if we've already retried once (server is rate limiting)
+      if (response.status === 429 && attempt > 0) {
+        return response;
+      }
+      
+      if (!response.ok && response.status >= 500) {
+        // Retry on server errors
+        throw new Error(`Server error: ${response.status}`);
+      }
+      
+      return response;
+    } catch (error) {
+      lastError = error as Error;
+      
+      if (attempt < maxRetries - 1) {
+        // Exponential backoff: 100ms, 200ms, 400ms
+        const delayMs = 100 * Math.pow(2, attempt);
+        await new Promise(resolve => setTimeout(resolve, delayMs));
+      }
+    }
+  }
+
+  throw lastError || new Error('Failed to fetch after retries');
+}
+
 export function useChatSessions() {
   const [sessions, setSessions] = useState<SessionSummary[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const fetchSessions = useCallback(async () => {
     try {
-      const res = await fetch('/api/chat/sessions');
-      if (!res.ok) return;
+      const res = await fetchWithRetry('/api/chat/sessions');
+      if (!res.ok) {
+        if (res.status === 429) {
+          console.warn('Sessions list rate limited');
+        }
+        return;
+      }
       const { sessions: data } = await res.json();
       setSessions(data ?? []);
     } catch (err) {
@@ -49,7 +91,7 @@ export function useChatSessions() {
     async (id: string) => {
       setSessions((prev) => prev.filter((s) => s.id !== id));
       try {
-        await fetch(`/api/chat/sessions/${id}`, { method: 'DELETE' });
+        await fetchWithRetry(`/api/chat/sessions/${id}`, { method: 'DELETE' });
       } catch (err) {
         console.error('Failed to delete session:', err);
         // Re-fetch to restore correct state on error

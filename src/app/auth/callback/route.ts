@@ -4,7 +4,6 @@ import { NextResponse } from 'next/server';
 // Validate redirect to prevent open redirect attacks
 function getSafeRedirect(url: string | null): string {
   if (!url) return '/chat';
-  // Only allow relative paths starting with / (not //)
   if (url.startsWith('/') && !url.startsWith('//')) {
     return url;
   }
@@ -16,11 +15,10 @@ export async function GET(request: Request) {
   const code = searchParams.get('code');
   const next = getSafeRedirect(searchParams.get('next'));
   const errorCode = searchParams.get('error_code');
-
-  // Handle errors from Supabase (OAuth denied, OTP expired, etc.)
   const providerError = searchParams.get('error');
+
+  // Handle errors from OAuth provider
   if (providerError) {
-    // If this was a password reset attempt and the link expired
     if (errorCode === 'otp_expired' && next === '/reset-password') {
       return NextResponse.redirect(
         `${origin}/forgot-password?error=${encodeURIComponent('Reset link has expired. Please request a new one.')}`
@@ -36,24 +34,34 @@ export async function GET(request: Request) {
     );
   }
 
-  if (code) {
-    const supabase = await createClient();
-    const { error } = await supabase.auth.exchangeCodeForSession(code);
-
-    if (!error) {
-      return NextResponse.redirect(`${origin}${next}`);
-    }
-
-    console.error('[auth/callback] exchangeCodeForSession error:', error.message);
-
-    // If code exchange failed for a password reset, redirect back to forgot-password
-    if (next === '/reset-password') {
-      return NextResponse.redirect(
-        `${origin}/forgot-password?error=${encodeURIComponent('Reset link is invalid. Please request a new one.')}`
-      );
-    }
+  if (!code) {
+    return NextResponse.redirect(`${origin}/login?error=${encodeURIComponent('Missing authorization code')}`);
   }
 
-  // Return the user to an error page with instructions
-  return NextResponse.redirect(`${origin}/login?error=Could+not+authenticate+user`);
+  try {
+    const supabase = await createClient();
+
+    // Exchange the auth code for a session
+    const { error } = await supabase.auth.exchangeCodeForSession(code);
+
+    if (error) {
+      console.error('[auth/callback] Code exchange failed:', error);
+
+      // Handle password reset link errors specifically
+      if (next === '/reset-password') {
+        return NextResponse.redirect(
+          `${origin}/forgot-password?error=${encodeURIComponent('Reset link is invalid or expired. Please request a new one.')}`
+        );
+      }
+
+      return NextResponse.redirect(`${origin}/login?error=${encodeURIComponent('Authentication failed. Please try again.')}`);
+    }
+
+    // Successful auth — redirect to the intended destination
+    return NextResponse.redirect(`${origin}${next}`);
+  } catch (err) {
+    console.error('[auth/callback] Unexpected error:', err);
+    return NextResponse.redirect(`${origin}/login?error=${encodeURIComponent('Could not authenticate user')}`);
+  }
 }
+

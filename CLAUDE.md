@@ -24,7 +24,7 @@ No test framework is configured.
 - **Styling:** Tailwind CSS 4 + shadcn/ui (New York style) + Framer Motion
 - **Auth:** Supabase Auth (email/password + Google OAuth), middleware-protected routes
 - **Database:** Supabase PostgreSQL with Row Level Security
-- **AI:** Vercel AI SDK v6 with Groq — `gpt-oss-120b` (chat, reasoning model) + `llama-3.1-8b-instant` (memory extraction), streaming responses
+- **AI:** Vercel AI SDK v7 with OpenRouter — `deepseek/deepseek-chat:free` (chat + memory extraction + fact extraction), streaming responses
 - **Rate Limiting:** Upstash Redis (distributed) with in-memory fallback
 - **CAPTCHA:** Cloudflare Turnstile on signup
 - **Package Manager:** pnpm
@@ -48,7 +48,7 @@ Next.js middleware lives at `src/proxy.ts` (not the conventional `middleware.ts`
 - `/admin` — Protected admin dashboard (admin role required)
 - `/admin/ai-instructions` — AI prompt configuration
 - `/login`, `/signup`, `/forgot-password`, `/reset-password` — Auth pages
-- `/api/chat/route.ts` — Streaming chat endpoint (auth + rate limit + Groq LLM)
+- `/api/chat/route.ts` — Streaming chat endpoint (auth + rate limit + OpenRouter LLM)
 - `/api/chat/sessions/` — Session CRUD (GET/POST, DELETE by ID)
 - `/api/admin/ai-prompts/route.ts` — AI prompt management (admin only, GET/PUT/POST)
 - `/api/auth/login/route.ts` — Email/password login (rate limited: 5/5min per IP, generic errors to prevent enumeration)
@@ -77,18 +77,16 @@ Next.js middleware lives at `src/proxy.ts` (not the conventional `middleware.ts`
 2. Server validates auth, rate limits (20 req/60s per user), sanitizes input (max 8 messages, 1500 chars/msg)
 3. Country-specific legal context injected into system prompt (`COUNTRY_CONTEXTS` in route.ts)
 4. Admin-configured prompts (character, SOP, company info, services) loaded from `ai_prompts` table, auto-truncated at 6,000 chars if too long
-5. Groq `gpt-oss-120b` (reasoning model) streams response via Vercel AI SDK with `maxOutputTokens: 2048`
-6. Memory extraction runs in background using lightweight `llama-3.1-8b-instant` to save TPM quota
+5. OpenRouter `deepseek/deepseek-chat:free` streams response via Vercel AI SDK with `maxOutputTokens: 2048`
+6. Memory extraction runs in background using the same lightweight `deepseek/deepseek-chat:free` model
 7. Messages saved to Supabase; session ID returned via `X-Session-Id` header
 8. Client renders streaming markdown response
 
-### Token budget (Groq free tier)
-- Groq free tier: **8,000 TPM** (tokens per minute) for `gpt-oss-120b`
-- `gpt-oss-120b` is a reasoning model — uses tokens for internal thinking before generating content
+### Token budget (OpenRouter free tier)
+- OpenRouter free tier — `deepseek/deepseek-chat:free` has rate limits (requests/day) enforced by OpenRouter
 - System prompt + AI instructions must stay compact; `MAX_CUSTOM_PROMPTS_CHARS = 6000` enforces this
-- Memory extraction uses `llama-3.1-8b-instant` (separate, higher TPM limit) to avoid burning chat quota
+- Memory extraction and fact extraction reuse the same `deepseek/deepseek-chat:free` model
 - `maxDuration = 60` set on chat route for Vercel serverless timeout
-- If upgrading to Groq Dev tier, these constraints can be relaxed
 
 ### Auth flow
 - Middleware (`src/lib/supabase/middleware.ts`) protects `/chat` and `/admin`; unauthenticated users → `/login`
@@ -134,8 +132,7 @@ Schema defined in `supabase/schema.sql`. All tables have RLS policies.
 
 See `.env.local` for the full template. Key variables:
 - `NEXT_PUBLIC_SUPABASE_URL` / `NEXT_PUBLIC_SUPABASE_ANON_KEY` — Supabase connection
-- `GROQ_API_KEY` — Primary AI provider (required)
-- `GOOGLE_GENERATIVE_AI_API_KEY` — Fallback AI provider (optional)
+- `OPENROUTER_API_KEY` — Primary AI provider (required)
 - `NEXT_PUBLIC_APP_URL` — Production URL for OAuth callbacks
 - `ADMIN_EMAILS` — Comma-separated admin email allowlist (fallback when `profiles.role` not set)
 - `UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN` — Rate limiting (optional, falls back to in-memory)

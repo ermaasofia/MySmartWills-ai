@@ -3,32 +3,80 @@ import Link from 'next/link';
 
 export function LandingNav() {
   return (
-    <nav className="sticky top-0 z-20 border-b border-[var(--border)] bg-[rgba(10,10,10,0.7)] backdrop-blur-xl">
-      <div className="mx-auto flex max-w-[1280px] items-center justify-between px-4 py-3.5 sm:px-6 lg:px-8">
-        <div className="flex items-center gap-7">
-          <Link href="/" className="flex items-center gap-2">
-            <Image
-              src="/logo.png"
-              alt="SmartWills"
-              width={28}
-              height={28}
-              className="rounded-[4px]"
-            />
-            <span className="text-base font-semibold">SmartWills</span>
+    <nav className="sticky top-0 z-50 border-b border-[#ececec] bg-white/95 backdrop-blur-xl">
+      <div className="mx-auto flex h-[68px] max-w-[1120px] items-center justify-between px-4 sm:px-6 lg:px-0">
+        {/* LEFT - LOGO */}
+        <Link href="/" className="flex items-center gap-2.5">
+          <Image
+            src="/logo.png"
+            alt="SmartWills.ai"
+            width={30}
+            height={30}
+            className="rounded-[5px]"
+            priority
+          />
+
+          <span className="font-serif text-[20px] font-semibold tracking-[-0.02em] text-[#171717]">
+            SmartWills.ai
+          </span>
+        </Link>
+
+        {/* CENTER - NAVIGATION */}
+        <div className="hidden items-center gap-10 md:flex">
+          <Link
+            href="#features"
+            className="text-[13px] font-medium text-[#292929] transition-colors hover:text-[#a42025]"
+          >
+            What we do
           </Link>
-          <div className="hidden items-center gap-5 text-[15px] text-white/65 md:flex">
-            <Link href="#features" className="hover:text-white">What we do</Link>
-            <Link href="#countries" className="hover:text-white">Countries</Link>
-            <Link href="#faq" className="hover:text-white">Questions</Link>
-          </div>
+
+          <Link
+            href="#countries"
+            className="text-[13px] font-medium text-[#292929] transition-colors hover:text-[#a42025]"
+          >
+            Countries
+          </Link>
+
+          <Link
+            href="#faq"
+            className="text-[13px] font-medium text-[#292929] transition-colors hover:text-[#a42025]"
+          >
+            Questions
+          </Link>
+
+          <Link
+            href="#about"
+            className="text-[13px] font-medium text-[#292929] transition-colors hover:text-[#a42025]"
+          >
+            About us
+          </Link>
         </div>
-        <div className="flex items-center gap-3.5 text-[15px]">
-          <Link href="/login" className="text-white/65 hover:text-white">
+
+        {/* RIGHT - ACTIONS */}
+        <div className="flex items-center gap-5">
+          <Link
+            href="/login"
+            className="hidden text-[13px] font-medium text-[#292929] transition-colors hover:text-[#a42025] sm:block"
+          >
             Sign in
           </Link>
+
           <Link
             href="/signup"
-            className="rounded-[6px] bg-[#ededed] px-3.5 py-[7px] text-[15px] font-medium text-[#0a0a0a] transition-opacity hover:opacity-90"
+            className="
+              rounded-[7px]
+              bg-[#a42025]
+              px-5
+              py-2.5
+              text-[13px]
+              font-semibold
+              text-white
+              shadow-[0_6px_18px_rgba(164,32,37,0.18)]
+              transition-all
+              hover:-translate-y-[1px]
+              hover:bg-[#8f1c20]
+              hover:shadow-[0_8px_22px_rgba(164,32,37,0.24)]
+            "
           >
             Get started
           </Link>

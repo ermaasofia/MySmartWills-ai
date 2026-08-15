@@ -51,7 +51,7 @@ export default async function TermsPage() {
           <Breadcrumb currentPage="Terms of Service" />
           <div className="mb-8">
             <div className="mb-3 font-mono text-[12px] uppercase tracking-[1.5px] text-[var(--accent)]">
-              // terms_of_service
+              {/* terms_of_service */}
             </div>
             <h1 className="text-3xl font-medium tracking-[-0.02em] text-[#ededed] sm:text-4xl">
               Terms of Service

@@ -4,14 +4,12 @@ import { rateLimitAsync } from '@/lib/rate-limit';
 import { getClientIp } from '@/lib/ip';
 import { NextResponse } from 'next/server';
 import { headers } from 'next/headers';
+import { sendWelcomeEmail } from '@/lib/email';
 
 /**
  * POST /api/auth/signup
  *
- * Server-side signup with rate limiting and CAPTCHA verification.
- * - Rate limited per IP: 5 attempts / 15 minutes
- * - Verifies Turnstile CAPTCHA server-side before creating account
- * - Returns generic errors to prevent enumeration
+ * Server-side signup using Supabase Auth with rate limiting and CAPTCHA verification.
  */
 export async function POST(request: Request) {
   // ── Rate limiting ─────────────────────────────────────────────────
@@ -62,6 +60,14 @@ export async function POST(request: Request) {
     );
   }
 
+  // Password strength check
+  if (password.length < 8) {
+    return NextResponse.json(
+      { error: 'Password must be at least 8 characters' },
+      { status: 400 }
+    );
+  }
+
   // ── Verify Turnstile CAPTCHA server-side ──────────────────────────
   if (!captchaToken) {
     return NextResponse.json(
@@ -78,25 +84,54 @@ export async function POST(request: Request) {
     );
   }
 
-  // ── Create account via Supabase ───────────────────────────────────
-  const supabase = await createClient();
-  const { error } = await supabase.auth.signUp({
-    email,
-    password,
-    options: {
-      data: {
-        full_name: fullName,
+  // ── Create account via Supabase Auth ──────────────────────────────
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          full_name: fullName || null,
+          role: 'user',
+        },
       },
-    },
-  });
+    });
 
-  if (error) {
-    // Return generic message to prevent enumeration
+    if (error) {
+      // Handle duplicate email
+      if (error.message?.includes('already registered') || error.code === 'user_already_exists') {
+        return NextResponse.json(
+          { error: 'An account with this email already exists' },
+          { status: 409 }
+        );
+      }
+      console.error('Signup error:', error);
+      return NextResponse.json(
+        { error: 'Unable to create account. Please try again.' },
+        { status: 400 }
+      );
+    }
+
+    if (!data.user) {
+      return NextResponse.json(
+        { error: 'Unable to create account. Please try again.' },
+        { status: 400 }
+      );
+    }
+
+    // Send welcome email (non-blocking)
+    sendWelcomeEmail(email, fullName || null).catch(err =>
+      console.error('Failed to send welcome email:', err)
+    );
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error('Signup error:', error);
     return NextResponse.json(
       { error: 'Unable to create account. Please try again.' },
       { status: 400 }
     );
   }
-
-  return NextResponse.json({ success: true });
 }
+

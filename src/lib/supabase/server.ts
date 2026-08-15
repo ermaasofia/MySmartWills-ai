@@ -1,3 +1,12 @@
+/**
+ * Supabase Server Client
+ *
+ * Creates an authenticated Supabase client for server-side usage using
+ * the @supabase/ssr package with cookie-based session management.
+ *
+ * This returns a real Supabase client. Call `await createClient()` to get it.
+ */
+
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 
@@ -19,10 +28,13 @@ export async function createClient() {
             );
           } catch {
             // The `setAll` method was called from a Server Component.
-            // This can be ignored if you have middleware refreshing user sessions.
+            // This can be ignored if you have middleware refreshing sessions.
           }
         },
       },
     }
   );
 }
+
+export type SupabaseClient = Awaited<ReturnType<typeof createClient>>;
+

@@ -1,20 +1,34 @@
-import { NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { NextRequest, NextResponse } from 'next/server';
+import { getSessionUser } from '@/lib/auth';
+import { rateLimitAsync } from '@/lib/rate-limit';
 import { getUserMemory } from '@/lib/memory';
+import { isAllowedOrigin } from '@/lib/validation';
 
 export const runtime = 'nodejs';
 
-export async function GET() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+export async function GET(req: NextRequest) {
+  if (!isAllowedOrigin(req.headers.get('origin'))) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  }
 
+  const user = await getSessionUser();
   if (!user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const facts = await getUserMemory(supabase, user.id);
+  const { success: rateLimitOk } = await rateLimitAsync(`plan-fetch:${user.id}`, {
+    maxRequests: 30,
+    windowMs: 60 * 1000,
+  });
+
+  if (!rateLimitOk) {
+    return NextResponse.json(
+      { error: 'Too many requests. Please wait a moment.' },
+      { status: 429 }
+    );
+  }
+
+  const facts = await getUserMemory(user.id);
 
   const dependentsCount =
     (facts?.children?.length ?? 0) + (facts?.dependents?.length ?? 0);

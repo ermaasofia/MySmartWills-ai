@@ -12,13 +12,14 @@ export async function register() {
   // Always-required: app cannot function without these
   requireOrCollect('NEXT_PUBLIC_SUPABASE_URL', errors);
   requireOrCollect('NEXT_PUBLIC_SUPABASE_ANON_KEY', errors);
-  requireOrCollect('GROQ_API_KEY', errors, 'chat API depends on this');
+  requireOrCollect('OPENROUTER_API_KEY', errors, 'chat API depends on this');
 
-  // Production-required: signup CAPTCHA must be configured
+  // SECURITY: CAPTCHA must be configured in ALL environments
+  // Prevents email spam attacks (forgot-password, signup, login endpoints)
   requireOrCollect(
     'CLOUDFLARE_TURNSTILE_SECRET_KEY',
-    isProd ? errors : warnings,
-    'signup is unprotected without CAPTCHA verification',
+    errors,  // Required in both production AND development
+    'signup, login, and password reset require CAPTCHA verification',
   );
 
   // Distributed rate limit — opt-in to in-memory fallback if Redis is intentionally absent
@@ -41,3 +42,4 @@ export async function register() {
     console.warn(msg);
   }
 }
+

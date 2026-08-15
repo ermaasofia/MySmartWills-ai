@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
+import { verifyTurnstileToken } from '@/lib/turnstile';
 import { rateLimitAsync } from '@/lib/rate-limit';
 import { getClientIp } from '@/lib/ip';
 import { NextResponse } from 'next/server';
@@ -7,9 +8,7 @@ import { headers } from 'next/headers';
 /**
  * POST /api/auth/forgot-password
  *
- * Server-side password reset with rate limiting.
- * - Rate limited per IP: 3 attempts / 15 minutes
- * - Always returns success to prevent email enumeration
+ * Server-side password reset using Supabase Auth with rate limiting.
  */
 export async function POST(request: Request) {
   // ── Rate limiting ─────────────────────────────────────────────────
@@ -22,12 +21,11 @@ export async function POST(request: Request) {
   });
 
   if (!rateLimitResult.success) {
-    // Still return success to prevent enumeration via rate limit timing
     return NextResponse.json({ success: true });
   }
 
   // ── Parse & validate body ─────────────────────────────────────────
-  let body: { email?: unknown; captchaToken?: unknown; redirectTo?: unknown };
+  let body: { email?: unknown; captchaToken?: unknown };
   try {
     body = await request.json();
   } catch {
@@ -37,22 +35,6 @@ export async function POST(request: Request) {
   const email = typeof body.email === 'string' ? body.email.trim().slice(0, 320) : '';
   const captchaToken = typeof body.captchaToken === 'string' ? body.captchaToken : '';
 
-  // Validate redirectTo — must be absolute URL with same origin as the request.
-  // Supabase's Redirect URLs allowlist provides defense-in-depth.
-  const rawRedirect = typeof body.redirectTo === 'string' ? body.redirectTo : null;
-  let redirectTo: string | undefined;
-  if (rawRedirect) {
-    try {
-      const parsed = new URL(rawRedirect);
-      const requestUrl = new URL(request.url);
-      if (parsed.origin === requestUrl.origin) {
-        redirectTo = rawRedirect;
-      }
-    } catch {
-      // Invalid URL — leave redirectTo undefined so Supabase falls back to Site URL
-    }
-  }
-
   if (!email) {
     return NextResponse.json(
       { error: 'Email is required' },
@@ -60,16 +42,39 @@ export async function POST(request: Request) {
     );
   }
 
-  // ── Send reset email via Supabase ───────────────────────────────
-  // Supabase verifies the Turnstile token itself when captcha protection
-  // is enabled in Auth settings. Don't verify here too — Turnstile tokens
-  // are single-use, so a double-verify produces "timeout-or-duplicate".
-  const supabase = await createClient();
-  await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo,
-    captchaToken: captchaToken || undefined,
-  });
+  // ── CAPTCHA verification (required) ────────────────────────────────
+  if (!captchaToken) {
+    return NextResponse.json(
+      { error: 'CAPTCHA verification is required' },
+      { status: 400 }
+    );
+  }
+
+  const turnstileResult = await verifyTurnstileToken(captchaToken, ip);
+  if (!turnstileResult.success) {
+    return NextResponse.json(
+      { error: 'CAPTCHA verification failed' },
+      { status: 403 }
+    );
+  }
+
+  // ── Send reset email via Supabase Auth ────────────────────────────
+  try {
+    const supabase = await createClient();
+    const origin = process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_APP_URL || new URL(request.url).origin;
+
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${origin}/reset-password`,
+    });
+
+    if (error) {
+      console.error('Failed to send password reset email:', error);
+    }
+  } catch (err) {
+    console.error('Failed to send password reset email:', err);
+  }
 
   // Always return success to prevent email enumeration
   return NextResponse.json({ success: true });
 }
+

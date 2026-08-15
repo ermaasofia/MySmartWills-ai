@@ -20,7 +20,7 @@ export function LenisProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (!isLandingPage) {
-      setLenis(null);
+      queueMicrotask(() => setLenis(null));
       return;
     }
 
@@ -31,7 +31,7 @@ export function LenisProvider({ children }: { children: React.ReactNode }) {
       infinite: false,
     });
 
-    setLenis(lenisInstance);
+    queueMicrotask(() => setLenis(lenisInstance));
 
     function raf(time: number) {
       lenisInstance.raf(time);

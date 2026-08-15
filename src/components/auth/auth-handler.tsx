@@ -1,29 +1,25 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import { createClient } from '@/lib/supabase/client';
 
 /**
  * Auth Handler Component
  *
- * 1. Listens for PASSWORD_RECOVERY events and redirects to /reset-password.
- * 2. Safety-net: if Supabase drops the OAuth `?code=` on a non-callback page
- *    (e.g. the homepage), this detects it and forwards to /auth/callback so the
- *    session can be exchanged properly.
+ * Handles auth-related client-side redirects:
+ * 1. Safety-net: forwards stray OAuth `?code=` params to /auth/callback
+ * 2. Checks URL params for password reset flow
  */
 export function AuthHandler() {
   const hasRedirected = useRef(false);
 
   useEffect(() => {
-    // ── Safety-net: forward stray OAuth codes to /auth/callback ──────
-    // This happens when Supabase's Site URL is set to the root domain and
-    // the redirectTo URL isn't in the Redirect URLs allowlist.
     const params = new URLSearchParams(window.location.search);
     const code = params.get('code');
     const currentPath = window.location.pathname;
+
+    // Safety-net: forward stray OAuth codes to /auth/callback
     if (code && currentPath !== '/auth/callback' && !hasRedirected.current) {
       hasRedirected.current = true;
-      // Preserve any ?next= param the callback route expects
       const next = params.get('next') ?? '/chat';
       window.location.replace(
         `/auth/callback?code=${encodeURIComponent(code)}&next=${encodeURIComponent(next)}`
@@ -31,19 +27,13 @@ export function AuthHandler() {
       return;
     }
 
-    // ── Handle PASSWORD_RECOVERY event ───────────────────────────────
-    const supabase = createClient();
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
-      if (event === 'PASSWORD_RECOVERY' && !hasRedirected.current) {
-        hasRedirected.current = true;
-        window.location.href = '/reset-password';
-      }
-    });
-
-    return () => {
-      subscription.unsubscribe();
-    };
+    // Check if we're on the reset-password page with a token
+    const token = params.get('token');
+    if (token && currentPath === '/reset-password' && !hasRedirected.current) {
+      hasRedirected.current = true;
+      // The reset-password-form component handles the actual token exchange
+      return;
+    }
   }, []);
 
   return null;

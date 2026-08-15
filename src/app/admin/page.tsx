@@ -1,5 +1,5 @@
 import { Metadata } from 'next';
-import { createClient } from '@/lib/supabase/server';
+import { getTotalUsers, getTotalSessions, getActivePromptsCount } from '@/lib/auth';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Users, MessageSquare, Bot } from 'lucide-react';
 import { PROMPT_TYPES } from '@/lib/constants';
@@ -10,18 +10,16 @@ export const metadata: Metadata = {
 };
 
 async function getStats() {
-  const supabase = await createClient();
-
-  const [profilesRes, sessionsRes, promptsRes] = await Promise.all([
-    supabase.from('profiles').select('id', { count: 'exact', head: true }),
-    supabase.from('chat_sessions').select('id', { count: 'exact', head: true }),
-    supabase.from('ai_prompts').select('id', { count: 'exact', head: true }).eq('is_active', true),
+  const [totalUsers, totalSessions, activePrompts] = await Promise.all([
+    getTotalUsers(),
+    getTotalSessions(),
+    getActivePromptsCount(),
   ]);
 
   return {
-    totalUsers: profilesRes.count ?? 0,
-    totalSessions: sessionsRes.count ?? 0,
-    activePrompts: promptsRes.count ?? 0,
+    totalUsers,
+    totalSessions,
+    activePrompts,
   };
 }
 

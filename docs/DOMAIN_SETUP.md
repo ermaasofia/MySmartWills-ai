@@ -87,11 +87,9 @@ Cross-check **Supabase → Logs → Auth logs** for any `500 Error sending recov
 NEXT_PUBLIC_SUPABASE_URL
 NEXT_PUBLIC_SUPABASE_ANON_KEY
 NEXT_PUBLIC_APP_URL=https://smartwills.ai
-GROQ_API_KEY
-GOOGLE_GENERATIVE_AI_API_KEY                (optional fallback)
-ADMIN_EMAILS                                  (comma-separated)
+OPENROUTER_API_KEY                      (primary AI provider)
+ADMIN_EMAILS                            (comma-separated)
 UPSTASH_REDIS_REST_URL
 UPSTASH_REDIS_REST_TOKEN
 NEXT_PUBLIC_CLOUDFLARE_TURNSTILE_SITE_KEY
 CLOUDFLARE_TURNSTILE_SECRET_KEY
-```

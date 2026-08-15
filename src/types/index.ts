@@ -23,13 +23,22 @@ export type ChatSession = {
   updatedAt: Date;
 };
 
-export type PromptData = {
+export interface PromptData {
   character: string;
   sop: string;
   company_info: string;
   services: string;
   other: string;
-};
+
+  testator: string;
+  executor: string;
+  guardian: string;
+  asset: string;
+  beneficiary: string;
+  residue_estate: string;
+  witness: string;
+  pdf_preview: string;
+}
 
 export type UserProfile = {
   id: string;

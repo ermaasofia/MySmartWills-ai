@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
+import { fetchWithRetry } from '@/lib/fetch';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Select,
@@ -50,32 +51,100 @@ const PROMPT_CONFIGS: {
   {
     key: 'character',
     title: 'AI Character / Personality',
-    description: 'Define how the AI behaves and its personality. E.g: Friendly, professional, empathetic.',
-    placeholder: 'E.g: You are friendly and professional. You speak in a warm, empathetic tone...',
+    description: 'Define the AI personality and behaviour.',
+    placeholder: 'You are AI SmartWills...',
   },
   {
     key: 'sop',
     title: 'Standard Operating Procedures (SOP)',
-    description: 'Guidelines the AI follows when responding. E.g: Response format, step by step process.',
-    placeholder: 'E.g: Always greet users first. Provide clear steps. Ask clarifying questions when needed...',
+    description: 'General response rules for the AI.',
+    placeholder: 'Always greet users...',
   },
   {
     key: 'company_info',
     title: 'Company Information',
-    description: 'Company details the AI can reference when users ask.',
-    placeholder: 'E.g: SmartWills is a will planning platform in Malaysia. Founded in 2020...',
+    description: 'Information about your company.',
+    placeholder: 'SmartWills is...',
   },
   {
     key: 'services',
     title: 'Services / Products',
-    description: 'Services or products the company offers so the AI can inform users accurately.',
-    placeholder: 'E.g: 1. Will Writing Service - RM299, 2. Trust Setup - RM1,999...',
+    description: 'Products and services provided.',
+    placeholder: 'Will Writing Service...',
   },
   {
     key: 'other',
     title: 'Other Instructions',
-    description: 'Additional instructions or special cases not covered by other categories.',
-    placeholder: 'E.g: Special promotions, seasonal offers, important disclaimers...',
+    description: 'Additional global instructions.',
+    placeholder: 'Other instructions...',
+  },
+
+  // ==========================
+  // WILL PLANNING
+  // ==========================
+
+  {
+    key: 'testator',
+    title: 'Testator Guidance',
+    description: 'Guide the AI when collecting testator information.',
+    placeholder:
+      'Collect full name, NRIC/passport, gender, address, phone and email...',
+  },
+
+  {
+    key: 'executor',
+    title: 'Executor Guidance',
+    description: 'Guide the AI when collecting executor information.',
+    placeholder:
+      'Explain the executor role. Collect full name, NRIC, relationship...',
+  },
+
+  {
+    key: 'guardian',
+    title: 'Guardian Guidance',
+    description: 'Guide the AI when collecting guardian information.',
+    placeholder:
+      'Ask whether the user has children under 18...',
+  },
+
+  {
+    key: 'asset',
+    title: 'Asset Guidance',
+    description: 'Guide the AI when collecting assets.',
+    placeholder:
+      'Collect asset type, description and location...',
+  },
+
+  {
+    key: 'beneficiary',
+    title: 'Beneficiary Guidance',
+    description: 'Guide the AI when collecting beneficiaries.',
+    placeholder:
+      'Collect beneficiary details and percentages...',
+  },
+
+  {
+    key: 'residue_estate',
+    title: 'Residue Estate Guidance',
+    description: 'Guide the AI for residue estate distribution.',
+    placeholder:
+      'Ensure residue estate equals 100%...',
+  },
+
+  {
+    key: 'witness',
+    title: 'Witness Guidance',
+    description: 'Guide the AI when collecting witnesses.',
+    placeholder:
+      'Witnesses must be independent adults...',
+  },
+
+  {
+    key: 'pdf_preview',
+    title: 'PDF Preview Review',
+    description: 'Instructions for reviewing the generated PDF.',
+    placeholder:
+      'Summarize the will. Highlight missing fields...',
   },
 ];
 
@@ -92,20 +161,19 @@ export function AIInstructionsForm() {
   });
 
   const [blocks, setBlocks] = useState<Record<PromptType, string[]>>(createEmptyBlocks);
-  const [saveStatus, setSaveStatus] = useState<SaveStatus>({
-    character: 'idle',
-    sop: 'idle',
-    company_info: 'idle',
-    services: 'idle',
-    other: 'idle',
-  });
+  const [saveStatus, setSaveStatus] = useState(
+  Object.fromEntries(
+    PROMPT_TYPES.map((t) => [t, 'idle'])
+  ) as SaveStatus
+  );
+  
   const [isLoading, setIsLoading] = useState(true);
   const timeoutsRef = useRef<Record<string, NodeJS.Timeout>>({});
 
   const fetchPrompts = useCallback(async (countryCode: string) => {
     setIsLoading(true);
     try {
-      const response = await fetch(`/api/admin/ai-prompts?country_code=${countryCode}`);
+      const response = await fetchWithRetry(`/api/admin/ai-prompts?country_code=${countryCode}`);
       if (!response.ok) {
         if (response.status === 401 || response.status === 403) {
           router.push('/login');
@@ -140,15 +208,13 @@ export function AIInstructionsForm() {
 
   const handleCountryChange = (countryCode: string) => {
     setSelectedCountry(countryCode);
-    setSaveStatus({
-      character: 'idle',
-      sop: 'idle',
-      company_info: 'idle',
-      services: 'idle',
-      other: 'idle',
-    });
+  
+    setSaveStatus(
+  Object.fromEntries(
+    PROMPT_TYPES.map((t) => [t, 'idle'])
+  ) as SaveStatus
+);
   };
-
   const handleBlockChange = (promptType: PromptType, index: number, value: string) => {
     setBlocks((prev) => {
       const updated = [...prev[promptType]];
@@ -177,7 +243,7 @@ export function AIInstructionsForm() {
     const content = joinBlocks(blocks[promptType]);
 
     try {
-      const response = await fetch('/api/admin/ai-prompts', {
+      const response = await fetchWithRetry('/api/admin/ai-prompts', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

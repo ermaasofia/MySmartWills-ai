@@ -1,5 +1,6 @@
-import { createClient } from '@/lib/supabase/server';
-import { getSessionMessages, deleteSession, updateSessionTitle } from '@/lib/chat';
+import { getSessionUser } from '@/lib/auth';
+import { rateLimitAsync } from '@/lib/rate-limit';
+import { getSessionMessages, deleteSession, updateSessionTitle, getSessionById } from '@/lib/chat';
 import { isAllowedOrigin } from '@/lib/validation';
 
 // GET /api/chat/sessions/[id] — fetch all messages for a session
@@ -12,33 +13,33 @@ export async function GET(
       return Response.json({ error: 'Forbidden' }, { status: 403 });
     }
 
-    const supabase = await createClient();
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-
-    if (authError || !user) {
+    const user = await getSessionUser();
+    if (!user) {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const { success: rateLimitOk } = await rateLimitAsync(`session-fetch:${user.id}`, {
+      maxRequests: 30,
+      windowMs: 60 * 1000,
+    });
+
+    if (!rateLimitOk) {
+      return Response.json(
+        { error: 'Too many requests. Please wait a moment.' },
+        { status: 429 }
+      );
     }
 
     const { id: sessionId } = await params;
 
-    // Verify the session belongs to the authenticated user (defense-in-depth: explicit check + RLS)
-    const { data: session, error: sessionError } = await supabase
-      .from('chat_sessions')
-      .select('id, title, country_code, created_at, user_id')
-      .eq('id', sessionId)
-      .single();
-
-    if (sessionError || !session) {
+    const session = await getSessionById(sessionId, user.id);
+    if (!session) {
       return Response.json({ error: 'Session not found' }, { status: 404 });
     }
 
-    if (session.user_id !== user.id) {
-      return Response.json({ error: 'Forbidden' }, { status: 403 });
-    }
-
-    const messages = await getSessionMessages(supabase, sessionId);
-    // Strip user_id from response — client doesn't need it
-    const { user_id: _, ...safeSession } = session;
+    const messages = await getSessionMessages(sessionId);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { user_id: _ignore, ...safeSession } = session as any;
     return Response.json({ session: safeSession, messages });
   } catch (error) {
     console.error('GET /api/chat/sessions/[id] error:', error);
@@ -56,11 +57,21 @@ export async function PATCH(
       return Response.json({ error: 'Forbidden' }, { status: 403 });
     }
 
-    const supabase = await createClient();
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-
-    if (authError || !user) {
+    const user = await getSessionUser();
+    if (!user) {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const { success: rateLimitOk } = await rateLimitAsync(`session-update:${user.id}`, {
+      maxRequests: 15,
+      windowMs: 60 * 1000,
+    });
+
+    if (!rateLimitOk) {
+      return Response.json(
+        { error: 'Too many requests. Please wait a moment.' },
+        { status: 429 }
+      );
     }
 
     const { id: sessionId } = await params;
@@ -71,22 +82,12 @@ export async function PATCH(
       return Response.json({ error: 'Title is required' }, { status: 400 });
     }
 
-    // Defense-in-depth: explicit ownership check + RLS
-    const { data: session } = await supabase
-      .from('chat_sessions')
-      .select('id, user_id')
-      .eq('id', sessionId)
-      .single();
-
+    const session = await getSessionById(sessionId, user.id);
     if (!session) {
       return Response.json({ error: 'Session not found' }, { status: 404 });
     }
 
-    if (session.user_id !== user.id) {
-      return Response.json({ error: 'Forbidden' }, { status: 403 });
-    }
-
-    await updateSessionTitle(supabase, sessionId, title);
+    await updateSessionTitle(sessionId, title);
     return Response.json({ success: true, title });
   } catch (error) {
     console.error('PATCH /api/chat/sessions/[id] error:', error);
@@ -104,34 +105,43 @@ export async function DELETE(
       return Response.json({ error: 'Forbidden' }, { status: 403 });
     }
 
-    const supabase = await createClient();
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-
-    if (authError || !user) {
+    const user = await getSessionUser();
+    if (!user) {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const { success: rateLimitOk } = await rateLimitAsync(
+      `session-delete:${user.id}`,
+      {
+        maxRequests: 10,
+        windowMs: 60 * 60 * 1000,
+      },
+    );
+
+    if (!rateLimitOk) {
+      return Response.json(
+        {
+          error:
+            'Too many deletions. Please wait before deleting more sessions.',
+        },
+        { status: 429 },
+      );
     }
 
     const { id: sessionId } = await params;
 
-    // Confirm ownership before deletion (defense-in-depth: explicit check + RLS)
-    const { data: session } = await supabase
-      .from('chat_sessions')
-      .select('id, user_id')
-      .eq('id', sessionId)
-      .single();
-
+    const session = await getSessionById(sessionId, user.id);
     if (!session) {
       return Response.json({ error: 'Session not found' }, { status: 404 });
     }
 
-    if (session.user_id !== user.id) {
-      return Response.json({ error: 'Forbidden' }, { status: 403 });
-    }
-
-    await deleteSession(supabase, sessionId);
+    await deleteSession(sessionId);
     return Response.json({ success: true });
   } catch (error) {
     console.error('DELETE /api/chat/sessions/[id] error:', error);
-    return Response.json({ error: 'Failed to delete session' }, { status: 500 });
+    return Response.json(
+      { error: 'Failed to delete session' },
+      { status: 500 },
+    );
   }
 }

@@ -15,23 +15,25 @@ import { LandingFooter } from '@/components/landing/landing-footer';
 export default function Home() {
   return (
     <LandingShell>
-    <div
-      className="min-h-screen bg-[#0a0a0a] text-[#ededed]"
-      style={{ fontFeatureSettings: '"ss01", "cv11", "tnum"' }}
-    >
-      <LandingNav />
-      <Hero />
-      <EcosystemStrip />
-      <AboutSection />
-      <FeaturesMatrix />
-      <ServicesGrid />
-      <HowItWorks />
-      <CountriesGrid />
-      <Testimonial />
-      <FaqAccordion />
-      <LandingCTA />
-      <LandingFooter />
-    </div>
+      <div
+        className="min-h-screen bg-white text-[#171717]"
+        style={{
+          fontFeatureSettings: '"ss01", "cv11", "tnum"',
+        }}
+      >
+        <LandingNav />
+        <Hero />
+        <EcosystemStrip />
+        <AboutSection />
+        <FeaturesMatrix />
+        <ServicesGrid />
+        <HowItWorks />
+        <CountriesGrid />
+        <Testimonial />
+        <FaqAccordion />
+        <LandingCTA />
+        <LandingFooter />
+      </div>
     </LandingShell>
   );
 }

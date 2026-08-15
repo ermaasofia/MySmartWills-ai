@@ -11,10 +11,15 @@ export function LandingShell({ children }: { children: React.ReactNode }) {
   const [showIntro, setShowIntro] = useState(false);
 
   useEffect(() => {
-    if (!sessionStorage.getItem(SESSION_KEY)) {
+    const hasSeenIntro = typeof window !== 'undefined' && sessionStorage.getItem(SESSION_KEY);
+    if (!hasSeenIntro) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setShowIntro(true);
       document.body.style.overflow = 'hidden';
     }
+    return () => {
+      document.body.style.overflow = '';
+    };
   }, []);
 
   const handleComplete = useCallback(() => {

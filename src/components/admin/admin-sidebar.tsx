@@ -11,7 +11,6 @@ import {
   X,
   ArrowLeft,
 } from 'lucide-react';
-import { createClient } from '@/lib/supabase/client';
 import { cn } from '@/lib/utils';
 
 const NAV_ITEMS = [
@@ -30,10 +29,13 @@ export function AdminSidebar({ userEmail, isSidebarOpen, onClose }: AdminSidebar
   const router = useRouter();
 
   const handleSignOut = async () => {
-    const supabase = createClient();
-    await supabase.auth.signOut();
-    router.push('/');
-    router.refresh();
+    try {
+      await fetch('/api/auth/logout', { method: 'POST' });
+      router.push('/');
+      router.refresh();
+    } catch {
+      router.push('/');
+    }
   };
 
   const isActive = (href: string) => {
@@ -43,7 +45,6 @@ export function AdminSidebar({ userEmail, isSidebarOpen, onClose }: AdminSidebar
 
   const sidebarContent = (
     <div className="flex flex-col h-full w-64 bg-sidebar border-r border-sidebar-border">
-      {/* Top: logo + admin badge */}
       <div className="flex items-center justify-between px-3 py-3 shrink-0">
         <Link
           href="/admin"
@@ -72,7 +73,6 @@ export function AdminSidebar({ userEmail, isSidebarOpen, onClose }: AdminSidebar
         </button>
       </div>
 
-      {/* Navigation */}
       <nav className="flex-1 px-2 py-2 space-y-0.5">
         {NAV_ITEMS.map((item) => {
           const Icon = item.icon;
@@ -96,9 +96,7 @@ export function AdminSidebar({ userEmail, isSidebarOpen, onClose }: AdminSidebar
         })}
       </nav>
 
-      {/* Bottom section */}
       <div className="shrink-0 border-t border-sidebar-border px-2 pt-2 pb-3 space-y-0.5">
-        {/* Back to chat */}
         <Link
           href="/chat"
           className="w-full flex items-center gap-3 rounded-lg px-3 py-2 text-sm
@@ -108,7 +106,6 @@ export function AdminSidebar({ userEmail, isSidebarOpen, onClose }: AdminSidebar
           Back to Chat
         </Link>
 
-        {/* User info + sign out */}
         <button
           onClick={handleSignOut}
           className="w-full flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm
@@ -122,17 +119,15 @@ export function AdminSidebar({ userEmail, isSidebarOpen, onClose }: AdminSidebar
             <p className="text-[10px] text-muted-foreground">Admin</p>
           </div>
           <LogOut className="h-3.5 w-3.5 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" />
-        </button>
+          </button>
+        </div>
       </div>
-    </div>
   );
 
   return (
     <>
-      {/* Desktop: always visible */}
       <aside className="hidden md:flex shrink-0">{sidebarContent}</aside>
 
-      {/* Mobile: slide-over with backdrop */}
       <AnimatePresence>
         {isSidebarOpen && (
           <>

@@ -1,13 +1,19 @@
-import { SupabaseClient } from '@supabase/supabase-js';
+/**
+ * Memory Library
+ *
+ * User memories and conversation summaries managed via Supabase.
+ */
+
 import { generateText, type LanguageModel } from 'ai';
 import type { UserMemoryFacts, ConversationSummaryRow } from '@/types/memory';
+import { createClient } from '@/lib/supabase/server';
 
 // ─── DB Helpers ──────────────────────────────────────────────────────────────
 
 export async function getUserMemory(
-  supabase: SupabaseClient,
   userId: string,
 ): Promise<UserMemoryFacts | null> {
+  const supabase = await createClient();
   const { data } = await supabase
     .from('user_memories')
     .select('facts')
@@ -15,25 +21,33 @@ export async function getUserMemory(
     .single();
 
   if (!data) return null;
-  return data.facts as UserMemoryFacts;
+
+  try {
+    return data.facts as UserMemoryFacts;
+  } catch {
+    return null;
+  }
 }
 
 export async function upsertUserMemory(
-  supabase: SupabaseClient,
   userId: string,
   facts: UserMemoryFacts,
 ) {
+  const supabase = await createClient();
   const { error } = await supabase
     .from('user_memories')
-    .upsert({ user_id: userId, facts }, { onConflict: 'user_id' });
+    .upsert(
+      { user_id: userId, facts, updated_at: new Date().toISOString() },
+      { onConflict: 'user_id' }
+    );
 
-  if (error) console.error('Failed to upsert user memory:', error.message);
+  if (error) throw error;
 }
 
 export async function getSessionSummary(
-  supabase: SupabaseClient,
   sessionId: string,
 ): Promise<ConversationSummaryRow | null> {
+  const supabase = await createClient();
   const { data } = await supabase
     .from('conversation_summaries')
     .select('summary, message_count')
@@ -41,24 +55,31 @@ export async function getSessionSummary(
     .single();
 
   if (!data) return null;
+
   return data as ConversationSummaryRow;
 }
 
 export async function upsertSessionSummary(
-  supabase: SupabaseClient,
   userId: string,
   sessionId: string,
   summary: string,
   messageCount: number,
 ) {
+  const supabase = await createClient();
   const { error } = await supabase
     .from('conversation_summaries')
     .upsert(
-      { session_id: sessionId, user_id: userId, summary, message_count: messageCount },
-      { onConflict: 'session_id' },
+      {
+        session_id: sessionId,
+        user_id: userId,
+        summary,
+        message_count: messageCount,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: 'session_id' }
     );
 
-  if (error) console.error('Failed to upsert session summary:', error.message);
+  if (error) throw error;
 }
 
 // ─── Extraction Prompts ──────────────────────────────────────────────────────
@@ -138,7 +159,6 @@ interface ExtractionResult {
 /** Validate and sanitize individual fact values by type */
 function validateFactValue(key: keyof UserMemoryFacts, value: unknown): unknown {
   switch (key) {
-    // String fields
     case 'name':
     case 'nationality':
     case 'country_of_residence':
@@ -153,17 +173,14 @@ function validateFactValue(key: keyof UserMemoryFacts, value: unknown): unknown 
     case 'preferred_language':
       return typeof value === 'string' ? value.slice(0, 500) : undefined;
 
-    // Number fields
     case 'age':
       return typeof value === 'number' && Number.isFinite(value) && value > 0 && value < 200
         ? value : undefined;
 
-    // Boolean fields
     case 'has_existing_will':
     case 'islamic_faraid_applicable':
       return typeof value === 'boolean' ? value : undefined;
 
-    // String array
     case 'primary_concerns':
       if (!Array.isArray(value)) return undefined;
       return value
@@ -171,7 +188,6 @@ function validateFactValue(key: keyof UserMemoryFacts, value: unknown): unknown 
         .map(v => v.slice(0, 500))
         .slice(0, 20);
 
-    // children: Array<{ name: string; age?: number; notes?: string }>
     case 'children':
       if (!Array.isArray(value)) return undefined;
       return value
@@ -183,7 +199,6 @@ function validateFactValue(key: keyof UserMemoryFacts, value: unknown): unknown 
         }))
         .slice(0, 30);
 
-    // dependents: Array<{ name: string; relationship: string; notes?: string }>
     case 'dependents':
       if (!Array.isArray(value)) return undefined;
       return value
@@ -196,7 +211,6 @@ function validateFactValue(key: keyof UserMemoryFacts, value: unknown): unknown 
         }))
         .slice(0, 30);
 
-    // assets: Array<{ type: string; description: string; location?: string }>
     case 'assets':
       if (!Array.isArray(value)) return undefined;
       return value
@@ -209,7 +223,6 @@ function validateFactValue(key: keyof UserMemoryFacts, value: unknown): unknown 
         }))
         .slice(0, 50);
 
-    // specific_bequests: Array<{ beneficiary: string; asset: string }>
     case 'specific_bequests':
       if (!Array.isArray(value)) return undefined;
       return value
@@ -228,14 +241,12 @@ function validateFactValue(key: keyof UserMemoryFacts, value: unknown): unknown 
 
 function parseExtractionResponse(text: string): ExtractionResult {
   try {
-    // Strip markdown code fences if present
     const cleaned = text.replace(/^```(?:json)?\s*\n?/i, '').replace(/\n?```\s*$/i, '').trim();
     const parsed = JSON.parse(cleaned);
     if (!parsed.facts || typeof parsed.facts !== 'object') {
       return { facts: {}, summary: typeof parsed.summary === 'string' ? parsed.summary : null };
     }
 
-    // Only accept keys in the whitelist, with type validation
     const safeFacts: Partial<UserMemoryFacts> = {};
     for (const [key, value] of Object.entries(parsed.facts)) {
       if (!VALID_FACT_KEYS.has(key as keyof UserMemoryFacts) || value === undefined || value === null) {
@@ -268,7 +279,6 @@ export function mergeFacts(
 
   for (const [key, value] of Object.entries(extracted)) {
     if (value === undefined || value === null) continue;
-    // Only merge keys that are in the valid whitelist
     if (!VALID_FACT_KEYS.has(key as keyof UserMemoryFacts)) continue;
     (merged as Record<string, unknown>)[key] = value;
   }
@@ -278,7 +288,6 @@ export function mergeFacts(
 
 export async function extractAndSaveMemory(
   model: LanguageModel,
-  supabase: SupabaseClient,
   userId: string,
   sessionId: string,
   userMessage: string,
@@ -286,7 +295,8 @@ export async function extractAndSaveMemory(
   existingMemory: UserMemoryFacts | null,
   summaryData: ConversationSummaryRow | null,
 ) {
-  const currentMessageCount = (summaryData?.message_count ?? 0) + 2; // +2 for user + assistant
+  
+  const currentMessageCount = (summaryData?.message_count ?? 0) + 2;
   const shouldUpdateSummary = currentMessageCount >= 4 && currentMessageCount % 4 < 2;
 
   const prompt = buildExtractionPrompt(
@@ -306,19 +316,15 @@ export async function extractAndSaveMemory(
 
   const { facts, summary } = parseExtractionResponse(text);
 
-  // Save facts if new ones were extracted
   if (Object.keys(facts).length > 0) {
     const merged = mergeFacts(existingMemory, facts);
-    await upsertUserMemory(supabase, userId, merged);
+    await upsertUserMemory(userId, merged);
   }
 
-  // Save summary if updated
   if (summary) {
-    await upsertSessionSummary(supabase, userId, sessionId, summary, currentMessageCount);
+    await upsertSessionSummary(userId, sessionId, summary, currentMessageCount);
   } else {
-    // Still update message count even if summary wasn't regenerated
     await upsertSessionSummary(
-      supabase,
       userId,
       sessionId,
       summaryData?.summary ?? '',
@@ -329,13 +335,12 @@ export async function extractAndSaveMemory(
 
 // ─── Prompt Formatting ───────────────────────────────────────────────────────
 
-/** Sanitize a string value before inserting into a system prompt to prevent injection */
 function sanitizeForPrompt(value: string): string {
   return value
-    .replace(/\n/g, ' ')      // collapse newlines (prevents injecting new prompt lines)
-    .replace(/\r/g, '')        // remove carriage returns
-    .replace(/[═─]/g, '-')    // prevent spoofing section delimiters
-    .slice(0, 500);           // cap length of any single value
+    .replace(/\n/g, ' ')
+    .replace(/\r/g, '')
+    .replace(/[═─]/g, '-')
+    .slice(0, 500);
 }
 
 export function formatMemoryForPrompt(
@@ -411,7 +416,6 @@ export function formatMemoryForPrompt(
   if (summary) {
     lines.push('');
     lines.push('CONVERSATION SUMMARY (current session):');
-    // Sanitize summary but allow newlines within the summary block (they can't escape the section)
     lines.push(summary.replace(/[═─]/g, '-').slice(0, 2000));
   }
 
@@ -420,3 +424,4 @@ export function formatMemoryForPrompt(
 
   return '\n' + lines.join('\n') + '\n';
 }
+

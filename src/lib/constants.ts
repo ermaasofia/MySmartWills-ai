@@ -99,7 +99,24 @@ export const COUNTRIES: Country[] = [
   },
 ];
 
-export const PROMPT_TYPES = ['character', 'sop', 'company_info', 'services', 'other'] as const;
+export const PROMPT_TYPES = [
+  'character',
+  'sop',
+  'company_info',
+  'services',
+  'other',
+
+  // Will Planning
+  'testator',
+  'executor',
+  'guardian',
+  'asset',
+  'beneficiary',
+  'residue_estate',
+  'witness',
+  'pdf_preview',
+] as const;
+
 export type PromptType = (typeof PROMPT_TYPES)[number];
 
 export const EMPTY_PROMPTS: PromptData = {
@@ -108,19 +125,39 @@ export const EMPTY_PROMPTS: PromptData = {
   company_info: '',
   services: '',
   other: '',
+
+  testator: '',
+  executor: '',
+  guardian: '',
+  asset: '',
+  beneficiary: '',
+  residue_estate: '',
+  witness: '',
+  pdf_preview: '',
 };
 
 export const AI_INSTRUCTION_COUNTRIES = [
-  { code: 'MY' as const, name: 'Malaysia (Conventional Will)', flag: COUNTRIES[0].flag },
-  { code: 'MY_WK' as const, name: 'Malaysia / WasiatKu (Islamic Will)', flag: COUNTRIES[0].flag },
-  ...COUNTRIES.filter((c) => c.code !== 'MY').map((c) => ({
-    code: c.code,
-    name: c.name,
-    flag: c.flag,
-  })),
+  {
+    code: 'MY' as const,
+    name: 'Malaysia (Conventional Will)',
+    flag: COUNTRIES[0].flag,
+  },
+  {
+    code: 'MY_WK' as const,
+    name: 'Malaysia / WasiatKu (Islamic Will)',
+    flag: COUNTRIES[0].flag,
+  },
+  ...COUNTRIES
+    .filter((c) => c.code !== 'MY')
+    .map((c) => ({
+      code: c.code,
+      name: c.name,
+      flag: c.flag,
+    })),
 ];
 
-export type AIInstructionCountryCode = (typeof AI_INSTRUCTION_COUNTRIES)[number]['code'];
+export type AIInstructionCountryCode =
+  (typeof AI_INSTRUCTION_COUNTRIES)[number]['code'];
 
 export type SavyCountry = {
   code: string;
@@ -128,18 +165,52 @@ export type SavyCountry = {
   name: string;
   flag: string;
   isActive: boolean;
-  video?: string; // public path to looping mp4, only set for active countries
+  video?: string;
 };
 
-// MY_WK is a synthetic code not in COUNTRIES, so it is handled by the explicit entry above — intentionally absent here.
 const ACTIVE_CODES = ['MY', 'SG', 'HK', 'TH'];
 
 export const SAVY_COUNTRIES: SavyCountry[] = [
-  { code: 'MY', savyName: 'Savy MY', name: 'Malaysia', flag: '🇲🇾', isActive: true, video: '/savy-my.mp4' },
-  { code: 'MY_WK', savyName: 'Savy WasiatKu', name: 'Malaysia (Islamic Will)', flag: '🇲🇾', isActive: true, video: '/savy-my-wk.mp4' },
-  { code: 'SG', savyName: 'Savy SG', name: 'Singapore', flag: '🇸🇬', isActive: true, video: '/savy-sg.mp4' },
-  { code: 'HK', savyName: 'Savy HK', name: 'Hong Kong', flag: '🇭🇰', isActive: true, video: '/savy-hk.mp4' },
-  { code: 'TH', savyName: 'Savy TH', name: 'Thailand', flag: '🇹🇭', isActive: true, video: '/savy-th.mp4' },
+  {
+    code: 'MY',
+    savyName: 'Savy MY',
+    name: 'Malaysia',
+    flag: '🇲🇾',
+    isActive: true,
+    video: '/savy-my.mp4',
+  },
+  {
+    code: 'MY_WK',
+    savyName: 'Savy WasiatKu',
+    name: 'Malaysia (Islamic Will)',
+    flag: '🇲🇾',
+    isActive: true,
+    video: '/savy-my-wk.mp4',
+  },
+  {
+    code: 'SG',
+    savyName: 'Savy SG',
+    name: 'Singapore',
+    flag: '🇸🇬',
+    isActive: true,
+    video: '/savy-sg.mp4',
+  },
+  {
+    code: 'HK',
+    savyName: 'Savy HK',
+    name: 'Hong Kong',
+    flag: '🇭🇰',
+    isActive: true,
+    video: '/savy-hk.mp4',
+  },
+  {
+    code: 'TH',
+    savyName: 'Savy TH',
+    name: 'Thailand',
+    flag: '🇹🇭',
+    isActive: true,
+    video: '/savy-th.mp4',
+  },
   ...COUNTRIES.filter((c) => !ACTIVE_CODES.includes(c.code)).map((c) => ({
     code: c.code,
     savyName: `Savy ${c.code}`,
@@ -150,4 +221,5 @@ export const SAVY_COUNTRIES: SavyCountry[] = [
 ];
 
 export const APP_NAME = 'AI SmartWills';
-export const APP_DESCRIPTION = 'Your intelligent legal will planning assistant';
+export const APP_DESCRIPTION =
+  'Your intelligent legal will planning assistant';
