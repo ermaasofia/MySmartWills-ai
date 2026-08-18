@@ -1,27 +1,16 @@
-import Image from 'next/image';
 import Link from 'next/link';
+
+import { SmartWillsBrand } from '@/components/brand/smartwills-brand';
 
 export function LandingNav() {
   return (
     <nav className="sticky top-0 z-50 border-b border-[#ececec] bg-white/95 backdrop-blur-xl">
-      <div className="mx-auto flex h-[68px] max-w-[1120px] items-center justify-between px-4 sm:px-6 lg:px-0">
-        {/* LEFT - LOGO */}
-        <Link href="/" className="flex items-center gap-2.5">
-          <Image
-            src="/logo.png"
-            alt="SmartWills.ai"
-            width={30}
-            height={30}
-            className="rounded-[5px]"
-            priority
-          />
+      <div className="mx-auto flex h-[82px] max-w-[1120px] items-center justify-between px-4 sm:px-6 lg:px-0">
 
-          <span className="font-serif text-[20px] font-semibold tracking-[-0.02em] text-[#171717]">
-            SmartWills.ai
-          </span>
-        </Link>
+        {/* BRAND */}
+        <SmartWillsBrand size="md" />
 
-        {/* CENTER - NAVIGATION */}
+        {/* CENTER NAVIGATION */}
         <div className="hidden items-center gap-10 md:flex">
           <Link
             href="#features"
@@ -52,7 +41,7 @@ export function LandingNav() {
           </Link>
         </div>
 
-        {/* RIGHT - ACTIONS */}
+        {/* ACTIONS */}
         <div className="flex items-center gap-5">
           <Link
             href="/login"
@@ -74,8 +63,7 @@ export function LandingNav() {
               shadow-[0_6px_18px_rgba(164,32,37,0.18)]
               transition-all
               hover:-translate-y-[1px]
-              hover:bg-[#8f1c20]
-              hover:shadow-[0_8px_22px_rgba(164,32,37,0.24)]
+              hover:bg-[#891b1f]
             "
           >
             Get started

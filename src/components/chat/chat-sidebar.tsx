@@ -149,6 +149,8 @@ function groupSessionsByDate(
     );
 }
 
+
+   
 /* =========================================================
    SMARTWILLS LOGO
 ========================================================= */
@@ -157,82 +159,70 @@ function SwLogo() {
   return (
     <Link
       href="/"
+      aria-label="SmartWills.Ai Home"
       className="
+        group
         flex
-        h-12
+        h-[64px]
         w-full
         items-center
-        gap-2.5
+        gap-3
         rounded-[12px]
         border
         border-[#a42025]/15
         bg-white
         px-3
+        no-underline
         shadow-[0_4px_14px_rgba(0,0,0,0.04)]
         transition-all
 
         hover:border-[#a42025]/25
-        hover:bg-[#a42025]/[0.03]
+        hover:bg-[#a42025]/[0.025]
         hover:shadow-[0_6px_18px_rgba(164,32,37,0.08)]
       "
     >
-      {/* SMARTWILLS ICON */}
-
+      {/* LOGO SYMBOL */}
       <div
         className="
           flex
-          h-9
-          w-9
+          h-[46px]
+          w-[46px]
           shrink-0
           items-center
           justify-center
-          rounded-[9px]
-          bg-[#a42025]/[0.06]
         "
       >
         <Image
           src="/icon.png"
-          alt="SmartWills.ai"
-          width={30}
-          height={30}
-          className="
-            h-8
-            w-8
-            object-contain
-          "
+          alt="SmartWills logo"
+          width={46}
+          height={46}
           priority
+          className="
+            h-[46px]
+            w-[46px]
+            object-contain
+            transition-transform
+            duration-300
+            group-hover:scale-[1.03]
+          "
         />
       </div>
 
-      {/* SMARTWILLS NAME */}
-
-      <div className="flex min-w-0 items-center gap-1">
-        <span
-          className="
-            truncate
-            text-[15px]
-            font-semibold
-            tracking-[-0.025em]
-            text-[#171717]
-          "
-        >
-          SmartWills
-        </span>
-
-        <span
-          className="
-            rounded-[5px]
-            bg-[#a42025]
-            px-1.5
-            py-0.5
-            text-[9px]
-            font-semibold
-            text-white
-          "
-        >
-          .ai
-        </span>
-      </div>
+      {/* BRAND NAME */}
+      <span
+        className="
+          min-w-0
+          truncate
+          font-serif
+          text-[20px]
+          font-semibold
+          tracking-[-0.035em]
+          text-[#171717]
+        "
+      >
+        SmartWills.Ai
+      </span>
     </Link>
   );
 }

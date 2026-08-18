@@ -47,7 +47,6 @@ export function AuthShell({
         "
       >
         {/* TOP BRAND GLOW */}
-
         <div
           className="
             absolute
@@ -63,7 +62,6 @@ export function AuthShell({
         />
 
         {/* RIGHT BRAND GLOW */}
-
         <div
           className="
             absolute
@@ -78,7 +76,6 @@ export function AuthShell({
         />
 
         {/* LEFT SOFT GLOW */}
-
         <div
           className="
             absolute
@@ -111,7 +108,7 @@ export function AuthShell({
           className="
             mx-auto
             flex
-            h-[68px]
+            h-[82px]
             max-w-[1120px]
             items-center
             justify-between
@@ -120,70 +117,60 @@ export function AuthShell({
             lg:px-0
           "
         >
-          {/* LOGO */}
+          {/* =================================================
+              SMARTWILLS.AI BRAND
+          ================================================= */}
 
           <Link
             href="/"
+            aria-label="SmartWills.Ai Home"
             className="
+              group
               flex
               items-center
               gap-2.5
               no-underline
             "
           >
-            <div
+            {/* LOGO SYMBOL */}
+            <Image
+              src="/icon.png"
+              alt="SmartWills logo"
+              width={52}
+              height={52}
+              priority
               className="
-                flex
-                h-9
-                w-9
-                items-center
-                justify-center
-                rounded-[9px]
-                bg-[#a42025]/[0.05]
+                h-[46px]
+                w-[46px]
+                shrink-0
+                object-contain
+                transition-transform
+                duration-300
+                group-hover:scale-[1.03]
+                sm:h-[50px]
+                sm:w-[50px]
               "
-            >
-              <Image
-                src="/icon.png"
-                alt="SmartWills.ai"
-                width={30}
-                height={30}
-                className="
-                  h-8
-                  w-8
-                  object-contain
-                "
-                priority
-              />
-            </div>
+            />
 
+            {/* BRAND NAME */}
             <span
               className="
+                whitespace-nowrap
                 font-serif
-                text-[19px]
+                text-[18px]
                 font-semibold
-                tracking-[-0.025em]
+                tracking-[-0.03em]
                 text-[#171717]
+                sm:text-[20px]
               "
             >
-              SmartWills
-            </span>
-
-            <span
-              className="
-                rounded-[5px]
-                bg-[#a42025]
-                px-1.5
-                py-0.5
-                text-[9px]
-                font-semibold
-                text-white
-              "
-            >
-              .ai
+              SmartWills.Ai
             </span>
           </Link>
 
-          {/* BACK */}
+          {/* =================================================
+              BACK
+          ================================================= */}
 
           <Link
             href="/"
@@ -200,13 +187,11 @@ export function AuthShell({
               tracking-[0.13em]
               text-[#777777]
               transition-all
-
               hover:bg-[#a42025]/[0.05]
               hover:text-[#a42025]
             "
           >
             <span>←</span>
-
             Back
           </Link>
         </div>
@@ -225,9 +210,9 @@ export function AuthShell({
           items-center
           justify-center
           px-4
-          py-12
+          py-10
           sm:px-6
-          sm:py-16
+          sm:py-14
         "
       >
         <div className="w-full max-w-[460px]">
@@ -236,48 +221,6 @@ export function AuthShell({
           ========================================= */}
 
           <div className="mb-8 text-center">
-            {/* SMALL BRAND BADGE */}
-
-            <div
-              className="
-                mx-auto
-                mb-5
-                flex
-                w-fit
-                items-center
-                gap-2
-                rounded-full
-                border
-                border-[#e7e7e7]
-                bg-white
-                px-3
-                py-1.5
-                shadow-[0_4px_15px_rgba(0,0,0,0.035)]
-              "
-            >
-              <span
-                className="
-                  h-[6px]
-                  w-[6px]
-                  rounded-full
-                  bg-[#a42025]
-                  shadow-[0_0_6px_rgba(164,32,37,0.25)]
-                "
-              />
-
-              <span
-                className="
-                  text-[9px]
-                  font-semibold
-                  uppercase
-                  tracking-[0.15em]
-                  text-[#555555]
-                "
-              >
-                SmartWills.ai
-              </span>
-            </div>
-
             {/* TITLE */}
 
             <h1
@@ -401,9 +344,7 @@ export function AuthShell({
             sm:justify-between
           "
         >
-          <span>
-            © 2026 SmartWills.ai
-          </span>
+          <span>© 2026 SmartWills.Ai</span>
 
           <div className="flex items-center gap-5">
             <Link
