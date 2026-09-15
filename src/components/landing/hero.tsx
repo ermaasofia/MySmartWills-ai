@@ -71,6 +71,9 @@ export function Hero() {
         setIsIntroActive(false);
         setIsTransitioning(false);
         setShowPins(true);
+        if (globeWrapperRef.current) {
+          globeWrapperRef.current.style.transform = '';
+        }
         document.body.style.overflow = '';
         document.documentElement.style.overflow = '';
         if (lenis) {
@@ -94,7 +97,7 @@ export function Hero() {
       );
     }
 
-    // 2. Stage 2: Globe glides majestically from bottom-center horizon to hero right column (100ms - 980ms)
+    // 2. Stage 2: Globe glides smoothly from bottom-center horizon to hero right column (100ms - 980ms)
     if (globeWrapperRef.current && heroRightSlotRef.current) {
       const targetRect = heroRightSlotRef.current.getBoundingClientRect();
       const currentRect = globeWrapperRef.current.getBoundingClientRect();
@@ -275,8 +278,8 @@ export function Hero() {
           px-4
           py-14
           sm:px-6
-          lg:grid-cols-[0.95fr_1.05fr]
-          lg:gap-12
+          lg:grid-cols-[1fr_1fr]
+          lg:gap-10
           lg:px-0
           lg:py-16
         "
@@ -362,23 +365,23 @@ export function Hero() {
           </Reveal>
         </div>
 
-        {/* RIGHT HERO SLOT (FINAL RESTING TARGET FOR GLOBE) */}
+        {/* RIGHT HERO SLOT (FINAL RESTING TARGET FOR GLOBE - BALANCED & CENTERED) */}
         <div
           ref={heroRightSlotRef}
-          className="relative mx-auto min-h-[430px] w-full max-w-[570px] flex items-center justify-center z-10"
+          className="relative mx-auto min-h-[430px] w-full max-w-[480px] flex items-center justify-center z-10"
         >
           {/* =========================================================
               GLOBE CONTAINER
               - In Intro State: Fixed at bottom-center horizon (50% left, 0 bottom, translate -50% 50%)
-              - In Final Hero State: Sits naturally inside hero right slot
+              - In Final Hero State: Sits centered naturally inside right hero slot
           ========================================================= */}
           <div
             ref={globeWrapperRef}
             className={`
               ${
                 isIntroActive
-                  ? 'fixed bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 scale-[1.38] w-[460px] sm:w-[540px] lg:w-[620px] h-[460px] sm:h-[540px] lg:h-[620px] z-30'
-                  : 'relative w-full h-full'
+                  ? 'fixed bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 scale-[1.38] w-[460px] sm:w-[540px] lg:w-[600px] h-[460px] sm:h-[540px] lg:h-[600px] z-30'
+                  : 'relative w-full h-[430px] flex items-center justify-center'
               }
             `}
             style={{
@@ -391,20 +394,20 @@ export function Hero() {
             )}
 
             {/* BACKGROUND GLOW */}
-            <div className="pointer-events-none absolute left-1/2 top-1/2 h-[350px] w-[350px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#a42025]/[0.025] blur-3xl" />
+            <div className="pointer-events-none absolute left-1/2 top-1/2 h-[320px] w-[320px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#a42025]/[0.025] blur-3xl" />
 
             {/* 3D APAC GLOBE */}
             <div className="absolute inset-0 flex items-center justify-center z-10">
-              <div className="w-[370px] max-w-[78vw] opacity-95">
+              <div className="w-[340px] sm:w-[360px] max-w-[76vw] opacity-95">
                 <ApacGlobe showPins={showPins || (!isIntroActive && !isTransitioning)} />
               </div>
             </div>
 
             {/* ORBIT LINES */}
-            <div className="pointer-events-none absolute left-1/2 top-1/2 h-[220px] w-[440px] max-w-[90%] -translate-x-1/2 -translate-y-1/2 rotate-[-10deg] rounded-[50%] border border-[#a42025]/10" />
-            <div className="pointer-events-none absolute left-1/2 top-1/2 h-[290px] w-[400px] max-w-[80%] -translate-x-1/2 -translate-y-1/2 rotate-[28deg] rounded-[50%] border border-[#a42025]/10" />
+            <div className="pointer-events-none absolute left-1/2 top-1/2 h-[210px] w-[410px] max-w-[90%] -translate-x-1/2 -translate-y-1/2 rotate-[-10deg] rounded-[50%] border border-[#a42025]/10" />
+            <div className="pointer-events-none absolute left-1/2 top-1/2 h-[270px] w-[370px] max-w-[80%] -translate-x-1/2 -translate-y-1/2 rotate-[28deg] rounded-[50%] border border-[#a42025]/10" />
 
-            {/* FLOATING BADGES & SAVY AVATAR (ONLY VISIBLE IN FINAL HERO STATE) */}
+            {/* FLOATING BADGES & SAVY AVATAR (COMFORTABLY POSITIONED WITHIN BOUNDARIES) */}
             <div
               ref={heroBadgesRef}
               className={`transition-opacity duration-300 ${
@@ -412,21 +415,21 @@ export function Hero() {
               }`}
             >
               {/* PRIVATE CARD */}
-              <div className="absolute left-[3%] top-[12%] z-10 flex w-[175px] gap-3 rounded-[10px] border border-[#e8e8e8] bg-white/95 p-3.5 shadow-[0_10px_30px_rgba(0,0,0,0.08)] backdrop-blur-md">
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#a42025]/[0.07] text-[#a42025]">
-                  <LockKeyhole size={17} strokeWidth={1.8} />
+              <div className="absolute left-[-15px] sm:left-[0%] top-[12%] z-10 flex w-[168px] gap-2.5 rounded-[10px] border border-[#e8e8e8] bg-white/95 p-3 shadow-[0_10px_30px_rgba(0,0,0,0.08)] backdrop-blur-md">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#a42025]/[0.07] text-[#a42025]">
+                  <LockKeyhole size={16} strokeWidth={1.8} />
                 </div>
                 <div>
                   <p className="m-0 text-[10px] font-semibold text-[#222222]">Private & secure</p>
-                  <p className="mt-1 text-[8px] leading-[1.5] text-[#707070]">
+                  <p className="mt-0.5 text-[8px] leading-[1.4] text-[#707070]">
                     Your data is encrypted and never shared.
                   </p>
                 </div>
               </div>
 
               {/* SAVY VIDEO AVATAR CARD */}
-              <div className="absolute right-[2%] top-[18%] z-20 flex items-center gap-3 rounded-[14px] border border-[#a42025]/20 bg-white/95 p-2.5 pr-4 shadow-[0_12px_35px_rgba(164,32,37,0.12)] backdrop-blur-md animate-bounce-subtle">
-                <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-full border-2 border-[#a42025]/30 bg-red-50">
+              <div className="absolute right-[-10px] sm:right-[0%] top-[20%] z-20 flex items-center gap-2.5 rounded-[14px] border border-[#a42025]/20 bg-white/95 p-2 pr-3.5 shadow-[0_12px_35px_rgba(164,32,37,0.12)] backdrop-blur-md animate-bounce-subtle">
+                <div className="relative h-11 w-11 shrink-0 overflow-hidden rounded-full border-2 border-[#a42025]/30 bg-red-50">
                   <video
                     src="/flags/savy_vd.mp4"
                     autoPlay
@@ -435,44 +438,44 @@ export function Hero() {
                     playsInline
                     className="h-full w-full object-cover scale-110"
                   />
-                  <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-white bg-emerald-500" />
+                  <span className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full border-2 border-white bg-emerald-500" />
                 </div>
                 <div>
                   <div className="flex items-center gap-1.5">
-                    <p className="m-0 text-[11px] font-bold text-[#1f1f1f]">Savy AI Assistant</p>
-                    <span className="rounded-full bg-[#a42025]/10 px-1.5 py-0.5 text-[8px] font-bold text-[#a42025]">
+                    <p className="m-0 text-[10.5px] font-bold text-[#1f1f1f]">Savy AI Assistant</p>
+                    <span className="rounded-full bg-[#a42025]/10 px-1.5 py-0.5 text-[7.5px] font-bold text-[#a42025]">
                       LIVE
                     </span>
                   </div>
-                  <p className="mt-0.5 text-[9px] leading-tight text-[#666666]">
+                  <p className="mt-0.5 text-[8.5px] leading-tight text-[#666666]">
                     Ready to guide your will planning
                   </p>
                 </div>
               </div>
 
               {/* WILL READY CARD */}
-              <div className="absolute bottom-[12%] left-[12%] z-10 flex w-[175px] gap-3 rounded-[10px] border border-[#e8e8e8] bg-white/95 p-3.5 shadow-[0_10px_30px_rgba(0,0,0,0.08)] backdrop-blur-md">
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#a42025]/[0.07] text-[#a42025]">
-                  <FileText size={17} strokeWidth={1.8} />
+              <div className="absolute bottom-[10%] left-[2%] z-10 flex w-[168px] gap-2.5 rounded-[10px] border border-[#e8e8e8] bg-white/95 p-3 shadow-[0_10px_30px_rgba(0,0,0,0.08)] backdrop-blur-md">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#a42025]/[0.07] text-[#a42025]">
+                  <FileText size={16} strokeWidth={1.8} />
                 </div>
                 <div>
                   <p className="m-0 text-[10px] font-semibold text-[#222222]">Will ready</p>
-                  <p className="mt-1 text-[8px] leading-[1.5] text-[#707070]">
-                    Get a clear summary of your will information.
+                  <p className="mt-0.5 text-[8px] leading-[1.4] text-[#707070]">
+                    Get a clear summary of your will.
                   </p>
                 </div>
               </div>
 
               {/* SHIELD */}
-              <div className="absolute bottom-[8%] left-[54%] z-10 flex h-11 w-11 items-center justify-center rounded-[14px] bg-[#a42025] text-white shadow-[0_8px_25px_rgba(164,32,37,0.25)]">
-                <ShieldCheck size={23} strokeWidth={2} />
+              <div className="absolute bottom-[6%] left-[48%] z-10 flex h-10 w-10 items-center justify-center rounded-[12px] bg-[#a42025] text-white shadow-[0_8px_25px_rgba(164,32,37,0.25)]">
+                <ShieldCheck size={20} strokeWidth={2} />
               </div>
 
               {/* DECORATIVE DOTS */}
               <span className="absolute left-[27%] top-[7%] h-2 w-2 rounded-full bg-[#a42025] shadow-[0_0_9px_rgba(164,32,37,0.6)]" />
               <span className="absolute left-[2%] top-[49%] h-2 w-2 rounded-full bg-[#a42025] shadow-[0_0_9px_rgba(164,32,37,0.6)]" />
               <span className="absolute right-[8%] top-[15%] h-2 w-2 rounded-full bg-[#a42025] shadow-[0_0_9px_rgba(164,32,37,0.6)]" />
-              <span className="absolute bottom-[16%] right-[11%] h-3 w-3 rounded-full bg-[#a42025] shadow-[0_0_12px_rgba(164,32,37,0.65)]" />
+              <span className="absolute bottom-[16%] right-[11%] h-2.5 w-2.5 rounded-full bg-[#a42025] shadow-[0_0_12px_rgba(164,32,37,0.65)]" />
             </div>
           </div>
         </div>
