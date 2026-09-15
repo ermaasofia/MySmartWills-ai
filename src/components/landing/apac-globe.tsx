@@ -102,7 +102,7 @@ const SMARTWILLS_RED: [
    COMPONENT
 ========================================================= */
 
-export function ApacGlobe() {
+export function ApacGlobe({ showPins = true }: { showPins?: boolean }) {
   const canvasRef =
     useRef<HTMLCanvasElement>(null);
 
@@ -485,12 +485,13 @@ export function ApacGlobe() {
 
             pointerEvents: 'none',
 
-            opacity: `var(--cobe-visible-${marker.id}, 0)`,
+            opacity: showPins ? `var(--cobe-visible-${marker.id}, 0)` : 0,
+            visibility: showPins ? 'visible' : 'hidden',
 
             filter: `blur(calc((1 - var(--cobe-visible-${marker.id}, 0)) * 8px))`,
 
             transition:
-              'opacity 0.3s, filter 0.3s',
+              'opacity 0.4s ease, filter 0.4s ease, visibility 0.4s ease',
 
             zIndex: 10,
           }}
