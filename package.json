@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "eslint"
   },
-"dependencies": {
+  "dependencies": {
     "@ai-sdk/deepseek": "^3.0.19",
     "@ai-sdk/openai": "^4.0.27",
     "@ai-sdk/react": "^3.0.70",
@@ -21,6 +21,7 @@
     "@upstash/ratelimit": "^2.0.8",
     "@upstash/redis": "^1.36.2",
     "ai": "^7.0.48",
+    "animejs": "^4.5.0",
     "bcryptjs": "^3.0.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",

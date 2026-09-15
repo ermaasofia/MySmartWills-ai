@@ -75,7 +75,7 @@ export function Testimonial() {
   return (
     <section id="feedback-faq" className="bg-[#fafafa] border-t border-[#eeeeee] py-16 lg:py-24">
       <div className="mx-auto max-w-[1240px] px-4 sm:px-6 lg:px-8">
-        
+
         {/* TOP SECTION HEADER */}
         <Reveal>
           <div className="mb-12 text-center max-w-2xl mx-auto">
@@ -99,7 +99,7 @@ export function Testimonial() {
 
         {/* 2-COLUMN SIDE-BY-SIDE GRID */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-start">
-          
+
           {/* ==========================================
               LEFT COLUMN: CUSTOMER STORY / TESTIMONIAL
           ========================================== */}
@@ -166,11 +166,10 @@ export function Testimonial() {
                     <button
                       key={s.author}
                       onClick={() => setActiveStory(idx)}
-                      className={`h-7 px-3 rounded-full text-[11px] font-semibold transition-all ${
-                        activeStory === idx
+                      className={`h-7 px-3 rounded-full text-[11px] font-semibold transition-all ${activeStory === idx
                           ? 'bg-[#a42025] text-white shadow-sm'
                           : 'bg-[#f4f4f4] text-[#666666] hover:bg-[#eaeaea]'
-                      }`}
+                        }`}
                     >
                       {s.author.split(' ')[0]}
                     </button>
@@ -186,7 +185,7 @@ export function Testimonial() {
           <div className="lg:col-span-7">
             <Reveal delay={80}>
               <div className="rounded-[24px] border border-[#e8e8e8] bg-white overflow-hidden shadow-[0_12px_40px_rgba(0,0,0,0.04)]">
-                
+
                 {/* ACCORDION HEADER */}
                 <div className="bg-[#fafafa] border-b border-[#eeeeee] px-6 py-4 flex items-center justify-between">
                   <div className="flex items-center gap-2">
@@ -207,9 +206,8 @@ export function Testimonial() {
                     return (
                       <div
                         key={item.q}
-                        className={`transition-colors duration-200 ${
-                          isOpen ? 'bg-[#fdfaf9]' : 'bg-white hover:bg-[#fafafa]/80'
-                        }`}
+                        className={`transition-colors duration-200 ${isOpen ? 'bg-[#fdfaf9]' : 'bg-white hover:bg-[#fafafa]/80'
+                          }`}
                       >
                         <button
                           type="button"
@@ -227,9 +225,8 @@ export function Testimonial() {
                           </div>
 
                           <div
-                            className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-[#e2e2e2] bg-white text-[#666666] transition-transform duration-200 ${
-                              isOpen ? 'rotate-180 border-[#a42025]/40 text-[#a42025] bg-[#a42025]/[0.04]' : ''
-                            }`}
+                            className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-[#e2e2e2] bg-white text-[#666666] transition-transform duration-200 ${isOpen ? 'rotate-180 border-[#a42025]/40 text-[#a42025] bg-[#a42025]/[0.04]' : ''
+                              }`}
                           >
                             <ChevronDown size={14} strokeWidth={2.2} />
                           </div>
