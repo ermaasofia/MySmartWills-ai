@@ -91,7 +91,7 @@ export function Hero() {
           opacity: [1, 0],
           translateY: [0, -24],
           duration: 300,
-          ease: 'easeOutQuad',
+          ease: 'outQuad',
         },
         0
       );
@@ -128,7 +128,7 @@ export function Hero() {
           translateY: [24, 0],
           duration: 580,
           delay: stagger(65),
-          ease: 'easeOutCubic',
+          ease: 'outCubic',
         },
         360
       );
@@ -144,7 +144,7 @@ export function Hero() {
           scale: [0.92, 1],
           duration: 480,
           delay: stagger(60),
-          ease: 'easeOutBack',
+          ease: 'outBack',
         },
         540
       );
