@@ -27,7 +27,7 @@ export function LandingNav() {
           </Link>
 
           <Link
-            href="#faq"
+            href="#feedback-faq"
             className="text-[13px] font-medium text-[#292929] transition-colors hover:text-[#a42025]"
           >
             Questions

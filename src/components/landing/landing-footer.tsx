@@ -109,7 +109,7 @@ export function LandingFooter() {
               </Link>
 
               <Link
-                href="#faq"
+                href="#feedback-faq"
                 className="text-[10px] text-[#666666] transition-colors hover:text-[#a42025]"
               >
                 Questions
