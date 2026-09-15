@@ -365,10 +365,10 @@ export function Hero() {
           </Reveal>
         </div>
 
-        {/* RIGHT HERO SLOT (FINAL RESTING TARGET FOR GLOBE - BALANCED & CENTERED) */}
+        {/* RIGHT HERO SLOT (FINAL RESTING TARGET FOR GLOBE - BALANCED & SHIFTED LEFT) */}
         <div
           ref={heroRightSlotRef}
-          className="relative mx-auto min-h-[430px] w-full max-w-[480px] flex items-center justify-center z-10"
+          className="relative min-h-[430px] w-full max-w-[480px] flex items-center justify-center z-10 lg:-translate-x-8 xl:-translate-x-14"
         >
           {/* =========================================================
               GLOBE CONTAINER
