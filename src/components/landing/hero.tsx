@@ -80,21 +80,21 @@ export function Hero() {
       },
     });
 
-    // 1. Fade out Intro UI (0ms - 320ms)
+    // 1. Stage 1: Intro UI smoothly floats up & fades (0ms - 300ms)
     if (introContentStackRef.current) {
       tl.add(
         introContentStackRef.current,
         {
           opacity: [1, 0],
-          translateY: [0, -32],
-          duration: 320,
-          ease: 'inQuad',
+          translateY: [0, -24],
+          duration: 300,
+          ease: 'easeOutQuad',
         },
         0
       );
     }
 
-    // 2. Animate Globe from Bottom-Center Horizon into Hero Right Slot (80ms - 950ms)
+    // 2. Stage 2: Globe glides majestically from bottom-center horizon to hero right column (100ms - 980ms)
     if (globeWrapperRef.current && heroRightSlotRef.current) {
       const targetRect = heroRightSlotRef.current.getBoundingClientRect();
       const currentRect = globeWrapperRef.current.getBoundingClientRect();
@@ -107,43 +107,43 @@ export function Hero() {
         {
           translateX: [0, deltaX],
           translateY: [0, deltaY],
-          scale: [1.4, 1],
+          scale: [1.38, 1],
           duration: 880,
-          ease: 'cubicBezier(0.16, 1, 0.3, 1)',
+          ease: 'cubicBezier(0.18, 0.92, 0.28, 1)',
         },
-        80
+        100
       );
     }
 
-    // 3. Reveal Left Column in Hero (Text, Buttons, Stats) (400ms - 1000ms)
+    // 3. Stage 3: Hero left column rises naturally into view (360ms - 960ms)
     if (heroLeftRef.current) {
       const elements = Array.from(heroLeftRef.current.children) as HTMLElement[];
       tl.add(
         elements,
         {
           opacity: [0, 1],
-          translateX: [-28, 0],
-          duration: 600,
-          delay: stagger(75),
-          ease: 'outCubic',
+          translateY: [24, 0],
+          duration: 580,
+          delay: stagger(65),
+          ease: 'easeOutCubic',
         },
-        400
+        360
       );
     }
 
-    // 4. Reveal Floating Badges & Savy Video Avatar (520ms - 1050ms)
+    // 4. Stage 4: Floating trust badges & Savy avatar reveal around globe (540ms - 1050ms)
     if (heroBadgesRef.current) {
       const badgeElements = Array.from(heroBadgesRef.current.children) as HTMLElement[];
       tl.add(
         badgeElements,
         {
           opacity: [0, 1],
-          scale: [0.9, 1],
-          duration: 520,
-          delay: stagger(70),
-          ease: 'outBack',
+          scale: [0.92, 1],
+          duration: 480,
+          delay: stagger(60),
+          ease: 'easeOutBack',
         },
-        520
+        540
       );
     }
   }, [lenis]);
@@ -210,35 +210,35 @@ export function Hero() {
       {isIntroActive && (
         <div
           ref={introOverlayRef}
-          className={`fixed inset-0 z-40 flex flex-col items-center justify-start pt-20 sm:pt-24 select-none transition-opacity duration-300 ${
+          className={`fixed inset-0 z-40 flex flex-col items-center justify-start pt-16 sm:pt-20 select-none transition-opacity duration-300 ${
             isTransitioning ? 'pointer-events-none' : 'pointer-events-auto'
           }`}
         >
           <div
             ref={introContentStackRef}
-            className="flex flex-col items-center text-center max-w-3xl px-4 pointer-events-auto z-50"
+            className="flex flex-col items-center text-center max-w-4xl px-4 pointer-events-auto z-50 overflow-visible"
           >
-            {/* INTRO HEADLINE */}
+            {/* INTRO HEADLINE - NO CLIPPING */}
             <h1
-              className="m-0 font-serif font-medium leading-[1.02] tracking-[-0.045em] text-[#161616]"
-              style={{ fontSize: 'clamp(32px, 5.5vw, 64px)' }}
+              className="m-0 font-serif font-medium leading-[1.14] tracking-[-0.03em] text-[#161616] pb-1 overflow-visible"
+              style={{ fontSize: 'clamp(32px, 5.2vw, 64px)' }}
             >
-              Plan your legacy,<br />
+              Plan your legacy,<br className="hidden sm:inline" />{' '}
               <span className="text-[#a42025]">protect</span> what matters most.
             </h1>
 
             {/* INTRO SUBTITLE */}
-            <p className="mt-3 max-w-[560px] text-[15px] sm:text-[16px] leading-[1.65] text-[#555555]">
+            <p className="mt-3.5 max-w-[580px] text-[15px] sm:text-[16px] leading-[1.65] text-[#555555]">
               SmartWills.ai gives you country-aware guidance, step-by-step support, and instant peace of mind.
             </p>
 
             {/* ACTION STACK (SCROLL PROMPT + GET STARTED BUTTON) */}
-            <div className="mt-5 flex flex-col items-center gap-3.5">
+            <div className="mt-5 sm:mt-6 flex flex-col items-center gap-3.5">
               <div
                 onClick={triggerTransition}
-                className="flex flex-col items-center gap-1 cursor-pointer text-[#555555] hover:text-[#a42025] transition-colors"
+                className="flex flex-col items-center gap-1.5 cursor-pointer text-[#555555] hover:text-[#a42025] transition-colors"
               >
-                <span className="text-[10px] font-bold tracking-[0.18em] uppercase text-gray-500">
+                <span className="text-[10.5px] font-bold tracking-[0.16em] uppercase text-gray-500">
                   SCROLL DOWN TO EXPLORE
                 </span>
                 <div className="flex h-7 w-7 items-center justify-center rounded-full border border-gray-300 bg-white shadow-sm animate-bounce">
@@ -298,11 +298,11 @@ export function Hero() {
             </div>
           </Reveal>
 
-          {/* HEADING */}
+          {/* HEADING - NO CLIPPING */}
           <Reveal delay={80}>
             <h1
-              className="m-0 max-w-[570px] font-serif font-medium leading-[0.98] tracking-[-0.045em] text-[#161616]"
-              style={{ fontSize: 'clamp(48px, 5vw, 68px)' }}
+              className="m-0 max-w-[570px] font-serif font-medium leading-[1.12] tracking-[-0.035em] text-[#161616] pb-1 overflow-visible"
+              style={{ fontSize: 'clamp(44px, 4.8vw, 64px)' }}
             >
               Plan your will,<br />
               <span className="text-[#a42025]">protect</span> your family.
@@ -311,7 +311,7 @@ export function Hero() {
 
           {/* DESCRIPTION */}
           <Reveal delay={160}>
-            <p className="mt-6 max-w-[510px] text-[15px] leading-[1.7] text-[#555555] sm:text-[16px]">
+            <p className="mt-5 max-w-[510px] text-[15px] leading-[1.7] text-[#555555] sm:text-[16px]">
               SmartWills.ai gives you country-aware guidance, step-by-step support, and a clear summary of your will. So you can plan with confidence and peace of mind.
             </p>
           </Reveal>
@@ -377,7 +377,7 @@ export function Hero() {
             className={`
               ${
                 isIntroActive
-                  ? 'fixed bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 scale-[1.4] w-[460px] sm:w-[540px] lg:w-[620px] h-[460px] sm:h-[540px] lg:h-[620px] z-30'
+                  ? 'fixed bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 scale-[1.38] w-[460px] sm:w-[540px] lg:w-[620px] h-[460px] sm:h-[540px] lg:h-[620px] z-30'
                   : 'relative w-full h-full'
               }
             `}
