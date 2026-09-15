@@ -97,7 +97,7 @@ export function Hero() {
       );
     }
 
-    // 2. Stage 2: Globe glides smoothly from bottom-center horizon to hero right column (100ms - 980ms)
+    // 2. Stage 2: Globe glides smoothly from bottom-center horizon into the right hero slot (100ms - 980ms)
     if (globeWrapperRef.current && heroRightSlotRef.current) {
       const targetRect = heroRightSlotRef.current.getBoundingClientRect();
       const currentRect = globeWrapperRef.current.getBoundingClientRect();
@@ -221,7 +221,7 @@ export function Hero() {
             ref={introContentStackRef}
             className="flex flex-col items-center text-center max-w-4xl px-4 pointer-events-auto z-50 overflow-visible"
           >
-            {/* INTRO HEADLINE - NO CLIPPING */}
+            {/* INTRO HEADLINE */}
             <h1
               className="m-0 font-serif font-medium leading-[1.14] tracking-[-0.03em] text-[#161616] pb-1 overflow-visible"
               style={{ fontSize: 'clamp(32px, 5.2vw, 64px)' }}
@@ -263,31 +263,31 @@ export function Hero() {
       )}
 
       {/* =========================================
-          MAIN HERO CONTAINER (TWO-COLUMN LAYOUT)
+          MAIN HERO CONTAINER (TWO-COLUMN BALANCED LAYOUT)
       ========================================= */}
       <div
         className="
           relative
           mx-auto
           grid
-          min-h-[520px]
-          max-w-[1120px]
+          min-h-[540px]
+          max-w-[1180px]
           grid-cols-1
           items-center
-          gap-10
+          gap-8
           px-4
-          py-14
+          py-12
           sm:px-6
-          lg:grid-cols-[1fr_1fr]
+          lg:grid-cols-[1fr_1.05fr]
           lg:gap-10
-          lg:px-0
+          lg:px-6
           lg:py-16
         "
       >
         {/* LEFT HERO COLUMN */}
         <div
           ref={heroLeftRef}
-          className={`relative z-10 transition-opacity duration-300 ${
+          className={`relative z-10 flex flex-col justify-center transition-opacity duration-300 ${
             isIntroActive && !isTransitioning ? 'opacity-0 pointer-events-none' : 'opacity-100'
           }`}
         >
@@ -301,11 +301,11 @@ export function Hero() {
             </div>
           </Reveal>
 
-          {/* HEADING - NO CLIPPING */}
+          {/* HEADING */}
           <Reveal delay={80}>
             <h1
               className="m-0 max-w-[570px] font-serif font-medium leading-[1.12] tracking-[-0.035em] text-[#161616] pb-1 overflow-visible"
-              style={{ fontSize: 'clamp(44px, 4.8vw, 64px)' }}
+              style={{ fontSize: 'clamp(42px, 4.6vw, 64px)' }}
             >
               Plan your will,<br />
               <span className="text-[#a42025]">protect</span> your family.
@@ -365,15 +365,15 @@ export function Hero() {
           </Reveal>
         </div>
 
-        {/* RIGHT HERO SLOT (FINAL RESTING TARGET FOR GLOBE - BALANCED & SHIFTED LEFT) */}
+        {/* RIGHT HERO SLOT - FITS PERFECTLY IN THE RIGHT-HAND SPACE */}
         <div
           ref={heroRightSlotRef}
-          className="relative min-h-[430px] w-full max-w-[480px] flex items-center justify-center z-10 lg:-translate-x-8 xl:-translate-x-14"
+          className="relative min-h-[460px] w-full max-w-[560px] mx-auto flex items-center justify-center z-10 overflow-visible"
         >
           {/* =========================================================
               GLOBE CONTAINER
               - In Intro State: Fixed at bottom-center horizon (50% left, 0 bottom, translate -50% 50%)
-              - In Final Hero State: Sits centered naturally inside right hero slot
+              - In Final Hero State: Fits naturally and flexibly in the right space
           ========================================================= */}
           <div
             ref={globeWrapperRef}
@@ -381,7 +381,7 @@ export function Hero() {
               ${
                 isIntroActive
                   ? 'fixed bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 scale-[1.38] w-[460px] sm:w-[540px] lg:w-[600px] h-[460px] sm:h-[540px] lg:h-[600px] z-30'
-                  : 'relative w-full h-[430px] flex items-center justify-center'
+                  : 'relative w-full h-[460px] flex items-center justify-center overflow-visible'
               }
             `}
             style={{
@@ -394,28 +394,28 @@ export function Hero() {
             )}
 
             {/* BACKGROUND GLOW */}
-            <div className="pointer-events-none absolute left-1/2 top-1/2 h-[320px] w-[320px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#a42025]/[0.025] blur-3xl" />
+            <div className="pointer-events-none absolute left-1/2 top-1/2 h-[340px] w-[340px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#a42025]/[0.03] blur-3xl" />
 
             {/* 3D APAC GLOBE */}
             <div className="absolute inset-0 flex items-center justify-center z-10">
-              <div className="w-[340px] sm:w-[360px] max-w-[76vw] opacity-95">
+              <div className="w-[370px] sm:w-[400px] lg:w-[430px] max-w-[85vw] opacity-95 aspect-square">
                 <ApacGlobe showPins={showPins || (!isIntroActive && !isTransitioning)} />
               </div>
             </div>
 
             {/* ORBIT LINES */}
-            <div className="pointer-events-none absolute left-1/2 top-1/2 h-[210px] w-[410px] max-w-[90%] -translate-x-1/2 -translate-y-1/2 rotate-[-10deg] rounded-[50%] border border-[#a42025]/10" />
-            <div className="pointer-events-none absolute left-1/2 top-1/2 h-[270px] w-[370px] max-w-[80%] -translate-x-1/2 -translate-y-1/2 rotate-[28deg] rounded-[50%] border border-[#a42025]/10" />
+            <div className="pointer-events-none absolute left-1/2 top-1/2 h-[230px] w-[450px] max-w-[95%] -translate-x-1/2 -translate-y-1/2 rotate-[-10deg] rounded-[50%] border border-[#a42025]/10" />
+            <div className="pointer-events-none absolute left-1/2 top-1/2 h-[300px] w-[410px] max-w-[85%] -translate-x-1/2 -translate-y-1/2 rotate-[28deg] rounded-[50%] border border-[#a42025]/10" />
 
-            {/* FLOATING BADGES & SAVY AVATAR (COMFORTABLY POSITIONED WITHIN BOUNDARIES) */}
+            {/* FLOATING BADGES & SAVY AVATAR (WELL-BALANCED AROUND THE GLOBE) */}
             <div
               ref={heroBadgesRef}
               className={`transition-opacity duration-300 ${
                 isIntroActive && !isTransitioning ? 'opacity-0 pointer-events-none' : 'opacity-100'
               }`}
             >
-              {/* PRIVATE CARD */}
-              <div className="absolute left-[-15px] sm:left-[0%] top-[12%] z-10 flex w-[168px] gap-2.5 rounded-[10px] border border-[#e8e8e8] bg-white/95 p-3 shadow-[0_10px_30px_rgba(0,0,0,0.08)] backdrop-blur-md">
+              {/* PRIVATE CARD (TOP LEFT OF GLOBE) */}
+              <div className="absolute left-[0%] sm:left-[2%] top-[10%] z-10 flex w-[172px] gap-2.5 rounded-[10px] border border-[#e8e8e8] bg-white/95 p-3 shadow-[0_10px_30px_rgba(0,0,0,0.08)] backdrop-blur-md">
                 <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#a42025]/[0.07] text-[#a42025]">
                   <LockKeyhole size={16} strokeWidth={1.8} />
                 </div>
@@ -427,8 +427,8 @@ export function Hero() {
                 </div>
               </div>
 
-              {/* SAVY VIDEO AVATAR CARD */}
-              <div className="absolute right-[-10px] sm:right-[0%] top-[20%] z-20 flex items-center gap-2.5 rounded-[14px] border border-[#a42025]/20 bg-white/95 p-2 pr-3.5 shadow-[0_12px_35px_rgba(164,32,37,0.12)] backdrop-blur-md animate-bounce-subtle">
+              {/* SAVY VIDEO AVATAR CARD (TOP RIGHT OF GLOBE) */}
+              <div className="absolute right-[0%] sm:right-[2%] top-[16%] z-20 flex items-center gap-2.5 rounded-[14px] border border-[#a42025]/20 bg-white/95 p-2 pr-3.5 shadow-[0_12px_35px_rgba(164,32,37,0.12)] backdrop-blur-md animate-bounce-subtle">
                 <div className="relative h-11 w-11 shrink-0 overflow-hidden rounded-full border-2 border-[#a42025]/30 bg-red-50">
                   <video
                     src="/flags/savy_vd.mp4"
@@ -453,8 +453,8 @@ export function Hero() {
                 </div>
               </div>
 
-              {/* WILL READY CARD */}
-              <div className="absolute bottom-[10%] left-[2%] z-10 flex w-[168px] gap-2.5 rounded-[10px] border border-[#e8e8e8] bg-white/95 p-3 shadow-[0_10px_30px_rgba(0,0,0,0.08)] backdrop-blur-md">
+              {/* WILL READY CARD (BOTTOM LEFT OF GLOBE) */}
+              <div className="absolute bottom-[10%] left-[4%] sm:left-[6%] z-10 flex w-[172px] gap-2.5 rounded-[10px] border border-[#e8e8e8] bg-white/95 p-3 shadow-[0_10px_30px_rgba(0,0,0,0.08)] backdrop-blur-md">
                 <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#a42025]/[0.07] text-[#a42025]">
                   <FileText size={16} strokeWidth={1.8} />
                 </div>
@@ -466,16 +466,16 @@ export function Hero() {
                 </div>
               </div>
 
-              {/* SHIELD */}
-              <div className="absolute bottom-[6%] left-[48%] z-10 flex h-10 w-10 items-center justify-center rounded-[12px] bg-[#a42025] text-white shadow-[0_8px_25px_rgba(164,32,37,0.25)]">
+              {/* SHIELD (BOTTOM CENTER OF GLOBE) */}
+              <div className="absolute bottom-[6%] left-[50%] z-10 flex h-10 w-10 items-center justify-center rounded-[12px] bg-[#a42025] text-white shadow-[0_8px_25px_rgba(164,32,37,0.25)]">
                 <ShieldCheck size={20} strokeWidth={2} />
               </div>
 
               {/* DECORATIVE DOTS */}
-              <span className="absolute left-[27%] top-[7%] h-2 w-2 rounded-full bg-[#a42025] shadow-[0_0_9px_rgba(164,32,37,0.6)]" />
-              <span className="absolute left-[2%] top-[49%] h-2 w-2 rounded-full bg-[#a42025] shadow-[0_0_9px_rgba(164,32,37,0.6)]" />
-              <span className="absolute right-[8%] top-[15%] h-2 w-2 rounded-full bg-[#a42025] shadow-[0_0_9px_rgba(164,32,37,0.6)]" />
-              <span className="absolute bottom-[16%] right-[11%] h-2.5 w-2.5 rounded-full bg-[#a42025] shadow-[0_0_12px_rgba(164,32,37,0.65)]" />
+              <span className="absolute left-[25%] top-[6%] h-2 w-2 rounded-full bg-[#a42025] shadow-[0_0_9px_rgba(164,32,37,0.6)]" />
+              <span className="absolute left-[0%] top-[48%] h-2 w-2 rounded-full bg-[#a42025] shadow-[0_0_9px_rgba(164,32,37,0.6)]" />
+              <span className="absolute right-[6%] top-[12%] h-2 w-2 rounded-full bg-[#a42025] shadow-[0_0_9px_rgba(164,32,37,0.6)]" />
+              <span className="absolute bottom-[14%] right-[10%] h-2.5 w-2.5 rounded-full bg-[#a42025] shadow-[0_0_12px_rgba(164,32,37,0.65)]" />
             </div>
           </div>
         </div>
