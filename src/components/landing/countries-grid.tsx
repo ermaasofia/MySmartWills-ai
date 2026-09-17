@@ -23,7 +23,6 @@ const COUNTRIES_12 = [
     language: 'Malay / English',
     jurisdiction: 'Wills Act 1959 / Wasiat',
     featured: true,
-    imageClass: 'object-contain p-3 scale-[0.82] object-center',
   },
   {
     code: 'SG',
@@ -398,8 +397,7 @@ export function CountriesGrid() {
                     alt={country.name}
                     loading="lazy"
                     decoding="async"
-                    className={`absolute inset-0 h-full w-full transition-transform duration-700 ease-out group-hover/card:scale-105 ${country.imageClass || 'object-cover'
-                      }`}
+                    className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-out group-hover/card:scale-110"
                   />
 
                   {/* Gradient Scrim */}
