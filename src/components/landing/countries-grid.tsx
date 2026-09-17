@@ -18,7 +18,7 @@ const COUNTRIES_12 = [
   {
     code: 'MY',
     name: 'Malaysia',
-    image: '/flags/C1.jpeg',
+    image: '/flags/C13.jpeg',
     flagSvg: 'MY',
     language: 'Malay / English',
     jurisdiction: 'Wills Act 1959 / Wasiat',
@@ -107,7 +107,7 @@ const COUNTRIES_12 = [
   {
     code: 'PH',
     name: 'Philippines',
-    image: '/flags/C12.jpeg',
+    image: '/flags/C1.jpeg',
     flagSvg: 'PH',
     language: 'Filipino / English',
     jurisdiction: 'Civil Code Book III',

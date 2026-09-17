@@ -194,7 +194,7 @@ export function Hero() {
           <div
             className="flex flex-col items-center text-center max-w-4xl px-4 z-50 overflow-visible"
             style={{
-              paddingTop: 'clamp(60px, 9vh, 110px)',
+              paddingTop: 'clamp(30px, 9vh, 110px)',
             }}
           >
             {/* INTRO TEXT GROUP */}
@@ -209,9 +209,7 @@ export function Hero() {
                 <span className="text-[#a42025]">protect</span> what matters most.
               </h1>
 
-              <p className="mt-4 max-w-[580px] text-[15px] sm:text-[16px] leading-[1.65] text-[#555555]">
-                SmartWills.ai gives you country-aware guidance, step-by-step support, and instant peace of mind.
-              </p>
+
             </div>
 
             {/* ACTION STACK (SCROLL PROMPT + GET STARTED BUTTON) */}
