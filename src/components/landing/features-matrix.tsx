@@ -7,8 +7,6 @@ import {
   Globe2,
   LockKeyhole,
   HeartHandshake,
-  ListChecks,
-  RefreshCcw,
   FileCheck2,
   Bot,
   ShieldCheck,
@@ -17,7 +15,6 @@ import {
   Clock,
   CheckCircle2,
   Shield,
-  BadgeCheck,
 } from 'lucide-react';
 
 const useIsomorphicLayoutEffect =
@@ -38,13 +35,11 @@ export function FeaturesMatrix() {
       const tileElements = gsap.utils.toArray<HTMLElement>('.board-tile');
       if (!tileElements.length) return;
 
-      // Deterministically group or pseudo-shuffle for balanced reveals across the board
-      // A curated shuffle pattern ensures tiles pop evenly across all 4 quadrants in each step
+      // Curated balanced shuffle for a symmetric 3-step reveal across the board
       const curatedOrder = [
-        0, 3, 9, 14,   // Step 1: Top-left, top-right, bottom-left, bottom-right
-        1, 6, 8, 13,   // Step 2: Inner icons, center flanks
-        2, 5, 11, 15,  // Step 3: Top inner, mid-bottom flanks
-        4, 7, 10, 12,  // Step 4: Remaining completing tiles
+        0, 3, 8, 11,   // Step 1: 4 outer corner cards (01, 02, 03, 04)
+        1, 2, 9, 10,   // Step 2: Top & bottom inner icons (Global Laws, 256-Bit AES, Court Ready, Zero Jargon)
+        4, 5, 6, 7,    // Step 3: Center row flanks (Family First, 15 Mins, Legal Will, AI Copilot)
       ];
 
       // Reorder tiles according to curated balanced shuffle
@@ -70,8 +65,8 @@ export function FeaturesMatrix() {
         });
       });
 
-      // Pinned timeline driving step-by-step batch reveals matching "The Line Up"
-      const totalScrollDistance = batches.length * 400; // ~1600px scroll lock
+      // Pinned timeline driving step-by-step batch reveals
+      const totalScrollDistance = batches.length * 450;
 
       const tl = gsap.timeline({
         scrollTrigger: {
@@ -148,14 +143,13 @@ export function FeaturesMatrix() {
 
         {/* Scroll Progress Step Dots */}
         <div className="flex items-center justify-center gap-2 mt-3">
-          {[1, 2, 3, 4].map((step) => (
+          {[1, 2, 3].map((step) => (
             <div
               key={step}
-              className={`h-1.5 rounded-full transition-all duration-300 ${
-                activeBatch >= step
-                  ? 'w-6 bg-[#a42025]'
-                  : 'w-2 bg-gray-300'
-              }`}
+              className={`h-1.5 rounded-full transition-all duration-300 ${activeBatch >= step
+                ? 'w-6 bg-[#a42025]'
+                : 'w-2 bg-gray-300'
+                }`}
             />
           ))}
         </div>
@@ -205,8 +199,8 @@ export function FeaturesMatrix() {
           <div className="w-9 h-9 rounded-xl bg-red-50 text-[#a42025] flex items-center justify-center mb-1.5 shadow-inner">
             <LockKeyhole className="w-5 h-5 text-[#a42025]" strokeWidth={2.2} />
           </div>
-          <span className="text-[11px] font-bold text-[#1a1a1a] leading-none">256-Bit AES</span>
-          <span className="text-[9px] text-gray-400 font-medium mt-0.5">Encrypted Vault</span>
+          <span className="text-[11px] font-bold text-[#1a1a1a] leading-none">Encrypted Vault</span>
+          <span className="text-[9px] text-gray-400 font-medium mt-0.5">Bank-Grade</span>
         </div>
 
         {/* Tile 3: Feature 02 */}
@@ -259,7 +253,7 @@ export function FeaturesMatrix() {
           <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#a42025] text-white text-[10px] font-black uppercase tracking-widest shadow-xs mb-1.5">
             <Shield className="w-3 h-3 text-white fill-white/20" /> CORE PROMISE
           </div>
-          <h3 className="font-serif font-black text-sm sm:text-base md:text-[17px] text-[#1a1a1a] tracking-tight leading-tight uppercase">
+          <h3 className="font-sans font-black text-sm sm:text-base md:text-[17px] text-[#1a1a1a] tracking-tight leading-tight uppercase">
             DESIGNED TO PROTECT <span className="text-[#a42025]">YOUR LOVED ONES</span>
           </h3>
           <span className="text-[10px] text-gray-500 font-medium mt-0.5">
@@ -346,74 +340,6 @@ export function FeaturesMatrix() {
               Step-by-step allocations for executors, guardians, and estate division.
             </p>
           </div>
-        </div>
-
-        {/* =========================================================
-            ROW 4: (3 + 3 + 3 + 3 = 12 cols)
-        ========================================================== */}
-
-        {/* Tile 12: Feature 05 */}
-        <div className="board-tile col-span-12 sm:col-span-6 md:col-span-3 bg-white rounded-2xl border border-gray-200/90 p-3.5 sm:p-4 shadow-[0_6px_20px_rgba(0,0,0,0.03)] border-b-2 border-b-gray-200 flex flex-col justify-between hover:border-[#a42025]/40 hover:shadow-md transition-all duration-300 min-h-[90px] md:min-h-[100px]">
-          <div className="flex items-center justify-between">
-            <span className="text-[11px] font-black tracking-wider uppercase text-[#a42025] bg-red-50 px-2 py-0.5 rounded-md border border-red-100">
-              05
-            </span>
-            <RefreshCcw className="w-3.5 h-3.5 text-gray-400" />
-          </div>
-          <div>
-            <h4 className="font-bold text-sm text-[#1a1a1a] leading-tight">
-              Come back anytime
-            </h4>
-            <p className="text-[11px] text-gray-500 mt-0.5 leading-snug line-clamp-2">
-              Automatic saves allow you to pause and resume smoothly.
-            </p>
-          </div>
-        </div>
-
-        {/* Tile 13: Feature 07 */}
-        <div className="board-tile col-span-12 sm:col-span-6 md:col-span-3 bg-white rounded-2xl border border-gray-200/90 p-3.5 sm:p-4 shadow-[0_6px_20px_rgba(0,0,0,0.03)] border-b-2 border-b-gray-200 flex flex-col justify-between hover:border-[#a42025]/40 hover:shadow-md transition-all duration-300 min-h-[90px] md:min-h-[100px]">
-          <div className="flex items-center justify-between">
-            <span className="text-[11px] font-black tracking-wider uppercase text-[#a42025] bg-red-50 px-2 py-0.5 rounded-md border border-red-100">
-              07
-            </span>
-            <Bot className="w-3.5 h-3.5 text-gray-400" />
-          </div>
-          <div>
-            <h4 className="font-bold text-sm text-[#1a1a1a] leading-tight">
-              Always-on assistant
-            </h4>
-            <p className="text-[11px] text-gray-500 mt-0.5 leading-snug line-clamp-2">
-              Contextual AI answers your exact estate questions in seconds.
-            </p>
-          </div>
-        </div>
-
-        {/* Tile 14: Feature 06 */}
-        <div className="board-tile col-span-12 sm:col-span-6 md:col-span-3 bg-white rounded-2xl border border-gray-200/90 p-3.5 sm:p-4 shadow-[0_6px_20px_rgba(0,0,0,0.03)] border-b-2 border-b-gray-200 flex flex-col justify-between hover:border-[#a42025]/40 hover:shadow-md transition-all duration-300 min-h-[90px] md:min-h-[100px]">
-          <div className="flex items-center justify-between">
-            <span className="text-[11px] font-black tracking-wider uppercase text-[#a42025] bg-red-50 px-2 py-0.5 rounded-md border border-red-100">
-              06
-            </span>
-            <FileCheck2 className="w-3.5 h-3.5 text-gray-400" />
-          </div>
-          <div>
-            <h4 className="font-bold text-sm text-[#1a1a1a] leading-tight">
-              Clear will summary
-            </h4>
-            <p className="text-[11px] text-gray-500 mt-0.5 leading-snug line-clamp-2">
-              Review every clause in clean layout before finalizing.
-            </p>
-          </div>
-        </div>
-
-        {/* Tile 15: Bento Badge (100% Valid) */}
-        <div className="board-tile col-span-12 sm:col-span-6 md:col-span-3 bg-white rounded-2xl border border-gray-200/90 p-3.5 sm:p-4 shadow-[0_6px_20px_rgba(0,0,0,0.03)] border-b-2 border-b-gray-200 flex flex-col items-center justify-center text-center hover:border-[#a42025]/40 hover:shadow-md transition-all duration-300 min-h-[90px] md:min-h-[100px]">
-          <div className="flex items-center gap-1.5 text-[#a42025] mb-0.5">
-            <BadgeCheck className="w-4 h-4" />
-            <span className="text-sm font-extrabold tracking-tight">100% Valid</span>
-          </div>
-          <span className="text-[11px] font-bold text-[#1a1a1a] leading-none">Binding Legal Will</span>
-          <span className="text-[9px] text-gray-400 font-medium mt-0.5">Signature-Ready PDF</span>
         </div>
       </div>
     </section>

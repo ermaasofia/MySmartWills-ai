@@ -466,6 +466,7 @@ export function ApacGlobe({ showPins = true }: { showPins?: boolean }) {
       {MARKERS.map((marker) => (
         <div
           key={marker.id}
+          className="hero-flag-badge"
           style={{
             position: 'absolute',
 

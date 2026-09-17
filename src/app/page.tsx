@@ -1,7 +1,6 @@
 import { LandingShell } from '@/components/landing/landing-shell';
 import { LandingNav } from '@/components/landing/landing-nav';
 import { Hero } from '@/components/landing/hero';
-import { EcosystemStrip } from '@/components/landing/ecosystem-strip';
 import { AboutSection } from '@/components/landing/about-section';
 import { FeaturesMatrix } from '@/components/landing/features-matrix';
 import { ServicesGrid } from '@/components/landing/services-grid';
@@ -22,7 +21,6 @@ export default function Home() {
       >
         <LandingNav />
         <Hero />
-        <EcosystemStrip />
         <AboutSection />
         <FeaturesMatrix />
         <ServicesGrid />

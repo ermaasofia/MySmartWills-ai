@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
 import { createTimeline, stagger } from 'animejs';
 import {
@@ -51,29 +51,20 @@ export function Hero() {
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [showPins, setShowPins] = useState(false);
 
-  const introOverlayRef = useRef<HTMLDivElement>(null);
-  const introContentStackRef = useRef<HTMLDivElement>(null);
-  const globeWrapperRef = useRef<HTMLDivElement>(null);
-  const heroRightSlotRef = useRef<HTMLDivElement>(null);
-  const heroLeftRef = useRef<HTMLDivElement>(null);
-  const heroBadgesRef = useRef<HTMLDivElement>(null);
-  const hasTriggeredRef = useRef(false);
-
   const lenis = useLenis();
 
-  const triggerTransition = useCallback(() => {
-    if (hasTriggeredRef.current) return;
-    hasTriggeredRef.current = true;
+  const handleStartTransition = useCallback(() => {
+    if (isTransitioning || !isIntroActive) return;
     setIsTransitioning(true);
 
     const tl = createTimeline({
+      ease: 'cubicBezier(0.25, 1, 0.5, 1)',
       onComplete: () => {
+        // 1. Buang intro overlay sepenuhnya
         setIsIntroActive(false);
         setIsTransitioning(false);
         setShowPins(true);
-        if (globeWrapperRef.current) {
-          globeWrapperRef.current.style.transform = '';
-        }
+        // 2. Buka semula vertical scroll page
         document.body.style.overflow = '';
         document.documentElement.style.overflow = '';
         if (lenis) {
@@ -83,73 +74,53 @@ export function Hero() {
       },
     });
 
-    // 1. Stage 1: Intro UI smoothly floats up & fades (0ms - 300ms)
-    if (introContentStackRef.current) {
-      tl.add(
-        introContentStackRef.current,
+    // 1. Text & Button Intro Fade Out cepat (0ms - 250ms)
+    tl.add(
+      '#intro-text-group, #intro-get-started-btn, #intro-scroll-indicator',
+      {
+        opacity: [1, 0],
+        translateY: [0, -25],
+        duration: 250,
+        ease: 'inQuad',
+      },
+      0
+    )
+      // 2. Smooth Zoom-In Transition pada Intro Globe (100ms - 700ms)
+      // Tidak perlu gerak kiri-kanan (translateX), cuma scale ke depan dan fade
+      .add(
+        '#intro-globe-wrapper',
         {
+          scale: [1, 1.35],
           opacity: [1, 0],
-          translateY: [0, -24],
-          duration: 300,
-          ease: 'outQuad',
-        },
-        0
-      );
-    }
-
-    // 2. Stage 2: Globe glides smoothly from bottom-center horizon into the right hero slot (100ms - 980ms)
-    if (globeWrapperRef.current && heroRightSlotRef.current) {
-      const targetRect = heroRightSlotRef.current.getBoundingClientRect();
-      const currentRect = globeWrapperRef.current.getBoundingClientRect();
-
-      const deltaX = targetRect.left + targetRect.width / 2 - (currentRect.left + currentRect.width / 2);
-      const deltaY = targetRect.top + targetRect.height / 2 - (currentRect.top + currentRect.height / 2);
-
-      tl.add(
-        globeWrapperRef.current,
-        {
-          translateX: [0, deltaX],
-          translateY: [0, deltaY],
-          scale: [1.38, 1],
-          duration: 880,
-          ease: 'cubicBezier(0.18, 0.92, 0.28, 1)',
+          duration: 600,
+          ease: 'cubicBezier(0.4, 0, 0.2, 1)',
         },
         100
-      );
-    }
-
-    // 3. Stage 3: Hero left column rises naturally into view (360ms - 960ms)
-    if (heroLeftRef.current) {
-      const elements = Array.from(heroLeftRef.current.children) as HTMLElement[];
-      tl.add(
-        elements,
+      )
+      // 3. Final Hero Layout (Image 2) Muncul Serentak (Direct Fade & Subtle Settle)
+      .add(
+        '#final-hero-container',
         {
           opacity: [0, 1],
-          translateY: [24, 0],
-          duration: 580,
-          delay: stagger(65),
+          scale: [0.96, 1],
+          duration: 600,
           ease: 'outCubic',
         },
-        360
-      );
-    }
-
-    // 4. Stage 4: Floating trust badges & Savy avatar reveal around globe (540ms - 1050ms)
-    if (heroBadgesRef.current) {
-      const badgeElements = Array.from(heroBadgesRef.current.children) as HTMLElement[];
-      tl.add(
-        badgeElements,
+        200
+      )
+      // 4. Stagger Masuk untuk Floating Cards & Flag Badges (Hero Kedua)
+      .add(
+        '.hero-floating-card, .hero-flag-badge, .hero-shield-icon, .hero-metric-item',
         {
           opacity: [0, 1],
-          scale: [0.92, 1],
-          duration: 480,
+          scale: [0.85, 1],
+          duration: 450,
           delay: stagger(60),
           ease: 'outBack',
         },
-        540
+        300
       );
-    }
-  }, [lenis]);
+  }, [isTransitioning, isIntroActive, lenis]);
 
   useEffect(() => {
     if (!isIntroActive && !isTransitioning) {
@@ -167,19 +138,19 @@ export function Hero() {
     const handleWheel = (e: WheelEvent) => {
       e.preventDefault();
       if (e.deltaY > 0) {
-        triggerTransition();
+        handleStartTransition();
       }
     };
 
     const handleTouch = (e: TouchEvent) => {
       e.preventDefault();
-      triggerTransition();
+      handleStartTransition();
     };
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (['ArrowDown', 'PageDown', ' ', 'Enter'].includes(e.key)) {
         e.preventDefault();
-        triggerTransition();
+        handleStartTransition();
       }
     };
 
@@ -194,7 +165,7 @@ export function Hero() {
       document.body.style.overflow = '';
       document.documentElement.style.overflow = '';
     };
-  }, [isIntroActive, isTransitioning, lenis, triggerTransition]);
+  }, [isIntroActive, isTransitioning, lenis, handleStartTransition]);
 
   return (
     <section className="relative overflow-hidden bg-white min-h-[92vh] flex flex-col justify-center">
@@ -208,37 +179,46 @@ export function Hero() {
       />
 
       {/* =========================================
-          INTRO OVERLAY (TOP CONTENT & CTA)
+          INTRO OVERLAY (TOP CONTENT, CTA & ZOOM GLOBE)
       ========================================= */}
       {isIntroActive && (
         <div
-          ref={introOverlayRef}
-          className={`fixed inset-0 z-40 flex flex-col items-center justify-start pt-16 sm:pt-20 select-none transition-opacity duration-300 ${
-            isTransitioning ? 'pointer-events-none' : 'pointer-events-auto'
-          }`}
+          id="intro-overlay"
+          className={`fixed inset-x-0 bottom-0 z-40 flex flex-col items-center select-none ${isTransitioning ? 'pointer-events-none' : 'pointer-events-auto'
+            }`}
+          style={{
+            top: '82px',
+          }}
         >
+          {/* TOP INTRO CONTENT */}
           <div
-            ref={introContentStackRef}
-            className="flex flex-col items-center text-center max-w-4xl px-4 pointer-events-auto z-50 overflow-visible"
+            className="flex flex-col items-center text-center max-w-4xl px-4 z-50 overflow-visible"
+            style={{
+              paddingTop: 'clamp(60px, 9vh, 110px)',
+            }}
           >
-            {/* INTRO HEADLINE */}
-            <h1
-              className="m-0 font-serif font-medium leading-[1.14] tracking-[-0.03em] text-[#161616] pb-1 overflow-visible"
-              style={{ fontSize: 'clamp(32px, 5.2vw, 64px)' }}
-            >
-              Plan your legacy,<br className="hidden sm:inline" />{' '}
-              <span className="text-[#a42025]">protect</span> what matters most.
-            </h1>
+            {/* INTRO TEXT GROUP */}
+            <div id="intro-text-group" className="flex flex-col items-center">
+              <h1
+                className="m-1 font-serif font-medium leading-[1.18] tracking-[-0.03em] text-[#161616] pb-1 overflow-visible"
+                style={{
+                  fontSize: 'clamp(32px, 5vw, 60px)', paddingTop: '20px'
+                }}
+              >
+                Plan your legacy,<br className="hidden sm:inline" />{' '}
+                <span className="text-[#a42025]">protect</span> what matters most.
+              </h1>
 
-            {/* INTRO SUBTITLE */}
-            <p className="mt-3.5 max-w-[580px] text-[15px] sm:text-[16px] leading-[1.65] text-[#555555]">
-              SmartWills.ai gives you country-aware guidance, step-by-step support, and instant peace of mind.
-            </p>
+              <p className="mt-4 max-w-[580px] text-[15px] sm:text-[16px] leading-[1.65] text-[#555555]">
+                SmartWills.ai gives you country-aware guidance, step-by-step support, and instant peace of mind.
+              </p>
+            </div>
 
             {/* ACTION STACK (SCROLL PROMPT + GET STARTED BUTTON) */}
             <div className="mt-5 sm:mt-6 flex flex-col items-center gap-3.5">
               <div
-                onClick={triggerTransition}
+                id="intro-scroll-indicator"
+                onClick={handleStartTransition}
                 className="flex flex-col items-center gap-1.5 cursor-pointer text-[#555555] hover:text-[#a42025] transition-colors"
               >
                 <span className="text-[10.5px] font-bold tracking-[0.16em] uppercase text-gray-500">
@@ -250,13 +230,33 @@ export function Hero() {
               </div>
 
               <button
+                id="intro-get-started-btn"
                 type="button"
-                onClick={triggerTransition}
+                onClick={handleStartTransition}
                 className="inline-flex items-center gap-2.5 rounded-xl bg-[#a42025] px-8 py-3 text-[14px] font-semibold text-white shadow-[0_10px_30px_rgba(164,32,37,0.32)] hover:bg-[#891b1f] hover:shadow-[0_14px_40px_rgba(164,32,37,0.45)] transition-all cursor-pointer hover:scale-105 active:scale-95"
               >
                 <span>GET STARTED</span>
                 <ArrowRight size={16} strokeWidth={2.2} />
               </button>
+            </div>
+          </div>
+
+          {/* INTRO GLOBE (BOTTOM HORIZON) */}
+          <div
+            id="intro-globe-wrapper"
+            className="fixed bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 scale-[1.38] w-[460px] sm:w-[540px] lg:w-[600px] h-[460px] sm:h-[540px] lg:h-[600px] z-30 pointer-events-none"
+            style={{
+              transformOrigin: 'center center',
+            }}
+          >
+            {/* ATMOSPHERIC RED GLOW (INTRO DOME ONLY) */}
+            <div className="pointer-events-none absolute -top-12 left-1/2 -translate-x-1/2 w-[700px] max-w-[95vw] h-[220px] rounded-[50%] bg-[#a42025]/25 blur-3xl z-0" />
+
+            {/* 3D APAC GLOBE */}
+            <div className="absolute inset-0 flex items-center justify-center z-10">
+              <div className="w-[370px] sm:w-[400px] lg:w-[430px] max-w-[85vw] opacity-95 aspect-square">
+                <ApacGlobe showPins={false} />
+              </div>
             </div>
           </div>
         </div>
@@ -266,6 +266,7 @@ export function Hero() {
           MAIN HERO CONTAINER (TWO-COLUMN BALANCED LAYOUT)
       ========================================= */}
       <div
+        id="final-hero-container"
         className="
           relative
           mx-auto
@@ -283,14 +284,14 @@ export function Hero() {
           lg:px-6
           lg:py-16
         "
+        style={{
+          opacity: isIntroActive ? 0 : 1,
+          transform: isIntroActive ? 'scale(0.96)' : 'none',
+          pointerEvents: isIntroActive && !isTransitioning ? 'none' : 'auto',
+        }}
       >
         {/* LEFT HERO COLUMN */}
-        <div
-          ref={heroLeftRef}
-          className={`relative z-10 flex flex-col justify-center transition-opacity duration-300 ${
-            isIntroActive && !isTransitioning ? 'opacity-0 pointer-events-none' : 'opacity-100'
-          }`}
-        >
+        <div className="relative z-10 flex flex-col justify-center">
           {/* BADGE */}
           <Reveal>
             <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-[#e8e8e8] bg-white px-3 py-1.5 shadow-[0_3px_12px_rgba(0,0,0,0.04)]">
@@ -348,7 +349,7 @@ export function Hero() {
               {STATS.map((stat) => {
                 const Icon = stat.icon;
                 return (
-                  <div key={stat.value} className="flex items-start gap-2.5">
+                  <div key={stat.value} className="hero-metric-item flex items-start gap-2.5">
                     <Icon size={23} strokeWidth={1.7} className="mt-[2px] shrink-0 text-[#a42025]" />
                     <div className="flex flex-col">
                       <span className="text-[16px] font-semibold leading-none text-[#202020]">
@@ -367,39 +368,21 @@ export function Hero() {
 
         {/* RIGHT HERO SLOT - FITS PERFECTLY IN THE RIGHT-HAND SPACE */}
         <div
-          ref={heroRightSlotRef}
           className="relative min-h-[460px] w-full max-w-[560px] mx-auto flex items-center justify-center z-10 overflow-visible"
         >
-          {/* =========================================================
-              GLOBE CONTAINER
-              - In Intro State: Fixed at bottom-center horizon (50% left, 0 bottom, translate -50% 50%)
-              - In Final Hero State: Fits naturally and flexibly in the right space
-          ========================================================= */}
           <div
-            ref={globeWrapperRef}
-            className={`
-              ${
-                isIntroActive
-                  ? 'fixed bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 scale-[1.38] w-[460px] sm:w-[540px] lg:w-[600px] h-[460px] sm:h-[540px] lg:h-[600px] z-30'
-                  : 'relative w-full h-[460px] flex items-center justify-center overflow-visible'
-              }
-            `}
+            className="relative w-full h-[460px] flex items-center justify-center overflow-visible"
             style={{
               transformOrigin: 'center center',
             }}
           >
-            {/* ATMOSPHERIC RED GLOW (INTRO DOME ONLY) */}
-            {isIntroActive && (
-              <div className="pointer-events-none absolute -top-12 left-1/2 -translate-x-1/2 w-[700px] max-w-[95vw] h-[220px] rounded-[50%] bg-[#a42025]/25 blur-3xl z-0" />
-            )}
-
             {/* BACKGROUND GLOW */}
             <div className="pointer-events-none absolute left-1/2 top-1/2 h-[340px] w-[340px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#a42025]/[0.03] blur-3xl" />
 
             {/* 3D APAC GLOBE */}
             <div className="absolute inset-0 flex items-center justify-center z-10">
               <div className="w-[370px] sm:w-[400px] lg:w-[430px] max-w-[85vw] opacity-95 aspect-square">
-                <ApacGlobe showPins={showPins || (!isIntroActive && !isTransitioning)} />
+                <ApacGlobe showPins={showPins || !isIntroActive} />
               </div>
             </div>
 
@@ -408,14 +391,9 @@ export function Hero() {
             <div className="pointer-events-none absolute left-1/2 top-1/2 h-[300px] w-[410px] max-w-[85%] -translate-x-1/2 -translate-y-1/2 rotate-[28deg] rounded-[50%] border border-[#a42025]/10" />
 
             {/* FLOATING BADGES & SAVY AVATAR (WELL-BALANCED AROUND THE GLOBE) */}
-            <div
-              ref={heroBadgesRef}
-              className={`transition-opacity duration-300 ${
-                isIntroActive && !isTransitioning ? 'opacity-0 pointer-events-none' : 'opacity-100'
-              }`}
-            >
+            <div>
               {/* PRIVATE CARD (TOP LEFT OF GLOBE) */}
-              <div className="absolute left-[0%] sm:left-[2%] top-[10%] z-10 flex w-[172px] gap-2.5 rounded-[10px] border border-[#e8e8e8] bg-white/95 p-3 shadow-[0_10px_30px_rgba(0,0,0,0.08)] backdrop-blur-md">
+              <div className="hero-floating-card absolute left-[0%] sm:left-[2%] top-[10%] z-10 flex w-[172px] gap-2.5 rounded-[10px] border border-[#e8e8e8] bg-white/95 p-3 shadow-[0_10px_30px_rgba(0,0,0,0.08)] backdrop-blur-md">
                 <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#a42025]/[0.07] text-[#a42025]">
                   <LockKeyhole size={16} strokeWidth={1.8} />
                 </div>
@@ -427,34 +405,10 @@ export function Hero() {
                 </div>
               </div>
 
-              {/* SAVY VIDEO AVATAR CARD (TOP RIGHT OF GLOBE) */}
-              <div className="absolute right-[0%] sm:right-[2%] top-[16%] z-20 flex items-center gap-2.5 rounded-[14px] border border-[#a42025]/20 bg-white/95 p-2 pr-3.5 shadow-[0_12px_35px_rgba(164,32,37,0.12)] backdrop-blur-md animate-bounce-subtle">
-                <div className="relative h-11 w-11 shrink-0 overflow-hidden rounded-full border-2 border-[#a42025]/30 bg-red-50">
-                  <video
-                    src="/flags/savy_vd.mp4"
-                    autoPlay
-                    loop
-                    muted
-                    playsInline
-                    className="h-full w-full object-cover scale-110"
-                  />
-                  <span className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full border-2 border-white bg-emerald-500" />
-                </div>
-                <div>
-                  <div className="flex items-center gap-1.5">
-                    <p className="m-0 text-[10.5px] font-bold text-[#1f1f1f]">Savy AI Assistant</p>
-                    <span className="rounded-full bg-[#a42025]/10 px-1.5 py-0.5 text-[7.5px] font-bold text-[#a42025]">
-                      LIVE
-                    </span>
-                  </div>
-                  <p className="mt-0.5 text-[8.5px] leading-tight text-[#666666]">
-                    Ready to guide your will planning
-                  </p>
-                </div>
-              </div>
+
 
               {/* WILL READY CARD (BOTTOM LEFT OF GLOBE) */}
-              <div className="absolute bottom-[10%] left-[4%] sm:left-[6%] z-10 flex w-[172px] gap-2.5 rounded-[10px] border border-[#e8e8e8] bg-white/95 p-3 shadow-[0_10px_30px_rgba(0,0,0,0.08)] backdrop-blur-md">
+              <div className="hero-floating-card absolute bottom-[10%] left-[4%] sm:left-[6%] z-10 flex w-[172px] gap-2.5 rounded-[10px] border border-[#e8e8e8] bg-white/95 p-3 shadow-[0_10px_30px_rgba(0,0,0,0.08)] backdrop-blur-md">
                 <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#a42025]/[0.07] text-[#a42025]">
                   <FileText size={16} strokeWidth={1.8} />
                 </div>
@@ -467,7 +421,7 @@ export function Hero() {
               </div>
 
               {/* SHIELD (BOTTOM CENTER OF GLOBE) */}
-              <div className="absolute bottom-[6%] left-[50%] z-10 flex h-10 w-10 items-center justify-center rounded-[12px] bg-[#a42025] text-white shadow-[0_8px_25px_rgba(164,32,37,0.25)]">
+              <div className="hero-shield-icon absolute bottom-[6%] left-[50%] z-10 flex h-10 w-10 items-center justify-center rounded-[12px] bg-[#a42025] text-white shadow-[0_8px_25px_rgba(164,32,37,0.25)]">
                 <ShieldCheck size={20} strokeWidth={2} />
               </div>
 
