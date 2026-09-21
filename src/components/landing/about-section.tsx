@@ -31,17 +31,31 @@ export function AboutSection() {
   return (
     <section
       id="about"
-      className="border-b border-[#eeeeee] bg-white"
+      className="relative overflow-hidden bg-[#050508] border-b border-white/[0.08] text-white"
     >
-      <div className="mx-auto grid max-w-[1120px] grid-cols-1 gap-12 px-4 py-16 sm:px-6 lg:grid-cols-[0.8fr_1.2fr] lg:gap-20 lg:px-0 lg:py-20">
+      {/* Background Red Glow & Space Ambience */}
+      <div
+        className="pointer-events-none absolute inset-0 z-0"
+        style={{
+          background:
+            'radial-gradient(circle at 25% 40%, rgba(209, 26, 42, 0.12) 0%, rgba(130, 10, 20, 0.04) 45%, transparent 70%)',
+        }}
+      />
+
+      {/* Subtle Star Sparkles */}
+      <span className="pointer-events-none absolute left-[8%] top-[30%] h-1 w-1 rounded-full bg-white opacity-70 animate-pulse" />
+      <span className="pointer-events-none absolute right-[12%] top-[20%] h-1.5 w-1.5 rounded-full bg-[#ff3b47] shadow-[0_0_8px_#ff3b47] animate-pulse" />
+      <span className="pointer-events-none absolute right-[25%] bottom-[25%] h-1 w-1 rounded-full bg-white opacity-50" />
+      <span className="pointer-events-none absolute left-[15%] bottom-[20%] h-1.5 w-1.5 rounded-full bg-[#ff3b47] shadow-[0_0_10px_#ff3b47]" />
+
+      <div className="relative z-10 mx-auto grid max-w-[1240px] grid-cols-1 gap-12 px-4 py-16 sm:px-8 lg:grid-cols-[0.8fr_1.2fr] lg:gap-20 lg:py-20">
         {/* LEFT */}
         <Reveal>
           <div>
             {/* LABEL */}
-            <div className="mb-5 inline-flex items-center gap-2">
-              <span className="h-[6px] w-[6px] rounded-full bg-[#a42025]" />
-
-              <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#a42025]">
+            <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/[0.14] bg-[#12131c]/80 px-3.5 py-1 shadow-[0_0_20px_rgba(209,26,42,0.18)] backdrop-blur-md">
+              <span className="h-1.5 w-1.5 rounded-full bg-[#ff3b47] shadow-[0_0_6px_#ff3b47]" />
+              <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#e2e2ec]">
                 About us
               </span>
             </div>
@@ -52,10 +66,10 @@ export function AboutSection() {
                 m-0
                 max-w-[420px]
                 font-serif
-                font-medium
-                leading-[1.02]
-                tracking-[-0.035em]
-                text-[#171717]
+                font-normal
+                leading-[1.06]
+                tracking-[-0.03em]
+                text-white
               "
               style={{
                 fontSize: 'clamp(34px, 4vw, 48px)',
@@ -63,14 +77,14 @@ export function AboutSection() {
             >
               Part of the
               <br />
-              <span className="text-[#a42025]">
+              <span className="font-serif italic text-[#ff3847] drop-shadow-[0_0_30px_rgba(255,56,71,0.85)]">
                 SmartWills
               </span>{' '}
               family.
             </h2>
 
             {/* SMALL DECORATION */}
-            <div className="mt-7 h-[2px] w-12 rounded-full bg-[#a42025]" />
+            <div className="mt-7 h-[2px] w-12 rounded-full bg-gradient-to-r from-[#e01a2c] to-[#960d17] shadow-[0_0_10px_rgba(224,26,44,0.6)]" />
           </div>
         </Reveal>
 
@@ -78,21 +92,21 @@ export function AboutSection() {
         <Reveal delay={120}>
           <div>
             {/* DESCRIPTION */}
-            <p className="m-0 max-w-[650px] text-[16px] leading-[1.8] text-[#5f5f5f] sm:text-[17px]">
+            <p className="m-0 max-w-[650px] text-[16px] leading-[1.8] text-[#c4c4cc] sm:text-[17px]">
               SmartWills.ai is where your will journey begins.
               We&apos;re part of a trusted family of will services
               helping people across Asia plan for what matters
               most.
             </p>
 
-            <p className="mt-5 max-w-[650px] text-[15px] leading-[1.75] text-[#777777]">
+            <p className="mt-5 max-w-[650px] text-[15px] leading-[1.75] text-[#8e8e9c]">
               Savy guides you in simple language, helps organise
               your information step-by-step, and adapts the
               experience according to your selected country.
             </p>
 
             {/* STATS */}
-            <div className="mt-9 grid grid-cols-1 gap-3 sm:grid-cols-3">
+            <div className="mt-9 grid grid-cols-1 gap-4 sm:grid-cols-3">
               {STATS.map((stat) => {
                 const Icon = stat.icon;
 
@@ -101,18 +115,18 @@ export function AboutSection() {
                     key={stat.value}
                     className="
                       group
-                      rounded-[12px]
+                      rounded-2xl
                       border
-                      border-[#e8e8e8]
-                      bg-[#fcfcfc]
+                      border-white/[0.12]
+                      bg-[#0c0d14]/85
                       p-5
+                      shadow-[0_10px_30px_rgba(0,0,0,0.7)]
+                      backdrop-blur-xl
                       transition-all
-                      duration-200
-
+                      duration-300
                       hover:-translate-y-1
-                      hover:border-[#a42025]/20
-                      hover:bg-white
-                      hover:shadow-[0_12px_30px_rgba(164,32,37,0.08)]
+                      hover:border-[#ff3b47]/40
+                      hover:shadow-[0_12px_35px_rgba(209,26,42,0.25)]
                     "
                   >
                     {/* ICON */}
@@ -124,36 +138,41 @@ export function AboutSection() {
                         w-10
                         items-center
                         justify-center
-                        rounded-full
-                        bg-[#a42025]/[0.07]
-                        text-[#a42025]
+                        rounded-xl
+                        bg-[#d11a2a]/15
+                        text-[#ff4d5a]
+                        border
+                        border-[#d11a2a]/30
+                        transition-transform
+                        group-hover:scale-110
                       "
                     >
                       <Icon
                         size={19}
-                        strokeWidth={1.7}
+                        strokeWidth={1.8}
                       />
                     </div>
 
                     {/* VALUE */}
                     <div
                       className="
-                        text-[26px]
-                        font-semibold
+                        text-[28px]
+                        font-bold
                         tracking-[-0.03em]
-                        text-[#a42025]
+                        text-[#ff3847]
+                        drop-shadow-[0_0_15px_rgba(255,56,71,0.5)]
                       "
                     >
                       {stat.value}
                     </div>
 
                     {/* LABEL */}
-                    <div className="mt-1 text-[11px] font-semibold uppercase tracking-[0.08em] text-[#292929]">
+                    <div className="mt-1 text-[11px] font-bold uppercase tracking-[0.08em] text-white">
                       {stat.label}
                     </div>
 
                     {/* DESCRIPTION */}
-                    <p className="mt-2 text-[10px] leading-[1.5] text-[#858585]">
+                    <p className="mt-2 text-[10.5px] leading-[1.5] text-gray-400">
                       {stat.description}
                     </p>
                   </div>

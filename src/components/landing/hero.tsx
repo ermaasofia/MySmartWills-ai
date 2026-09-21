@@ -1,50 +1,22 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import { createTimeline, stagger } from 'animejs';
 import {
   ArrowRight,
-  Globe2,
-  LockKeyhole,
-  Play,
-  ShieldCheck,
   Sparkles,
-  UsersRound,
+  Lock,
+  Globe,
   FileText,
-  ChevronDown,
+  Shield,
+  Users,
+  FileCheck2,
+  Clock,
 } from 'lucide-react';
 
-import { Reveal } from './reveal';
 import { ApacGlobe } from './apac-globe';
 import { useLenis } from '../providers/lenis-provider';
-
-const STATS = [
-  {
-    value: '12',
-    line1: 'countries',
-    line2: 'supported',
-    icon: Globe2,
-  },
-  {
-    value: '100%',
-    line1: 'private &',
-    line2: 'secure',
-    icon: ShieldCheck,
-  },
-  {
-    value: '5',
-    line1: 'trusted',
-    line2: 'platforms',
-    icon: UsersRound,
-  },
-  {
-    value: '24/7',
-    line1: 'AI assistant',
-    line2: 'support',
-    icon: Sparkles,
-  },
-] as const;
 
 export function Hero() {
   const [isIntroActive, setIsIntroActive] = useState(true);
@@ -52,19 +24,20 @@ export function Hero() {
   const [showPins, setShowPins] = useState(false);
 
   const lenis = useLenis();
+  const heroRef = useRef<HTMLDivElement>(null);
 
   const handleStartTransition = useCallback(() => {
     if (isTransitioning || !isIntroActive) return;
     setIsTransitioning(true);
 
     const tl = createTimeline({
-      ease: 'cubicBezier(0.25, 1, 0.5, 1)',
+      defaults: {
+        ease: 'cubicBezier(0.25, 1, 0.5, 1)',
+      },
       onComplete: () => {
-        // 1. Buang intro overlay sepenuhnya
         setIsIntroActive(false);
         setIsTransitioning(false);
         setShowPins(true);
-        // 2. Buka semula vertical scroll page
         document.body.style.overflow = '';
         document.documentElement.style.overflow = '';
         if (lenis) {
@@ -74,51 +47,51 @@ export function Hero() {
       },
     });
 
-    // 1. Text & Button Intro Fade Out cepat (0ms - 250ms)
+    // 1. Fade out intro text group & right side feature items
     tl.add(
-      '#intro-text-group, #intro-get-started-btn, #intro-scroll-indicator',
+      '#intro-text-group, #intro-features-list, #intro-scroll-indicator',
       {
         opacity: [1, 0],
-        translateY: [0, -25],
+        translateY: [0, -15],
         duration: 250,
         ease: 'inQuad',
       },
       0
     )
-      // 2. Smooth Zoom-In Transition pada Intro Globe (100ms - 700ms)
-      // Tidak perlu gerak kiri-kanan (translateX), cuma scale ke depan dan fade
+      // 2. Smooth zoom & fade out of bottom half-globe
       .add(
         '#intro-globe-wrapper',
         {
-          scale: [1, 1.35],
+          scale: [1, 1.3],
           opacity: [1, 0],
-          duration: 600,
+          duration: 550,
           ease: 'cubicBezier(0.4, 0, 0.2, 1)',
         },
-        100
+        80
       )
-      // 3. Final Hero Layout (Image 2) Muncul Serentak (Direct Fade & Subtle Settle)
+      // 3. Final hero 2-column layout fades in
       .add(
         '#final-hero-container',
         {
           opacity: [0, 1],
-          scale: [0.96, 1],
-          duration: 600,
+          scale: [0.97, 1],
+          duration: 550,
           ease: 'outCubic',
         },
-        200
+        160
       )
-      // 4. Stagger Masuk untuk Floating Cards & Flag Badges (Hero Kedua)
+      // 4. Stagger in floating cards & badges
       .add(
-        '.hero-floating-card, .hero-flag-badge, .hero-shield-icon, .hero-metric-item',
+        '.hero-floating-card, .hero-action-feature-item',
         {
           opacity: [0, 1],
-          scale: [0.85, 1],
-          duration: 450,
+          scale: [0.92, 1],
+          translateY: [10, 0],
+          duration: 400,
           delay: stagger(60),
           ease: 'outBack',
         },
-        300
+        240
       );
   }, [isTransitioning, isIntroActive, lenis]);
 
@@ -168,268 +141,514 @@ export function Hero() {
   }, [isIntroActive, isTransitioning, lenis, handleStartTransition]);
 
   return (
-    <section className="relative overflow-hidden bg-white min-h-[92vh] flex flex-col justify-center">
-      {/* BACKGROUND GLOW */}
+    <section
+      ref={heroRef}
+      className="relative overflow-hidden bg-[#050508] h-[calc(100vh-82px)] max-h-[calc(100vh-82px)] flex flex-col justify-between text-white select-none"
+    >
+      {/* =========================================
+          BACKGROUND SPACE & NEBULA LIGHT EFFECTS
+      ========================================= */}
       <div
-        className="pointer-events-none absolute inset-0"
+        className="pointer-events-none absolute inset-0 z-0"
         style={{
           background:
-            'radial-gradient(circle at 72% 35%, rgba(164,32,37,0.045) 0%, rgba(164,32,37,0.015) 28%, transparent 55%)',
+            'radial-gradient(circle at 60% 55%, rgba(210, 25, 45, 0.18) 0%, rgba(130, 10, 20, 0.07) 38%, transparent 70%)',
         }}
       />
 
-      {/* =========================================
-          INTRO OVERLAY (TOP CONTENT, CTA & ZOOM GLOBE)
-      ========================================= */}
+      <div className="pointer-events-none absolute top-0 left-1/2 -translate-x-1/2 w-[800px] max-w-full h-[220px] bg-[#d11a2a]/12 blur-[100px] z-0" />
+
+      {/* Decorative Red Particle Light Trails */}
+      <div className="pointer-events-none absolute inset-0 z-0 opacity-40">
+        <div className="absolute top-[16%] left-[6%] w-[340px] h-[1px] bg-gradient-to-r from-transparent via-[#ff3b47]/60 to-transparent rotate-[-16deg] blur-[0.5px]" />
+        <div className="absolute top-[30%] right-[10%] w-[420px] h-[1px] bg-gradient-to-r from-transparent via-[#ff3b47]/70 to-transparent rotate-[14deg] blur-[0.5px]" />
+        <div className="absolute bottom-[20%] left-[10%] w-[380px] h-[1px] bg-gradient-to-r from-transparent via-[#ff3b47]/50 to-transparent rotate-[-10deg] blur-[0.5px]" />
+        <div className="absolute bottom-[24%] right-[8%] w-[300px] h-[1px] bg-gradient-to-r from-transparent via-[#ff3b47]/60 to-transparent rotate-[22deg] blur-[0.5px]" />
+      </div>
+
+      {/* Dense White Sparkle Particle Dust Cloud (Bintik Putih) */}
+      <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
+        {/* Dynamic Starfield Cluster around Globe */}
+        <div className="absolute right-[5%] sm:right-[15%] top-[10%] sm:top-[20%] w-[450px] sm:w-[600px] h-[450px] sm:h-[600px] opacity-75">
+          {[
+            { top: '8%', left: '42%', size: 1.5, opacity: 0.9, delay: '0.2s' },
+            { top: '14%', left: '68%', size: 2, opacity: 1, delay: '1.1s' },
+            { top: '22%', left: '15%', size: 1, opacity: 0.7, delay: '0.7s' },
+            { top: '28%', left: '82%', size: 2.5, opacity: 0.95, delay: '1.8s' },
+            { top: '35%', left: '38%', size: 1, opacity: 0.6, delay: '0.4s' },
+            { top: '42%', left: '92%', size: 1.5, opacity: 0.85, delay: '2.1s' },
+            { top: '48%', left: '8%', size: 2, opacity: 0.9, delay: '0.9s' },
+            { top: '56%', left: '74%', size: 1.5, opacity: 0.75, delay: '1.4s' },
+            { top: '65%', left: '22%', size: 1, opacity: 0.6, delay: '0.3s' },
+            { top: '72%', left: '88%', size: 2, opacity: 0.95, delay: '1.6s' },
+            { top: '78%', left: '45%', size: 1.5, opacity: 0.8, delay: '2.4s' },
+            { top: '85%', left: '12%', size: 2, opacity: 0.85, delay: '0.5s' },
+            { top: '90%', left: '65%', size: 1, opacity: 0.7, delay: '1.9s' },
+            { top: '18%', left: '52%', size: 1, opacity: 0.6, delay: '1.3s' },
+            { top: '32%', left: '26%', size: 1.5, opacity: 0.75, delay: '0.8s' },
+            { top: '60%', left: '60%', size: 1.2, opacity: 0.8, delay: '2.0s' },
+            { top: '80%', left: '30%', size: 1.8, opacity: 0.9, delay: '1.5s' },
+          ].map((star, i) => (
+            <span
+              key={i}
+              className="absolute rounded-full bg-white animate-pulse"
+              style={{
+                top: star.top,
+                left: star.left,
+                width: `${star.size}px`,
+                height: `${star.size}px`,
+                opacity: star.opacity,
+                boxShadow: '0 0 6px rgba(255,255,255,0.9)',
+                animationDuration: `${2 + (i % 3)}s`,
+                animationDelay: star.delay,
+              }}
+            />
+          ))}
+        </div>
+
+        {/* Ambient Left & Center Floating Sparkles */}
+        {[
+          { top: '15%', left: '8%', size: 1.5, delay: '0.3s' },
+          { top: '24%', left: '28%', size: 2, delay: '1.2s' },
+          { top: '45%', left: '14%', size: 1.2, delay: '0.8s' },
+          { top: '62%', left: '22%', size: 1.8, delay: '2.2s' },
+          { top: '75%', left: '6%', size: 1.4, delay: '1.0s' },
+          { top: '82%', left: '32%', size: 1, delay: '1.7s' },
+        ].map((star, i) => (
+          <span
+            key={`amb-${i}`}
+            className="absolute rounded-full bg-white animate-pulse"
+            style={{
+              top: star.top,
+              left: star.left,
+              width: `${star.size}px`,
+              height: `${star.size}px`,
+              boxShadow: '0 0 5px rgba(255,255,255,0.8)',
+              animationDelay: star.delay,
+              animationDuration: '3s',
+            }}
+          />
+        ))}
+      </div>
+
+      {/* Floating Sparkle Dots */}
+      <span className="pointer-events-none absolute left-[12%] top-[22%] h-1.5 w-1.5 rounded-full bg-[#ff3b47] shadow-[0_0_10px_#ff3b47] animate-pulse" />
+      <span className="pointer-events-none absolute left-[26%] top-[14%] h-1 w-1 rounded-full bg-white shadow-[0_0_8px_white] opacity-75" />
+      <span className="pointer-events-none absolute right-[18%] top-[18%] h-1.5 w-1.5 rounded-full bg-[#ff3b47] shadow-[0_0_12px_#ff3b47] animate-pulse" />
+      <span className="pointer-events-none absolute right-[8%] top-[34%] h-1 w-1 rounded-full bg-white shadow-[0_0_8px_white] opacity-60" />
+      <span className="pointer-events-none absolute left-[14%] bottom-[30%] h-1.5 w-1.5 rounded-full bg-[#ff3b47] shadow-[0_0_10px_#ff3b47]" />
+
+      {/* =========================================================
+          STAGE 1: INTRO OVERLAY (FIRST PICTURE - HALF GLOBE)
+      ========================================================= */}
       {isIntroActive && (
         <div
           id="intro-overlay"
-          className={`fixed inset-x-0 bottom-0 z-40 flex flex-col items-center select-none ${isTransitioning ? 'pointer-events-none' : 'pointer-events-auto'
+          className={`fixed inset-x-0 bottom-0 z-40 flex flex-col justify-between select-none ${isTransitioning ? 'pointer-events-none' : 'pointer-events-auto'
             }`}
           style={{
             top: '82px',
           }}
         >
-          {/* TOP INTRO CONTENT */}
-          <div
-            className="flex flex-col items-center text-center max-w-4xl px-4 z-50 overflow-visible"
-            style={{
-              paddingTop: 'clamp(30px, 9vh, 110px)',
-            }}
-          >
-            {/* INTRO TEXT GROUP */}
-            <div id="intro-text-group" className="flex flex-col items-center">
+          {/* Top Intro Group */}
+          <div className="relative mx-auto w-full max-w-[1240px] px-4 sm:px-8 pt-4 sm:pt-6 flex-1 flex flex-col items-center">
+
+            {/* Center Content */}
+            <div id="intro-text-group" className="flex flex-col items-center text-center max-w-3xl z-50">
+              {/* Badge */}
+              <div className="mb-3.5 inline-flex items-center gap-2 rounded-full border border-white/[0.14] bg-[#12131c]/80 px-3.5 py-1 shadow-[0_0_20px_rgba(209,26,42,0.18)] backdrop-blur-md">
+                <span className="h-1.5 w-1.5 rounded-full bg-[#ff3b47] shadow-[0_0_6px_#ff3b47]" />
+                <span className="text-[10px] font-semibold tracking-[0.14em] uppercase text-[#e2e2ec]">
+                  AI-POWERED ESTATE PLANNING
+                </span>
+              </div>
+
+              {/* Headline */}
               <h1
-                className="m-1 font-serif font-medium leading-[1.18] tracking-[-0.03em] text-[#161616] pb-1 overflow-visible"
-                style={{
-                  fontSize: 'clamp(32px, 5vw, 60px)', paddingTop: '20px'
-                }}
+                className="m-0 font-serif font-normal leading-[1.12] tracking-[-0.03em] text-white"
+                style={{ fontSize: 'clamp(32px, 4.2vw, 56px)' }}
               >
-                Plan your legacy,<br className="hidden sm:inline" />{' '}
-                <span className="text-[#a42025]">protect</span> what matters most.
+                Plan your legacy,<br />
+                <span className="font-serif italic text-[#ff3847] drop-shadow-[0_0_35px_rgba(255,56,71,0.9)]">
+                  protect
+                </span>{' '}
+                what matters most.
               </h1>
 
+              {/* Sub-headline */}
+              <p className="mt-3 max-w-[560px] text-[14px] sm:text-[15px] leading-[1.55] text-[#b0b0be]">
+                A smarter, simpler way to create your will, manage your assets, and protect the people you love — across borders.
+              </p>
 
+              {/* Get Started Button */}
+              <div className="mt-4 sm:mt-5 flex flex-col items-center gap-2">
+                <button
+                  type="button"
+                  onClick={handleStartTransition}
+                  className="
+                    group
+                    inline-flex
+                    items-center
+                    gap-2.5
+                    rounded-xl
+                    bg-gradient-to-r
+                    from-[#e01a2c]
+                    via-[#c91424]
+                    to-[#960d17]
+                    px-8
+                    py-3
+                    text-[14px]
+                    font-bold
+                    tracking-wide
+                    text-white
+                    shadow-[0_0_30px_rgba(224,26,44,0.6)]
+                    transition-all
+                    duration-300
+                    hover:scale-105
+                    hover:shadow-[0_0_45px_rgba(240,30,50,0.85)]
+                    active:scale-95
+                    cursor-pointer
+                  "
+                >
+                  <span>GET STARTED</span>
+                  <ArrowRight size={16} strokeWidth={2.4} className="transition-transform group-hover:translate-x-1" />
+                </button>
+
+                <div className="flex items-center gap-1.5 text-[11.5px] text-[#8e8e9c]">
+                  <Clock size={12} className="text-[#a4a4b8]" />
+                  <span>Takes less than 10 minutes</span>
+                </div>
+              </div>
             </div>
 
-            {/* ACTION STACK (SCROLL PROMPT + GET STARTED BUTTON) */}
-            <div className="mt-5 sm:mt-6 flex flex-col items-center gap-3.5">
-              <div
-                id="intro-scroll-indicator"
-                onClick={handleStartTransition}
-                className="flex flex-col items-center gap-1.5 cursor-pointer text-[#555555] hover:text-[#a42025] transition-colors"
-              >
-                <span className="text-[10.5px] font-bold tracking-[0.16em] uppercase text-gray-500">
-                  SCROLL DOWN TO EXPLORE
-                </span>
-                <div className="flex h-7 w-7 items-center justify-center rounded-full border border-gray-300 bg-white shadow-sm animate-bounce">
-                  <ChevronDown size={14} className="text-[#a42025]" />
+            {/* Right Side Feature List (From Image 0) */}
+            <div
+              id="intro-features-list"
+              className="hidden lg:flex absolute right-8 top-10 flex-col gap-4 w-[190px] text-right z-30"
+            >
+              <div className="flex items-center justify-end gap-2.5">
+                <div>
+                  <h4 className="text-[11px] font-bold tracking-wider uppercase text-white">SECURE</h4>
+                  <p className="text-[10px] text-gray-400">Your information stays private</p>
+                </div>
+                <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#d11a2a]/15 text-[#ff4d5a] border border-[#d11a2a]/30">
+                  <Lock size={13} />
                 </div>
               </div>
 
-              <button
-                id="intro-get-started-btn"
-                type="button"
-                onClick={handleStartTransition}
-                className="inline-flex items-center gap-2.5 rounded-xl bg-[#a42025] px-8 py-3 text-[14px] font-semibold text-white shadow-[0_10px_30px_rgba(164,32,37,0.32)] hover:bg-[#891b1f] hover:shadow-[0_14px_40px_rgba(164,32,37,0.45)] transition-all cursor-pointer hover:scale-105 active:scale-95"
-              >
-                <span>GET STARTED</span>
-                <ArrowRight size={16} strokeWidth={2.2} />
-              </button>
+              <div className="flex items-center justify-end gap-2.5">
+                <div>
+                  <h4 className="text-[11px] font-bold tracking-wider uppercase text-white">SMART</h4>
+                  <p className="text-[10px] text-gray-400">AI-guided planning made simple</p>
+                </div>
+                <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#d11a2a]/15 text-[#ff4d5a] border border-[#d11a2a]/30">
+                  <Sparkles size={13} />
+                </div>
+              </div>
+
+              <div className="flex items-center justify-end gap-2.5">
+                <div>
+                  <h4 className="text-[11px] font-bold tracking-wider uppercase text-white">GLOBAL</h4>
+                  <p className="text-[10px] text-gray-400">Plan across countries</p>
+                </div>
+                <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#d11a2a]/15 text-[#ff4d5a] border border-[#d11a2a]/30">
+                  <Globe size={13} />
+                </div>
+              </div>
             </div>
           </div>
 
-          {/* INTRO GLOBE (BOTTOM HORIZON) */}
+          {/* INTRO HALF GLOBE (BOTTOM HORIZON) */}
           <div
             id="intro-globe-wrapper"
-            className="fixed bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 scale-[1.38] w-[460px] sm:w-[540px] lg:w-[600px] h-[460px] sm:h-[540px] lg:h-[600px] z-30 pointer-events-none"
+            className="fixed bottom-0 left-1/2 -translate-x-1/2 translate-y-[52%] scale-[1.3] w-[440px] sm:w-[520px] lg:w-[600px] h-[440px] sm:h-[520px] lg:h-[600px] z-30 pointer-events-none"
             style={{
               transformOrigin: 'center center',
             }}
           >
-            {/* ATMOSPHERIC RED GLOW (INTRO DOME ONLY) */}
-            <div className="pointer-events-none absolute -top-12 left-1/2 -translate-x-1/2 w-[700px] max-w-[95vw] h-[220px] rounded-[50%] bg-[#a42025]/25 blur-3xl z-0" />
+            {/* ATMOSPHERIC RED GLOW DOME */}
+            <div className="pointer-events-none absolute -top-14 left-1/2 -translate-x-1/2 w-[750px] max-w-[95vw] h-[220px] rounded-[50%] bg-[#d11a2a]/30 blur-[90px] z-0" />
 
             {/* 3D APAC GLOBE */}
             <div className="absolute inset-0 flex items-center justify-center z-10">
-              <div className="w-[370px] sm:w-[400px] lg:w-[430px] max-w-[85vw] opacity-95 aspect-square">
+              <div className="w-[380px] sm:w-[440px] lg:w-[490px] max-w-[85vw] aspect-square">
                 <ApacGlobe showPins={false} />
               </div>
             </div>
           </div>
+
+          {/* INTRO FOOTER: CHAT WIDGET & SCROLL EXPLORE */}
+          <div
+            id="intro-scroll-indicator"
+            className="relative z-50 mx-auto w-full max-w-[1240px] px-4 sm:px-8 pb-3.5 flex items-center justify-between"
+          >
+            {/* Chat Widget */}
+            <Link
+              href="/chat"
+              className="
+                group
+                inline-flex
+                items-center
+                gap-2.5
+                rounded-full
+                border
+                border-white/[0.14]
+                bg-[#0e0f17]/90
+                py-1.5
+                px-3
+                shadow-[0_10px_25px_rgba(0,0,0,0.6)]
+                backdrop-blur-xl
+                transition-all
+                hover:border-[#ff3b47]/40
+                hover:shadow-[0_0_20px_rgba(209,26,42,0.3)]
+              "
+            >
+              <div className="relative flex h-6 w-6 items-center justify-center rounded-full bg-[#1c1d28] font-semibold text-[10px] text-white">
+                N
+                <span className="absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full bg-[#ff3b47] ring-2 ring-[#0e0f17] shadow-[0_0_6px_#ff3b47]" />
+              </div>
+              <div className="flex flex-col text-left">
+                <span className="text-[9px] text-gray-400 leading-tight">Need help?</span>
+                <span className="text-[11px] font-medium text-white leading-tight">Ask SmartWills AI</span>
+              </div>
+            </Link>
+
+            {/* Scroll Down Button */}
+            <div
+              onClick={handleStartTransition}
+              className="flex flex-col items-center gap-1 text-gray-400 hover:text-white transition-colors cursor-pointer"
+            >
+              <span className="text-[9.5px] font-bold tracking-[0.18em] uppercase text-gray-400">
+                SCROLL DOWN TO EXPLORE
+              </span>
+              <div className="flex h-6 w-3.5 items-start justify-center rounded-full border border-gray-500/60 p-0.5">
+                <div className="h-1.5 w-1 rounded-full bg-[#ff3b47] animate-bounce" />
+              </div>
+            </div>
+
+            <div className="hidden sm:block w-[160px]" />
+          </div>
         </div>
       )}
 
-      {/* =========================================
-          MAIN HERO CONTAINER (TWO-COLUMN BALANCED LAYOUT)
-      ========================================= */}
+      {/* =========================================================
+          STAGE 2: FINAL HERO (SECOND PICTURE - COMPACT FULL SCREEN)
+      ========================================================= */}
       <div
         id="final-hero-container"
         className="
           relative
+          z-10
           mx-auto
           grid
-          min-h-[540px]
-          max-w-[1180px]
+          h-full
+          w-full
+          max-w-[1240px]
           grid-cols-1
           items-center
-          gap-8
+          gap-6
           px-4
-          py-12
-          sm:px-6
-          lg:grid-cols-[1fr_1.05fr]
-          lg:gap-10
-          lg:px-6
-          lg:py-16
+          py-2
+          sm:px-8
+          lg:grid-cols-[1fr_1.15fr]
+          lg:gap-8
         "
         style={{
           opacity: isIntroActive ? 0 : 1,
-          transform: isIntroActive ? 'scale(0.96)' : 'none',
+          transform: isIntroActive ? 'scale(0.97)' : 'none',
           pointerEvents: isIntroActive && !isTransitioning ? 'none' : 'auto',
         }}
       >
-        {/* LEFT HERO COLUMN */}
+        {/* LEFT COLUMN: AI IN ACTION */}
         <div className="relative z-10 flex flex-col justify-center">
-          {/* BADGE */}
-          <Reveal>
-            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-[#e8e8e8] bg-white px-3 py-1.5 shadow-[0_3px_12px_rgba(0,0,0,0.04)]">
-              <Sparkles size={13} strokeWidth={1.8} className="text-[#a42025]" />
-              <span className="text-[10px] font-semibold tracking-[0.08em] text-[#343434]">
-                AI-POWERED • HUMAN GUIDED
-              </span>
-            </div>
-          </Reveal>
+          {/* Badge */}
+          <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-white/[0.14] bg-[#12131c]/80 px-3 py-1 shadow-[0_0_20px_rgba(209,26,42,0.18)] backdrop-blur-md w-fit">
+            <span className="h-1.5 w-1.5 rounded-full bg-[#ff3b47] shadow-[0_0_6px_#ff3b47]" />
+            <span className="text-[10px] font-semibold tracking-[0.14em] uppercase text-[#e2e2ec]">
+              AI IN ACTION
+            </span>
+          </div>
 
-          {/* HEADING */}
-          <Reveal delay={80}>
-            <h1
-              className="m-0 max-w-[570px] font-serif font-medium leading-[1.12] tracking-[-0.035em] text-[#161616] pb-1 overflow-visible"
-              style={{ fontSize: 'clamp(42px, 4.6vw, 64px)' }}
-            >
-              Plan your will,<br />
-              <span className="text-[#a42025]">protect</span> your family.
-            </h1>
-          </Reveal>
-
-          {/* DESCRIPTION */}
-          <Reveal delay={160}>
-            <p className="mt-5 max-w-[510px] text-[15px] leading-[1.7] text-[#555555] sm:text-[16px]">
-              SmartWills.ai gives you country-aware guidance, step-by-step support, and a clear summary of your will. So you can plan with confidence and peace of mind.
-            </p>
-          </Reveal>
-
-          {/* CTA BUTTONS */}
-          <Reveal delay={240}>
-            <div className="mt-7 flex flex-wrap items-center gap-3">
-              <Link
-                href="/signup"
-                className="inline-flex items-center gap-5 rounded-[7px] bg-[#a42025] px-5 py-3 text-[13px] font-semibold text-white shadow-[0_8px_20px_rgba(164,32,37,0.16)] transition-all hover:-translate-y-[1px] hover:bg-[#891b1f]"
-              >
-                Start for free
-                <ArrowRight size={16} strokeWidth={1.8} />
-              </Link>
-
-              <Link
-                href="#how"
-                className="inline-flex items-center gap-3 rounded-[7px] border border-[#dedede] bg-white px-5 py-3 text-[13px] font-semibold text-[#252525] transition-all hover:border-[#a42025]/20 hover:bg-[#a42025]/[0.025]"
-              >
-                See how it works
-                <span className="flex h-[19px] w-[19px] items-center justify-center rounded-full border border-[#555555]">
-                  <Play size={8} fill="currentColor" />
-                </span>
-              </Link>
-            </div>
-          </Reveal>
-
-          {/* STATS */}
-          <Reveal delay={320}>
-            <div className="mt-9 grid max-w-[520px] grid-cols-2 gap-x-7 gap-y-5 sm:grid-cols-4">
-              {STATS.map((stat) => {
-                const Icon = stat.icon;
-                return (
-                  <div key={stat.value} className="hero-metric-item flex items-start gap-2.5">
-                    <Icon size={23} strokeWidth={1.7} className="mt-[2px] shrink-0 text-[#a42025]" />
-                    <div className="flex flex-col">
-                      <span className="text-[16px] font-semibold leading-none text-[#202020]">
-                        {stat.value}
-                      </span>
-                      <span className="mt-1 text-[10px] leading-[1.3] text-[#787878]">
-                        {stat.line1}<br />{stat.line2}
-                      </span>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </Reveal>
-        </div>
-
-        {/* RIGHT HERO SLOT - FITS PERFECTLY IN THE RIGHT-HAND SPACE */}
-        <div
-          className="relative min-h-[460px] w-full max-w-[560px] mx-auto flex items-center justify-center z-10 overflow-visible"
-        >
-          <div
-            className="relative w-full h-[460px] flex items-center justify-center overflow-visible"
-            style={{
-              transformOrigin: 'center center',
-            }}
+          {/* Heading */}
+          <h1
+            className="m-0 max-w-[500px] font-serif font-normal leading-[1.1] tracking-[-0.03em] text-white pb-0.5"
+            style={{ fontSize: 'clamp(32px, 4vw, 52px)' }}
           >
-            {/* BACKGROUND GLOW */}
-            <div className="pointer-events-none absolute left-1/2 top-1/2 h-[340px] w-[340px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#a42025]/[0.03] blur-3xl" />
+            Your wishes,<br />
+            intelligently{' '}
+            <span className="font-serif italic text-[#ff3847] drop-shadow-[0_0_35px_rgba(255,56,71,0.9)]">
+              protected.
+            </span>
+          </h1>
 
-            {/* 3D APAC GLOBE */}
-            <div className="absolute inset-0 flex items-center justify-center z-10">
-              <div className="w-[370px] sm:w-[400px] lg:w-[430px] max-w-[85vw] opacity-95 aspect-square">
-                <ApacGlobe showPins={showPins || !isIntroActive} />
+          {/* Description */}
+          <p className="mt-2.5 max-w-[460px] text-[13.5px] sm:text-[14px] leading-[1.55] text-[#a8a8b8]">
+            See how SmartWills.Ai uses AI to make estate planning simpler, faster and more accessible — across borders.
+          </p>
+
+          {/* Feature List (3 Items from Image 1) */}
+          <div className="mt-4 space-y-2.5 max-w-[460px]">
+            {/* Feature 1 */}
+            <div className="hero-action-feature-item flex items-start gap-3">
+              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[#d11a2a]/15 text-[#ff4d5a] border border-[#d11a2a]/30">
+                <FileText size={14} strokeWidth={2} />
+              </div>
+              <div>
+                <h4 className="text-[12.5px] font-bold text-white leading-tight">Guided by AI</h4>
+                <p className="mt-0.5 text-[11px] text-gray-400 leading-snug">
+                  Answer a few simple questions, our AI helps draft your will.
+                </p>
               </div>
             </div>
 
-            {/* ORBIT LINES */}
-            <div className="pointer-events-none absolute left-1/2 top-1/2 h-[230px] w-[450px] max-w-[95%] -translate-x-1/2 -translate-y-1/2 rotate-[-10deg] rounded-[50%] border border-[#a42025]/10" />
-            <div className="pointer-events-none absolute left-1/2 top-1/2 h-[300px] w-[410px] max-w-[85%] -translate-x-1/2 -translate-y-1/2 rotate-[28deg] rounded-[50%] border border-[#a42025]/10" />
-
-            {/* FLOATING BADGES & SAVY AVATAR (WELL-BALANCED AROUND THE GLOBE) */}
-            <div>
-              {/* PRIVATE CARD (TOP LEFT OF GLOBE) */}
-              <div className="hero-floating-card absolute left-[0%] sm:left-[2%] top-[10%] z-10 flex w-[172px] gap-2.5 rounded-[10px] border border-[#e8e8e8] bg-white/95 p-3 shadow-[0_10px_30px_rgba(0,0,0,0.08)] backdrop-blur-md">
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#a42025]/[0.07] text-[#a42025]">
-                  <LockKeyhole size={16} strokeWidth={1.8} />
-                </div>
-                <div>
-                  <p className="m-0 text-[10px] font-semibold text-[#222222]">Private & secure</p>
-                  <p className="mt-0.5 text-[8px] leading-[1.4] text-[#707070]">
-                    Your data is encrypted and never shared.
-                  </p>
-                </div>
+            {/* Feature 2 */}
+            <div className="hero-action-feature-item flex items-start gap-3">
+              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[#d11a2a]/15 text-[#ff4d5a] border border-[#d11a2a]/30">
+                <Shield size={14} strokeWidth={2} />
               </div>
-
-
-
-              {/* WILL READY CARD (BOTTOM LEFT OF GLOBE) */}
-              <div className="hero-floating-card absolute bottom-[10%] left-[4%] sm:left-[6%] z-10 flex w-[172px] gap-2.5 rounded-[10px] border border-[#e8e8e8] bg-white/95 p-3 shadow-[0_10px_30px_rgba(0,0,0,0.08)] backdrop-blur-md">
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#a42025]/[0.07] text-[#a42025]">
-                  <FileText size={16} strokeWidth={1.8} />
-                </div>
-                <div>
-                  <p className="m-0 text-[10px] font-semibold text-[#222222]">Will ready</p>
-                  <p className="mt-0.5 text-[8px] leading-[1.4] text-[#707070]">
-                    Get a clear summary of your will.
-                  </p>
-                </div>
+              <div>
+                <h4 className="text-[12.5px] font-bold text-white leading-tight">Legally Aligned</h4>
+                <p className="mt-0.5 text-[11px] text-gray-400 leading-snug">
+                  Structured to meet local legal requirements in each country.
+                </p>
               </div>
+            </div>
 
-              {/* SHIELD (BOTTOM CENTER OF GLOBE) */}
-              <div className="hero-shield-icon absolute bottom-[6%] left-[50%] z-10 flex h-10 w-10 items-center justify-center rounded-[12px] bg-[#a42025] text-white shadow-[0_8px_25px_rgba(164,32,37,0.25)]">
-                <ShieldCheck size={20} strokeWidth={2} />
+            {/* Feature 3 */}
+            <div className="hero-action-feature-item flex items-start gap-3">
+              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[#d11a2a]/15 text-[#ff4d5a] border border-[#d11a2a]/30">
+                <Users size={14} strokeWidth={2} />
               </div>
-
-              {/* DECORATIVE DOTS */}
-              <span className="absolute left-[25%] top-[6%] h-2 w-2 rounded-full bg-[#a42025] shadow-[0_0_9px_rgba(164,32,37,0.6)]" />
-              <span className="absolute left-[0%] top-[48%] h-2 w-2 rounded-full bg-[#a42025] shadow-[0_0_9px_rgba(164,32,37,0.6)]" />
-              <span className="absolute right-[6%] top-[12%] h-2 w-2 rounded-full bg-[#a42025] shadow-[0_0_9px_rgba(164,32,37,0.6)]" />
-              <span className="absolute bottom-[14%] right-[10%] h-2.5 w-2.5 rounded-full bg-[#a42025] shadow-[0_0_12px_rgba(164,32,37,0.65)]" />
+              <div>
+                <h4 className="text-[12.5px] font-bold text-white leading-tight">Across Borders</h4>
+                <p className="mt-0.5 text-[11px] text-gray-400 leading-snug">
+                  Manage your assets and loved ones, wherever you are.
+                </p>
+              </div>
             </div>
           </div>
+
+          {/* CTA Button */}
+          <div className="mt-5 flex items-center gap-4">
+            <Link
+              href="/signup"
+              className="
+                group
+                inline-flex
+                items-center
+                gap-2.5
+                rounded-xl
+                bg-gradient-to-r
+                from-[#e01a2c]
+                via-[#c91424]
+                to-[#960d17]
+                px-6
+                py-2.5
+                text-[13px]
+                font-bold
+                tracking-wide
+                text-white
+                shadow-[0_0_25px_rgba(224,26,44,0.5)]
+                transition-all
+                duration-300
+                hover:scale-105
+                hover:shadow-[0_0_40px_rgba(240,30,50,0.75)]
+                active:scale-95
+              "
+            >
+              <span>See it in action</span>
+              <ArrowRight size={15} strokeWidth={2.4} className="transition-transform group-hover:translate-x-1" />
+            </Link>
+          </div>
+        </div>
+
+        {/* RIGHT COLUMN: 3D GLOBE WITH GLOWING ORBITAL RINGS & TESTIMONIAL BOX */}
+        <div className="relative h-[340px] sm:h-[400px] lg:h-[440px] w-full max-w-[540px] mx-auto flex items-center justify-center z-10 overflow-visible">
+
+          {/* Central atmospheric glow */}
+          <div className="pointer-events-none absolute left-1/2 top-1/2 h-[320px] w-[320px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#d11a2a]/22 blur-[80px]" />
+
+          {/* =========================================================
+              LUMINOUS RED ORBITAL RINGS & CONCENTRIC GLOW (LIKE PICTURE 2)
+          ========================================================= */}
+          {/* Outer glowing red rim ring encircling the globe */}
+          <div className="pointer-events-none absolute left-1/2 top-1/2 h-[330px] sm:h-[390px] lg:h-[420px] w-[330px] sm:w-[390px] lg:w-[420px] -translate-x-1/2 -translate-y-1/2 rounded-full border-[1.5px] border-[#ff3847]/45 shadow-[0_0_30px_rgba(255,56,71,0.5),inset_0_0_20px_rgba(255,56,71,0.2)]" />
+
+          {/* Secondary thin atmospheric halo */}
+          <div className="pointer-events-none absolute left-1/2 top-1/2 h-[350px] sm:h-[415px] lg:h-[445px] w-[350px] sm:w-[415px] lg:w-[445px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-[#ff3847]/20 shadow-[0_0_15px_rgba(255,56,71,0.25)]" />
+
+          {/* Diagonal Tilted Ellipse Orbit 1 */}
+          <div className="pointer-events-none absolute left-1/2 top-1/2 h-[220px] sm:h-[260px] lg:h-[280px] w-[400px] sm:w-[480px] lg:w-[510px] -translate-x-1/2 -translate-y-1/2 rotate-[-15deg] rounded-[50%] border border-[#ff3847]/40 shadow-[0_0_12px_rgba(255,56,71,0.35)]" />
+
+          {/* Diagonal Tilted Ellipse Orbit 2 */}
+          <div className="pointer-events-none absolute left-1/2 top-1/2 h-[270px] sm:h-[320px] lg:h-[340px] w-[370px] sm:w-[440px] lg:w-[470px] -translate-x-1/2 -translate-y-1/2 rotate-[32deg] rounded-[50%] border border-[#ff3847]/30" />
+
+          {/* Diagonal Tilted Ellipse Orbit 3 */}
+          <div className="pointer-events-none absolute left-1/2 top-1/2 h-[300px] sm:h-[350px] lg:h-[370px] w-[340px] sm:w-[400px] lg:w-[430px] -translate-x-1/2 -translate-y-1/2 rotate-[75deg] rounded-[50%] border border-[#ff3847]/20" />
+
+          {/* 3D APAC Globe */}
+          <div className="absolute inset-0 flex items-center justify-center z-10">
+            <div className="w-[320px] sm:w-[380px] lg:w-[410px] max-w-[85vw] aspect-square">
+              <ApacGlobe showPins={showPins || !isIntroActive} />
+            </div>
+          </div>
+
+          {/* SMARTER WAY TESTIMONIAL BOX (BOTTOM RIGHT OF GLOBE) */}
+          <div className="hero-floating-card absolute -right-2 sm:-right-4 bottom-[2%] sm:bottom-[6%] z-20 flex w-[210px] sm:w-[230px] items-center gap-3 rounded-2xl border border-white/[0.14] bg-[#0c0d14]/85 p-3 shadow-[0_20px_50px_rgba(0,0,0,0.85)] backdrop-blur-xl pointer-events-auto">
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-[#d11a2a]/20 text-[#ff4d5a] border border-[#d11a2a]/30">
+              <FileCheck2 size={16} strokeWidth={2} />
+            </div>
+            <div>
+              <p className="m-0 font-serif text-[11px] italic leading-[1.35] text-gray-200">
+                &ldquo;A smarter, simpler way to secure tomorrow.&rdquo;
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* BOTTOM NAVIGATION FOR STAGE 2 */}
+        <div className="lg:col-span-2 flex items-center justify-between z-30 pb-2">
+          {/* Chat Widget */}
+          <Link
+            href="/chat"
+            className="
+              group
+              inline-flex
+              items-center
+              gap-2.5
+              rounded-full
+              border
+              border-white/[0.14]
+              bg-[#0e0f17]/90
+              py-1.5
+              px-3
+              shadow-[0_10px_25px_rgba(0,0,0,0.6)]
+              backdrop-blur-xl
+              transition-all
+              hover:border-[#ff3b47]/40
+            "
+          >
+            <div className="relative flex h-6 w-6 items-center justify-center rounded-full bg-[#1c1d28] font-semibold text-[10px] text-white">
+              N
+              <span className="absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full bg-[#ff3b47] ring-2 ring-[#0e0f17] shadow-[0_0_6px_#ff3b47]" />
+            </div>
+            <div className="flex flex-col text-left">
+              <span className="text-[9px] text-gray-400 leading-tight">Need help?</span>
+              <span className="text-[11px] font-medium text-white leading-tight">Ask SmartWills AI</span>
+            </div>
+          </Link>
+
+          {/* Scroll Down */}
+          <div className="flex flex-col items-center gap-1 text-gray-400 hover:text-white transition-colors">
+            <span className="text-[9.5px] font-bold tracking-[0.18em] uppercase text-gray-400">
+              SCROLL TO DISCOVER MORE
+            </span>
+            <div className="flex h-6 w-3.5 items-start justify-center rounded-full border border-gray-500/60 p-0.5">
+              <div className="h-1.5 w-1 rounded-full bg-[#ff3b47] animate-bounce" />
+            </div>
+          </div>
+
+          <div className="hidden sm:block w-[160px]" />
         </div>
       </div>
     </section>

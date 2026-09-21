@@ -19,6 +19,7 @@ const CAPITAL_COORDS: Record<
   string,
   [number, number]
 > = {
+  UK: [51.5074, -0.1278],
   MY: [3.139, 101.687],
   SG: [1.352, 103.819],
   HK: [22.302, 114.177],
@@ -37,11 +38,27 @@ const CAPITAL_COORDS: Record<
    MARKERS
 ========================================================= */
 
-const MARKERS = COUNTRIES.map((country) => ({
-  id: `apac-${country.code.toLowerCase()}`,
-  code: country.code,
-  location: CAPITAL_COORDS[country.code],
-}));
+const HIGHLIGHT_MARKERS = [
+  { id: 'apac-uk', code: 'UK', label: 'UK', location: [51.5074, -0.1278] as [number, number] },
+  { id: 'apac-cn', code: 'CN', label: 'China', location: [39.904, 116.407] as [number, number] },
+  { id: 'apac-vn', code: 'VN', label: 'Vietnam', location: [21.028, 105.804] as [number, number] },
+  { id: 'apac-th', code: 'TH', label: 'Thailand', location: [13.756, 100.502] as [number, number] },
+  { id: 'apac-sg', code: 'SG', label: 'Singapore', location: [1.352, 103.819] as [number, number] },
+  { id: 'apac-id', code: 'ID', label: 'Indonesia', location: [-6.208, 106.846] as [number, number] },
+  { id: 'apac-my', code: 'MY', label: 'Malaysia', location: [3.139, 101.687] as [number, number] },
+  { id: 'apac-au', code: 'AU', label: 'Australia', location: [-33.869, 151.209] as [number, number] },
+  { id: 'apac-nz', code: 'NZ', label: 'New Zealand', location: [-36.848, 174.763] as [number, number] },
+];
+
+const MARKERS = [
+  ...HIGHLIGHT_MARKERS,
+  ...COUNTRIES.filter((c) => !['MY', 'SG', 'AU', 'CN', 'VN', 'TH', 'ID', 'NZ'].includes(c.code)).map((country) => ({
+    id: `apac-${country.code.toLowerCase()}`,
+    code: country.code,
+    label: country.name,
+    location: CAPITAL_COORDS[country.code] || [0, 0],
+  })),
+];
 
 /* =========================================================
    CONNECTION ARCS
@@ -49,34 +66,44 @@ const MARKERS = COUNTRIES.map((country) => ({
 
 const ARCS = [
   {
-    id: 'apac-arc-my-sg',
-    from: CAPITAL_COORDS.MY,
+    id: 'apac-arc-uk-my',
+    from: CAPITAL_COORDS.UK,
+    to: CAPITAL_COORDS.MY,
+  },
+  {
+    id: 'apac-arc-cn-vn',
+    from: CAPITAL_COORDS.CN,
+    to: CAPITAL_COORDS.VN,
+  },
+  {
+    id: 'apac-arc-vn-th',
+    from: CAPITAL_COORDS.VN,
+    to: CAPITAL_COORDS.TH,
+  },
+  {
+    id: 'apac-arc-th-sg',
+    from: CAPITAL_COORDS.TH,
     to: CAPITAL_COORDS.SG,
   },
   {
-    id: 'apac-arc-my-hk',
-    from: CAPITAL_COORDS.MY,
-    to: CAPITAL_COORDS.HK,
-  },
-  {
-    id: 'apac-arc-sg-au',
+    id: 'apac-arc-sg-id',
     from: CAPITAL_COORDS.SG,
-    to: CAPITAL_COORDS.AU,
+    to: CAPITAL_COORDS.ID,
   },
   {
-    id: 'apac-arc-hk-tw',
-    from: CAPITAL_COORDS.HK,
-    to: CAPITAL_COORDS.TW,
-  },
-  {
-    id: 'apac-arc-id-ph',
+    id: 'apac-arc-id-au',
     from: CAPITAL_COORDS.ID,
-    to: CAPITAL_COORDS.PH,
+    to: CAPITAL_COORDS.AU,
   },
   {
     id: 'apac-arc-au-nz',
     from: CAPITAL_COORDS.AU,
     to: CAPITAL_COORDS.NZ,
+  },
+  {
+    id: 'apac-arc-my-sg',
+    from: CAPITAL_COORDS.MY,
+    to: CAPITAL_COORDS.SG,
   },
 ];
 
@@ -268,48 +295,38 @@ export function ApacGlobe({ showPins = true }: { showPins?: boolean }) {
         theta: 0.25,
 
         /*
-         * LIGHT MODE
+         * DARK MODE (SPACE GLOBE)
          */
-        dark: 0,
+        dark: 1,
 
-        diffuse: 1.35,
+        diffuse: 1.4,
 
         /*
          * Globe dot/detail density
          */
-        mapSamples: 20000,
+        mapSamples: 24000,
 
         /*
-         * Reduce from previous 10.
-         * Gives softer grey land dots.
+         * Bright luminous land dots
          */
-        mapBrightness: 5.5,
+        mapBrightness: 6,
 
         /*
-         * Main globe color.
-         * Very light grey / white.
+         * Deep dark crimson space base
          */
-        baseColor: [
-          0.97,
-          0.97,
-          0.97,
-        ],
+        baseColor: [0.07, 0.015, 0.025],
 
         /*
-         * SmartWills red locations
+         * Glowing red locations
          */
-        markerColor: SMARTWILLS_RED,
+        markerColor: [1, 0.15, 0.2],
 
         /*
-         * Soft white-grey glow
+         * Vibrant red atmospheric glow
          */
-        glowColor: [
-          0.97,
-          0.97,
-          0.97,
-        ],
+        glowColor: [0.85, 0.1, 0.15],
 
-        markerElevation: 0.025,
+        markerElevation: 0.035,
 
         markers: MARKERS.map(
           (marker) => ({
@@ -317,9 +334,9 @@ export function ApacGlobe({ showPins = true }: { showPins?: boolean }) {
               marker.location,
 
             size:
-              marker.code === 'MY'
-                ? 0.045
-                : 0.032,
+              ['UK', 'MY', 'SG', 'AU'].includes(marker.code)
+                ? 0.055
+                : 0.03,
 
             id: marker.id,
           })
@@ -332,14 +349,14 @@ export function ApacGlobe({ showPins = true }: { showPins?: boolean }) {
         })),
 
         /*
-         * Soft red connections
+         * Vibrant neon red connections
          */
-        arcColor: SMARTWILLS_RED,
+        arcColor: [1, 0.2, 0.25],
 
-        arcWidth: 0.35,
-        arcHeight: 0.22,
+        arcWidth: 0.4,
+        arcHeight: 0.25,
 
-        opacity: 0.78,
+        opacity: 0.96,
       });
 
       /* ===============================================
@@ -463,94 +480,73 @@ export function ApacGlobe({ showPins = true }: { showPins?: boolean }) {
       />
 
       {/* COUNTRY LABELS */}
-      {MARKERS.map((marker) => (
-        <div
-          key={marker.id}
-          className="hero-flag-badge"
-          style={{
-            position: 'absolute',
+      {MARKERS.map((marker) => {
+        const isHighlight = ['UK', 'MY', 'SG', 'AU', 'CN', 'VN', 'TH', 'ID', 'NZ'].includes(marker.code);
+        const displayName = marker.label || marker.code;
 
-            positionAnchor: `--cobe-${marker.id}`,
-
-            bottom: 'anchor(top)',
-            left: 'anchor(center)',
-
-            translate: '-50% 0',
-
-            display: 'flex',
-            flexDirection: 'column',
-
-            alignItems: 'center',
-
-            gap: 6,
-
-            pointerEvents: 'none',
-
-            opacity: showPins ? `var(--cobe-visible-${marker.id}, 0)` : 0,
-            visibility: showPins ? 'visible' : 'hidden',
-
-            filter: `blur(calc((1 - var(--cobe-visible-${marker.id}, 0)) * 8px))`,
-
-            transition:
-              'opacity 0.4s ease, filter 0.4s ease, visibility 0.4s ease',
-
-            zIndex: 10,
-          }}
-        >
-          <span
+        return (
+          <div
+            key={marker.id}
+            className="hero-flag-badge"
             style={{
-              fontFamily:
-                'var(--font-mono, ui-monospace, monospace)',
-
-              fontSize: '0.55rem',
-
-              color:
-                marker.code === 'MY'
-                  ? '#a42025'
-                  : '#292929',
-
-              background:
-                'rgba(255,255,255,0.96)',
-
-              padding: '4px 7px',
-
-              borderRadius: 5,
-
-              border:
-                marker.code === 'MY'
-                  ? '1px solid rgba(164,32,37,0.28)'
-                  : '1px solid rgba(0,0,0,0.08)',
-
-              letterSpacing: '0.05em',
-
-              whiteSpace: 'nowrap',
-
-              boxShadow:
-                marker.code === 'MY'
-                  ? '0 5px 16px rgba(164,32,37,0.14)'
-                  : '0 4px 14px rgba(0,0,0,0.08)',
-
-              display: 'inline-flex',
-
+              position: 'absolute',
+              positionAnchor: `--cobe-${marker.id}`,
+              bottom: 'anchor(top)',
+              left: 'anchor(center)',
+              translate: '-50% 0',
+              display: 'flex',
+              flexDirection: 'column',
               alignItems: 'center',
-
-              gap: 5,
-
-              fontWeight:
-                marker.code === 'MY'
-                  ? 700
-                  : 500,
+              gap: 4,
+              pointerEvents: 'none',
+              opacity: showPins ? `var(--cobe-visible-${marker.id}, 0)` : 0,
+              visibility: showPins ? 'visible' : 'hidden',
+              filter: `blur(calc((1 - var(--cobe-visible-${marker.id}, 0)) * 8px))`,
+              transition:
+                'opacity 0.4s ease, filter 0.4s ease, visibility 0.4s ease',
+              zIndex: 10,
             }}
           >
-            <CountryFlag
-              code={marker.code}
-              className="h-2.5 w-[15px] rounded-[1px] object-cover"
-            />
-
-            {marker.code}
-          </span>
-        </div>
-      ))}
+            <span
+              style={{
+                fontFamily:
+                  'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+                fontSize: isHighlight ? '0.62rem' : '0.55rem',
+                color: '#ffffff',
+                background: isHighlight
+                  ? 'rgba(15, 12, 16, 0.88)'
+                  : 'rgba(20, 20, 25, 0.75)',
+                padding: isHighlight ? '3px 8px' : '2px 6px',
+                borderRadius: '9999px',
+                border: isHighlight
+                  ? '1px solid rgba(230, 46, 56, 0.6)'
+                  : '1px solid rgba(255, 255, 255, 0.15)',
+                letterSpacing: '0.02em',
+                whiteSpace: 'nowrap',
+                boxShadow: isHighlight
+                  ? '0 0 14px rgba(230, 46, 56, 0.5), inset 0 0 8px rgba(230, 46, 56, 0.2)'
+                  : '0 4px 12px rgba(0, 0, 0, 0.5)',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 5,
+                fontWeight: isHighlight ? 600 : 500,
+                backdropFilter: 'blur(8px)',
+              }}
+            >
+              <span
+                style={{
+                  width: 5,
+                  height: 5,
+                  borderRadius: '50%',
+                  background: '#ff3344',
+                  boxShadow: '0 0 6px #ff3344',
+                }}
+              />
+              {displayName}
+            </span>
+          </div>
+        );
+      })}
     </div>
   );
 }

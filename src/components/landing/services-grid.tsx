@@ -38,7 +38,7 @@ export function ServicesGrid() {
   return (
     <section
       id="services"
-      className="border-y border-[#eeeeee] bg-[#fafafa]"
+      className="border-y border-white/[0.08] bg-[#050508] text-white"
     >
       <div className="mx-auto max-w-[1120px] px-4 py-16 sm:px-6 lg:px-0 lg:py-24">
         {/* HEADER */}
@@ -47,9 +47,9 @@ export function ServicesGrid() {
             <div>
               {/* SECTION LABEL */}
               <div className="mb-5 flex items-center gap-2">
-                <span className="h-[6px] w-[6px] rounded-full bg-[#a42025]" />
+                <span className="h-[6px] w-[6px] rounded-full bg-[#ff3b47] shadow-[0_0_6px_#ff3b47]" />
 
-                <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#a42025]">
+                <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#ff3847]">
                   What we offer
                 </span>
               </div>
@@ -63,7 +63,7 @@ export function ServicesGrid() {
                   font-medium
                   leading-[1.03]
                   tracking-[-0.035em]
-                  text-[#171717]
+                  text-white
                 "
                 style={{
                   fontSize: 'clamp(34px, 4vw, 48px)',
@@ -72,14 +72,14 @@ export function ServicesGrid() {
                 Everything you need,
                 <br />
 
-                <span className="text-[#a42025]">
+                <span className="text-[#ff3847] drop-shadow-[0_0_25px_rgba(255,56,71,0.7)]">
                   in one place.
                 </span>
               </h2>
             </div>
 
             {/* SMALL DESCRIPTION */}
-            <p className="m-0 max-w-[380px] text-[14px] leading-[1.75] text-[#6f6f6f]">
+            <p className="m-0 max-w-[380px] text-[14px] leading-[1.75] text-[#8e8e9c]">
               SmartWills.ai keeps your will-planning journey
               simple, organised and easy to continue.
             </p>
@@ -107,15 +107,17 @@ export function ServicesGrid() {
                     overflow-hidden
                     rounded-[16px]
                     border
-                    border-[#e5e5e5]
-                    bg-white
+                    border-white/[0.12]
+                    bg-[#0c0d14]/85
                     p-7
                     transition-all
                     duration-300
+                    backdrop-blur-xl
+                    shadow-[0_10px_30px_rgba(0,0,0,0.7)]
 
                     hover:-translate-y-1
-                    hover:border-[#a42025]/20
-                    hover:shadow-[0_18px_45px_rgba(164,32,37,0.08)]
+                    hover:border-[#ff3847]/40
+                    hover:shadow-[0_18px_45px_rgba(209,26,42,0.15)]
                   "
                 >
                   {/* TOP ROW */}
@@ -129,8 +131,10 @@ export function ServicesGrid() {
                         items-center
                         justify-center
                         rounded-full
-                        bg-[#a42025]/[0.07]
-                        text-[#a42025]
+                        bg-[#d11a2a]/15
+                        text-[#ff4d5a]
+                        border
+                        border-[#d11a2a]/30
                       "
                     >
                       <Icon
@@ -145,9 +149,9 @@ export function ServicesGrid() {
                         text-[10px]
                         font-semibold
                         tracking-[0.18em]
-                        text-[#b0b0b0]
+                        text-[#6e6e7c]
                         transition-colors
-                        group-hover:text-[#a42025]
+                        group-hover:text-[#ff3847]
                       "
                     >
                       {service.number}
@@ -156,11 +160,11 @@ export function ServicesGrid() {
 
                   {/* CONTENT */}
                   <div className="mt-8">
-                    <h3 className="m-0 text-[20px] font-semibold tracking-[-0.02em] text-[#202020]">
+                    <h3 className="m-0 text-[20px] font-semibold tracking-[-0.02em] text-white">
                       {service.title}
                     </h3>
 
-                    <p className="mt-4 text-[13px] leading-[1.75] text-[#737373]">
+                    <p className="mt-4 text-[13px] leading-[1.75] text-[#8e8e9c]">
                       {service.description}
                     </p>
                   </div>
@@ -172,15 +176,15 @@ export function ServicesGrid() {
                       className="
                         rounded-full
                         border
-                        border-[#a42025]/15
-                        bg-[#a42025]/[0.05]
+                        border-[#d11a2a]/25
+                        bg-[#d11a2a]/10
                         px-3
                         py-1.5
                         text-[9px]
                         font-semibold
                         uppercase
                         tracking-[0.12em]
-                        text-[#a42025]
+                        text-[#ff3847]
                       "
                     >
                       {service.badge}
@@ -196,14 +200,14 @@ export function ServicesGrid() {
                         justify-center
                         rounded-full
                         border
-                        border-[#e6e6e6]
-                        bg-white
-                        text-[#333333]
+                        border-white/[0.12]
+                        bg-[#0c0d14]
+                        text-[#b0b0be]
                         transition-all
                         duration-200
 
-                        group-hover:border-[#a42025]
-                        group-hover:bg-[#a42025]
+                        group-hover:border-[#ff3847]
+                        group-hover:bg-[#d11a2a]
                         group-hover:text-white
                       "
                     >
@@ -222,10 +226,11 @@ export function ServicesGrid() {
                       left-0
                       h-[3px]
                       w-0
-                      bg-[#a42025]
+                      bg-[#ff3847]
                       transition-all
                       duration-300
                       group-hover:w-full
+                      group-hover:shadow-[0_0_8px_rgba(255,56,71,0.5)]
                     "
                   />
                 </div>

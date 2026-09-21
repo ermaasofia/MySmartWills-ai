@@ -73,25 +73,25 @@ export function Testimonial() {
   const current = STORIES[activeStory];
 
   return (
-    <section id="feedback-faq" className="bg-[#fafafa] border-t border-[#eeeeee] py-16 lg:py-24">
+    <section id="feedback-faq" className="bg-[#050508] border-t border-white/[0.08] py-16 lg:py-24 text-white">
       <div className="mx-auto max-w-[1240px] px-4 sm:px-6 lg:px-8">
 
         {/* TOP SECTION HEADER */}
         <Reveal>
           <div className="mb-12 text-center max-w-2xl mx-auto">
             <div className="mb-3 flex items-center justify-center gap-2">
-              <span className="h-[6px] w-[6px] rounded-full bg-[#a42025]" />
-              <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#a42025]">
+              <span className="h-[6px] w-[6px] rounded-full bg-[#ff3b47] shadow-[0_0_6px_#ff3b47]" />
+              <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#ff3847]">
                 Feedback & Answers
               </span>
             </div>
             <h2
-              className="font-serif font-medium text-[#171717] tracking-tight"
+              className="font-serif font-medium text-white tracking-tight"
               style={{ fontSize: 'clamp(28px, 3.5vw, 42px)', lineHeight: 1.15 }}
             >
-              Real experiences, <span className="text-[#a42025]">honest answers.</span>
+              Real experiences, <span className="text-[#ff3847] drop-shadow-[0_0_25px_rgba(255,56,71,0.7)]">honest answers.</span>
             </h2>
-            <p className="mt-3 text-[14px] text-[#666666] leading-relaxed">
+            <p className="mt-3 text-[14px] text-[#8e8e9c] leading-relaxed">
               Read how families plan their legacy with SmartWills, and explore answers to common questions.
             </p>
           </div>
@@ -105,13 +105,13 @@ export function Testimonial() {
           ========================================== */}
           <div className="lg:col-span-5 flex flex-col gap-4">
             <Reveal delay={40}>
-              <div className="relative overflow-hidden rounded-[24px] border border-[#e8e8e8] bg-white p-7 sm:p-9 shadow-[0_12px_40px_rgba(0,0,0,0.04)]">
+              <div className="relative overflow-hidden rounded-[24px] border border-white/[0.12] bg-[#0c0d14]/85 p-7 sm:p-9 shadow-[0_12px_40px_rgba(0,0,0,0.5)] backdrop-blur-xl">
                 {/* AMBIENT BACKGROUND GLOW */}
-                <div className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full bg-[#a42025]/[0.05] blur-3xl" />
+                <div className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full bg-[#d11a2a]/[0.08] blur-3xl" />
 
                 {/* BADGE & RATING */}
                 <div className="flex items-center justify-between mb-6">
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#a42025]/[0.08] text-[10px] font-bold tracking-wider uppercase text-[#a42025]">
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#d11a2a]/10 text-[10px] font-bold tracking-wider uppercase text-[#ff3847] border border-[#d11a2a]/25">
                     <Sparkles size={12} />
                     Customer Story
                   </span>
@@ -124,42 +124,42 @@ export function Testimonial() {
                 </div>
 
                 {/* QUOTE ICON */}
-                <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-[#a42025]/[0.08] text-[#a42025]">
+                <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-[#d11a2a]/15 text-[#ff4d5a] border border-[#d11a2a]/30">
                   <Quote size={18} strokeWidth={2} />
                 </div>
 
                 {/* QUOTE TEXT */}
-                <blockquote className="m-0 font-serif text-[18px] sm:text-[20px] font-medium leading-[1.5] text-[#1f1f1f] min-h-[120px]">
+                <blockquote className="m-0 font-serif text-[18px] sm:text-[20px] font-medium leading-[1.5] text-white min-h-[120px]">
                   “{current.quote}”
                 </blockquote>
 
                 {/* DIVIDER */}
-                <div className="my-6 h-[1px] w-full bg-[#f0f0f0]" />
+                <div className="my-6 h-[1px] w-full bg-white/[0.08]" />
 
                 {/* AUTHOR INFO */}
                 <div className="flex items-center justify-between">
                   <div>
-                    <h4 className="m-0 text-[15px] font-bold text-[#1a1a1a]">
+                    <h4 className="m-0 text-[15px] font-bold text-white">
                       {current.author}
                     </h4>
-                    <p className="mt-0.5 text-[11px] text-[#777777] font-medium">
+                    <p className="mt-0.5 text-[11px] text-[#8e8e9c] font-medium">
                       {current.role}
                     </p>
-                    <div className="mt-1 flex items-center gap-1.5 text-[10.5px] text-[#a42025] font-semibold">
+                    <div className="mt-1 flex items-center gap-1.5 text-[10.5px] text-[#ff3847] font-semibold">
                       <MapPin size={12} strokeWidth={2} />
                       {current.location}
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-1 rounded-full bg-emerald-50 border border-emerald-200/60 px-2.5 py-1 text-[9.5px] font-bold text-emerald-700">
+                  <div className="flex items-center gap-1 rounded-full bg-emerald-950/50 border border-emerald-500/30 px-2.5 py-1 text-[9.5px] font-bold text-emerald-400">
                     <ShieldCheck size={13} />
                     Verified User
                   </div>
                 </div>
 
                 {/* STORY SWITCHER TABS */}
-                <div className="mt-7 flex items-center gap-2 pt-4 border-t border-[#f5f5f5]">
-                  <span className="text-[10px] font-bold text-[#888888] uppercase tracking-wider mr-1">
+                <div className="mt-7 flex items-center gap-2 pt-4 border-t border-white/[0.08]">
+                  <span className="text-[10px] font-bold text-[#6e6e7c] uppercase tracking-wider mr-1">
                     Stories:
                   </span>
                   {STORIES.map((s, idx) => (
@@ -167,8 +167,8 @@ export function Testimonial() {
                       key={s.author}
                       onClick={() => setActiveStory(idx)}
                       className={`h-7 px-3 rounded-full text-[11px] font-semibold transition-all ${activeStory === idx
-                          ? 'bg-[#a42025] text-white shadow-sm'
-                          : 'bg-[#f4f4f4] text-[#666666] hover:bg-[#eaeaea]'
+                        ? 'bg-gradient-to-r from-[#e01a2c] to-[#960d17] text-white shadow-[0_0_10px_rgba(224,26,44,0.4)]'
+                        : 'bg-white/[0.06] text-[#8e8e9c] hover:bg-white/[0.1]'
                         }`}
                     >
                       {s.author.split(' ')[0]}
@@ -184,29 +184,29 @@ export function Testimonial() {
           ========================================== */}
           <div className="lg:col-span-7">
             <Reveal delay={80}>
-              <div className="rounded-[24px] border border-[#e8e8e8] bg-white overflow-hidden shadow-[0_12px_40px_rgba(0,0,0,0.04)]">
+              <div className="rounded-[24px] border border-white/[0.12] bg-[#0c0d14]/85 overflow-hidden shadow-[0_12px_40px_rgba(0,0,0,0.5)] backdrop-blur-xl">
 
                 {/* ACCORDION HEADER */}
-                <div className="bg-[#fafafa] border-b border-[#eeeeee] px-6 py-4 flex items-center justify-between">
+                <div className="bg-[#0a0b12] border-b border-white/[0.08] px-6 py-4 flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <HelpCircle size={16} className="text-[#a42025]" />
-                    <span className="text-[12px] font-bold uppercase tracking-wider text-[#222222]">
+                    <HelpCircle size={16} className="text-[#ff4d5a]" />
+                    <span className="text-[12px] font-bold uppercase tracking-wider text-white">
                       Frequently Asked Questions
                     </span>
                   </div>
-                  <span className="text-[11px] font-medium text-[#888888]">
+                  <span className="text-[11px] font-medium text-[#6e6e7c]">
                     {FAQ_ITEMS.length} Questions
                   </span>
                 </div>
 
                 {/* ACCORDION ITEMS */}
-                <div className="divide-y divide-[#f0f0f0]">
+                <div className="divide-y divide-white/[0.06]">
                   {FAQ_ITEMS.map((item, index) => {
                     const isOpen = openFaq === index;
                     return (
                       <div
                         key={item.q}
-                        className={`transition-colors duration-200 ${isOpen ? 'bg-[#fdfaf9]' : 'bg-white hover:bg-[#fafafa]/80'
+                        className={`transition-colors duration-200 ${isOpen ? 'bg-[#d11a2a]/[0.04]' : 'bg-transparent hover:bg-white/[0.03]'
                           }`}
                       >
                         <button
@@ -216,16 +216,16 @@ export function Testimonial() {
                           aria-expanded={isOpen}
                         >
                           <div className="flex items-center gap-3.5">
-                            <span className="font-mono text-[11px] font-bold text-[#a42025]/70 w-5">
+                            <span className="font-mono text-[11px] font-bold text-[#ff3847]/70 w-5">
                               {String(index + 1).padStart(2, '0')}
                             </span>
-                            <span className="text-[13.5px] sm:text-[14.5px] font-semibold text-[#1f1f1f]">
+                            <span className="text-[13.5px] sm:text-[14.5px] font-semibold text-white">
                               {item.q}
                             </span>
                           </div>
 
                           <div
-                            className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-[#e2e2e2] bg-white text-[#666666] transition-transform duration-200 ${isOpen ? 'rotate-180 border-[#a42025]/40 text-[#a42025] bg-[#a42025]/[0.04]' : ''
+                            className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-white/[0.12] bg-[#0c0d14] text-[#8e8e9c] transition-transform duration-200 ${isOpen ? 'rotate-180 border-[#ff3847]/40 text-[#ff3847] bg-[#d11a2a]/10' : ''
                               }`}
                           >
                             <ChevronDown size={14} strokeWidth={2.2} />
@@ -233,8 +233,8 @@ export function Testimonial() {
                         </button>
 
                         {isOpen && (
-                          <div className="px-5 pb-5 pt-0 text-[13px] leading-[1.7] text-[#555555]">
-                            <p className="m-0 pl-9 border-l-2 border-[#a42025]/30">
+                          <div className="px-5 pb-5 pt-0 text-[13px] leading-[1.7] text-[#b0b0be]">
+                            <p className="m-0 pl-9 border-l-2 border-[#ff3847]/30">
                               {item.a}
                             </p>
                           </div>

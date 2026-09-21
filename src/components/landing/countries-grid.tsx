@@ -223,15 +223,14 @@ export function CountriesGrid() {
   return (
     <section
       id="countries"
-      className="relative overflow-hidden border-y border-[#eeeeee] bg-[#fafafa] py-14 sm:py-18 lg:py-20"
+      className="relative overflow-hidden border-y border-white/[0.08] bg-[#050508] py-14 sm:py-18 lg:py-20 text-white"
     >
       {/* Ambient background lighting */}
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-0 -z-10 overflow-hidden"
       >
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-[500px] w-[950px] rounded-full bg-gradient-to-tr from-[#a42025]/[0.05] via-[#a42025]/[0.015] to-transparent blur-3xl" />
-        <div className="absolute inset-0 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:24px_24px] opacity-40" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-[500px] w-[950px] rounded-full bg-gradient-to-tr from-[#d11a2a]/[0.08] via-[#d11a2a]/[0.02] to-transparent blur-3xl" />
       </div>
 
       <div className="mx-auto max-w-[1240px] px-4 sm:px-6 lg:px-8">
@@ -241,30 +240,30 @@ export function CountriesGrid() {
         <Reveal>
           <div className="mb-6 flex flex-col items-center text-center md:mb-8">
             {/* LABEL */}
-            <div className="mb-3.5 inline-flex items-center gap-2 rounded-full border border-[#a42025]/15 bg-[#a42025]/[0.06] px-3.5 py-1">
+            <div className="mb-3.5 inline-flex items-center gap-2 rounded-full border border-[#d11a2a]/25 bg-[#d11a2a]/10 px-3.5 py-1">
               <span className="relative flex h-2 w-2">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#a42025] opacity-75" />
-                <span className="relative inline-flex h-2 w-2 rounded-full bg-[#a42025]" />
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#ff3b47] opacity-75" />
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-[#ff3b47]" />
               </span>
 
-              <span className="text-[11px] font-semibold tracking-[0.14em] uppercase text-[#a42025]">
+              <span className="text-[11px] font-semibold tracking-[0.14em] uppercase text-[#ff3847]">
                 Multi-Jurisdiction Coverage
               </span>
             </div>
 
             {/* TITLE */}
             <h2
-              className="m-0 font-serif font-medium leading-[1.05] tracking-[-0.035em] text-[#171717]"
+              className="m-0 font-serif font-medium leading-[1.05] tracking-[-0.035em] text-white"
               style={{
                 fontSize: 'clamp(32px, 4vw, 48px)',
               }}
             >
               Twelve countries.{' '}
-              <span className="text-[#a42025]">One assistant.</span>
+              <span className="text-[#ff3847] drop-shadow-[0_0_25px_rgba(255,56,71,0.7)]">One assistant.</span>
             </h2>
 
             {/* SUBTITLE */}
-            <p className="mt-3.5 max-w-[560px] text-[14px] leading-[1.65] text-[#666666] sm:text-[15px]">
+            <p className="mt-3.5 max-w-[560px] text-[14px] leading-[1.65] text-[#8e8e9c] sm:text-[15px]">
               Choose your country and SmartWills.ai will adapt the experience
               based on your selected jurisdiction.
             </p>
@@ -272,7 +271,7 @@ export function CountriesGrid() {
             {/* LINK BUTTON */}
             <a
               href="/signup"
-              className="mt-3 inline-flex items-center gap-1.5 text-[13px] font-semibold text-[#a42025] transition-all hover:gap-2.5 hover:text-[#891b1f]"
+              className="mt-3 inline-flex items-center gap-1.5 text-[13px] font-semibold text-[#ff3847] transition-all hover:gap-2.5 hover:text-[#ff6b6b]"
             >
               <span>AI Legal Engine</span>
               <ArrowRight size={14} strokeWidth={2.2} />
@@ -284,10 +283,10 @@ export function CountriesGrid() {
             FEATURED MALAYSIA BAR (BELOW DESCRIPTION)
         ========================================== */}
         <Reveal delay={60}>
-          <div className="mb-6 flex flex-col justify-between gap-4 rounded-[16px] border border-[#a42025]/20 bg-[#a42025]/[0.04] p-4.5 shadow-[0_6px_25px_rgba(164,32,37,0.04)] sm:flex-row sm:items-center sm:px-6 sm:py-4">
+          <div className="mb-6 flex flex-col justify-between gap-4 rounded-[16px] border border-[#d11a2a]/25 bg-[#d11a2a]/10 p-4.5 shadow-[0_6px_25px_rgba(0,0,0,0.5)] sm:flex-row sm:items-center sm:px-6 sm:py-4">
             <div className="flex items-center gap-3.5">
               {/* FLAG */}
-              <div className="flex h-11 w-14 items-center justify-center rounded-[10px] border border-[#a42025]/15 bg-white shadow-sm">
+              <div className="flex h-11 w-14 items-center justify-center rounded-[10px] border border-[#d11a2a]/25 bg-[#0c0d14] shadow-sm">
                 <CountryFlag
                   code="MY"
                   name="Malaysia"
@@ -298,20 +297,20 @@ export function CountriesGrid() {
               {/* TEXT */}
               <div className="text-left">
                 <div className="flex items-center gap-2">
-                  <h3 className="m-0 text-[16px] font-bold text-[#1f1f1f]">
+                  <h3 className="m-0 text-[16px] font-bold text-white">
                     Malaysia
                   </h3>
 
-                  <span className="rounded-full bg-[#a42025] px-2.5 py-0.5 text-[8.5px] font-bold tracking-wider text-white uppercase shadow-sm">
+                  <span className="rounded-full bg-gradient-to-r from-[#e01a2c] to-[#960d17] px-2.5 py-0.5 text-[8.5px] font-bold tracking-wider text-white uppercase shadow-[0_0_10px_rgba(224,26,44,0.4)]">
                     Available
                   </span>
                 </div>
 
-                <div className="mt-1 flex items-center gap-1.5 text-[11.5px] font-medium text-[#666666]">
+                <div className="mt-1 flex items-center gap-1.5 text-[11.5px] font-medium text-[#8e8e9c]">
                   <MapPin
                     size={13}
                     strokeWidth={1.8}
-                    className="text-[#a42025]"
+                    className="text-[#ff4d5a]"
                   />
                   Malaysia • MY
                 </div>
@@ -321,7 +320,7 @@ export function CountriesGrid() {
             {/* CTA BUTTON */}
             <a
               href="/signup?country=my"
-              className="inline-flex items-center justify-center gap-2.5 rounded-[10px] bg-[#a42025] px-5 py-2.5 text-[12px] font-semibold text-white shadow-[0_6px_18px_rgba(164,32,37,0.22)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#891b1f] hover:shadow-[0_8px_22px_rgba(164,32,37,0.32)]"
+              className="inline-flex items-center justify-center gap-2.5 rounded-[10px] bg-gradient-to-r from-[#e01a2c] to-[#960d17] px-5 py-2.5 text-[12px] font-semibold text-white shadow-[0_0_20px_rgba(224,26,44,0.4)] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_0_30px_rgba(224,26,44,0.6)]"
             >
               Start with Malaysia
               <ArrowRight size={14} strokeWidth={2} />
@@ -352,17 +351,17 @@ export function CountriesGrid() {
         {/* Soft edge gradient masks for horizon blending */}
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute top-0 bottom-0 left-0 z-30 w-12 bg-gradient-to-r from-[#fafafa] via-[#fafafa]/80 to-transparent sm:w-24 lg:w-40"
+          className="pointer-events-none absolute top-0 bottom-0 left-0 z-30 w-12 bg-gradient-to-r from-[#050508] via-[#050508]/80 to-transparent sm:w-24 lg:w-40"
         />
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute top-0 bottom-0 right-0 z-30 w-12 bg-gradient-to-l from-[#fafafa] via-[#fafafa]/80 to-transparent sm:w-24 lg:w-40"
+          className="pointer-events-none absolute top-0 bottom-0 right-0 z-30 w-12 bg-gradient-to-l from-[#050508] via-[#050508]/80 to-transparent sm:w-24 lg:w-40"
         />
 
         {/* Ambient floor glow beneath the amphitheater arc */}
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute bottom-0 left-1/2 -translate-x-1/2 z-0 h-36 w-3/4 max-w-[700px] rounded-full bg-gradient-to-t from-[#a42025]/15 via-[#a42025]/[0.04] to-transparent blur-3xl"
+          className="pointer-events-none absolute bottom-0 left-1/2 -translate-x-1/2 z-0 h-36 w-3/4 max-w-[700px] rounded-full bg-gradient-to-t from-[#d11a2a]/15 via-[#d11a2a]/[0.04] to-transparent blur-3xl"
         />
 
         {/* 3D Background Carousel Track (z-index 10) */}
@@ -481,7 +480,7 @@ export function CountriesGrid() {
           <div
             className="relative flex h-[380px] w-[460px] sm:h-[410px] sm:w-[540px] lg:h-[440px] lg:w-[620px] flex-col items-center justify-center"
             style={{
-              backgroundColor: '#fafafa',
+              backgroundColor: '#050508',
               maskImage:
                 'linear-gradient(to right, transparent 0%, rgba(0, 0, 0, 0.4) 10%, black 25%, black 75%, rgba(0, 0, 0, 0.4) 90%, transparent 100%)',
               WebkitMaskImage:
@@ -498,14 +497,16 @@ export function CountriesGrid() {
                 className="sw-savy-video pointer-events-none max-h-[260px] w-auto object-contain sm:max-h-[285px] lg:max-h-[310px]"
                 style={{
                   pointerEvents: 'none',
-                  mixBlendMode: 'multiply',
+                  mixBlendMode: 'screen',
                   backgroundColor: 'transparent',
-                  filter: 'contrast(1.12) brightness(1.04)',
+                  filter: 'contrast(1.08) brightness(1.02)',
                 }}
               >
+                <source src="/flags/savy_vd (2).mp4" type="video/mp4" />
+                <source src="/flags/savy_vd%20(2).mp4" type="video/mp4" />
                 <source src="/flags/savy_vd.webm" type="video/webm" />
-                <source src="/flags/vdsavy.mp4" type="video/mp4" />
                 <source src="/flags/savy_vd.mp4" type="video/mp4" />
+                <source src="/flags/vdsavy.mp4" type="video/mp4" />
                 <source src="/savy-my.mp4" type="video/mp4" />
                 {/* Fallback image */}
                 {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -513,14 +514,14 @@ export function CountriesGrid() {
                   src="/flags/savy_vd.png"
                   alt="Savy AI Assistant"
                   className="max-h-[260px] w-auto object-contain sm:max-h-[285px] lg:max-h-[310px]"
-                  style={{ mixBlendMode: 'multiply', backgroundColor: 'transparent' }}
+                  style={{ mixBlendMode: 'screen', backgroundColor: 'transparent' }}
                 />
               </video>
 
               {/* Soft contact ground shadow beneath Savy */}
               <div
                 aria-hidden="true"
-                className="absolute -bottom-1 h-3.5 w-36 rounded-full bg-black/15 blur-md sm:w-44 sm:blur-lg"
+                className="absolute -bottom-1 h-3.5 w-36 rounded-full bg-black/40 blur-md sm:w-44 sm:blur-lg"
               />
             </div>
           </div>
@@ -532,17 +533,17 @@ export function CountriesGrid() {
       ========================================== */}
       <div className="mx-auto mt-4 max-w-[1240px] px-4 sm:px-6 lg:px-8">
         <Reveal delay={120}>
-          <div className="flex flex-col items-start justify-between gap-4 rounded-[14px] border border-[#e8e8e8] bg-white p-3.5 shadow-[0_4px_20px_rgba(0,0,0,0.03)] sm:flex-row sm:items-center sm:px-5 sm:py-3.5">
+          <div className="flex flex-col items-start justify-between gap-4 rounded-[14px] border border-white/[0.12] bg-[#0c0d14]/85 p-3.5 shadow-[0_4px_20px_rgba(0,0,0,0.5)] backdrop-blur-xl sm:flex-row sm:items-center sm:px-5 sm:py-3.5">
             <div className="flex items-center gap-3">
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#a42025]/[0.08] text-[#a42025]">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#d11a2a]/15 text-[#ff4d5a] border border-[#d11a2a]/30">
                 <Globe2 size={18} strokeWidth={1.8} />
               </div>
 
               <div>
-                <p className="m-0 text-[12.5px] font-semibold text-[#1e1e1e]">
+                <p className="m-0 text-[12.5px] font-semibold text-white">
                   Need a specific cross-border or foreign jurisdiction?
                 </p>
-                <p className="mt-0.5 text-[10.5px] text-[#787878]">
+                <p className="mt-0.5 text-[10.5px] text-[#8e8e9c]">
                   SmartWills.ai supports multi-jurisdiction estate planning and Commonwealth reciprocal enforcement.
                 </p>
               </div>
@@ -550,7 +551,7 @@ export function CountriesGrid() {
 
             <a
               href="#feedback-faq"
-              className="inline-flex shrink-0 items-center gap-2 rounded-lg border border-[#e0e0e0] bg-[#fafafa] px-3 py-1.5 text-[10.5px] font-semibold text-[#333333] transition-all hover:border-[#a42025]/30 hover:bg-[#a42025]/[0.06] hover:text-[#a42025]"
+              className="inline-flex shrink-0 items-center gap-2 rounded-lg border border-white/[0.12] bg-[#0c0d14] px-3 py-1.5 text-[10.5px] font-semibold text-[#b0b0be] transition-all hover:border-[#ff3847]/30 hover:bg-[#d11a2a]/10 hover:text-[#ff3847]"
             >
               Explore Jurisdiction FAQs
               <ArrowRight size={12} strokeWidth={1.8} />
@@ -581,11 +582,11 @@ export function CountriesGrid() {
         }
 
         .sw-savy-video {
-          mix-blend-mode: multiply !important;
+          mix-blend-mode: screen !important;
           background-color: transparent !important;
           pointer-events: none !important;
-          filter: contrast(1.12) brightness(1.04) !important;
-          -webkit-filter: contrast(1.12) brightness(1.04) !important;
+          filter: contrast(1.08) brightness(1.02) !important;
+          -webkit-filter: contrast(1.08) brightness(1.02) !important;
           will-change: filter, transform;
         }
       `}</style>

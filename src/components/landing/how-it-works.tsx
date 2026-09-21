@@ -39,7 +39,7 @@ export function HowItWorks() {
   return (
     <section
       id="how"
-      className="border-y border-[#eeeeee] bg-white"
+      className="border-y border-white/[0.08] bg-[#050508] text-white"
     >
       <div
         className="
@@ -65,9 +65,9 @@ export function HowItWorks() {
           <div>
             {/* LABEL */}
             <div className="mb-5 flex items-center gap-2">
-              <span className="h-[6px] w-[6px] rounded-full bg-[#a42025]" />
+              <span className="h-[6px] w-[6px] rounded-full bg-[#ff3b47] shadow-[0_0_6px_#ff3b47]" />
 
-              <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#a42025]">
+              <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#ff3847]">
                 How it works
               </span>
             </div>
@@ -80,7 +80,7 @@ export function HowItWorks() {
                 font-medium
                 leading-[1.02]
                 tracking-[-0.035em]
-                text-[#171717]
+                text-white
               "
               style={{
                 fontSize: 'clamp(34px, 4vw, 48px)',
@@ -88,13 +88,13 @@ export function HowItWorks() {
             >
               Three simple steps.
               <br />
-              <span className="text-[#a42025]">
+              <span className="text-[#ff3847] drop-shadow-[0_0_25px_rgba(255,56,71,0.7)]">
                 One clear plan.
               </span>
             </h2>
 
             {/* DESCRIPTION */}
-            <p className="mt-5 max-w-[390px] text-[14px] leading-[1.75] text-[#707070]">
+            <p className="mt-5 max-w-[390px] text-[14px] leading-[1.75] text-[#8e8e9c]">
               Savy guides you through your will one section at a
               time, so you always know what comes next.
             </p>
@@ -121,10 +121,10 @@ export function HowItWorks() {
                             items-center
                             justify-center
                             rounded-full
-                            bg-[#a42025]/[0.07]
-                            text-[#a42025]
+                            bg-[#d11a2a]/15
+                            text-[#ff4d5a]
                             transition-colors
-                            group-hover:bg-[#a42025]
+                            group-hover:bg-[#d11a2a]
                             group-hover:text-white
                           "
                         >
@@ -135,21 +135,21 @@ export function HowItWorks() {
                         </div>
 
                         {index !== STEPS.length - 1 && (
-                          <div className="mt-2 h-full min-h-[30px] w-px bg-[#e6e6e6]" />
+                          <div className="mt-2 h-full min-h-[30px] w-px bg-white/[0.12]" />
                         )}
                       </div>
 
                       {/* CONTENT */}
                       <div className="pb-3">
-                        <span className="text-[9px] font-semibold tracking-[0.15em] text-[#a42025]">
+                        <span className="text-[9px] font-semibold tracking-[0.15em] text-[#ff3847]">
                           STEP {step.number}
                         </span>
 
-                        <h3 className="mt-1.5 text-[15px] font-semibold text-[#202020]">
+                        <h3 className="mt-1.5 text-[15px] font-semibold text-white">
                           {step.title}
                         </h3>
 
-                        <p className="mt-2 max-w-[330px] text-[12px] leading-[1.65] text-[#737373]">
+                        <p className="mt-2 max-w-[330px] text-[12px] leading-[1.65] text-[#8e8e9c]">
                           {step.description}
                         </p>
                       </div>
@@ -169,24 +169,25 @@ export function HowItWorks() {
                 gap-3
                 rounded-[10px]
                 border
-                border-[#e8e8e8]
-                bg-[#fafafa]
+                border-white/[0.12]
+                bg-[#0c0d14]/85
                 px-4
                 py-3
+                backdrop-blur-xl
               "
             >
               <Clock3
                 size={18}
                 strokeWidth={1.7}
-                className="text-[#a42025]"
+                className="text-[#ff4d5a]"
               />
 
               <div>
-                <p className="m-0 text-[11px] font-semibold text-[#303030]">
+                <p className="m-0 text-[11px] font-semibold text-white">
                   Complete at your own pace
                 </p>
 
-                <p className="mt-1 text-[9px] text-[#818181]">
+                <p className="mt-1 text-[9px] text-[#6e6e7c]">
                   Save your progress and continue anytime.
                 </p>
               </div>
@@ -199,7 +200,7 @@ export function HowItWorks() {
         ================================================== */}
         <Reveal delay={140}>
           <div>
-            <div className="mb-3 text-[9px] font-semibold uppercase tracking-[0.17em] text-[#a42025]">
+            <div className="mb-3 text-[9px] font-semibold uppercase tracking-[0.17em] text-[#ff3847]">
               See SmartWills.ai in action
             </div>
 
@@ -208,9 +209,10 @@ export function HowItWorks() {
                 overflow-hidden
                 rounded-[18px]
                 border
-                border-[#e5e5e5]
-                bg-white
-                shadow-[0_20px_60px_rgba(0,0,0,0.07)]
+                border-white/[0.12]
+                bg-[#0c0d14]/85
+                shadow-[0_20px_60px_rgba(0,0,0,0.5)]
+                backdrop-blur-xl
               "
             >
               {/* BROWSER TOP */}
@@ -481,14 +483,14 @@ export function HowItWorks() {
               <a
                 href="/signup"
                 className="
-                  inline-flex
+                inline-flex
                   items-center
                   gap-2
                   text-[11px]
                   font-semibold
-                  text-[#303030]
+                  text-[#b0b0be]
                   transition-colors
-                  hover:text-[#a42025]
+                  hover:text-[#ff3847]
                 "
               >
                 Start your will

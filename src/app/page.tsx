@@ -13,7 +13,7 @@ export default function Home() {
   return (
     <LandingShell>
       <div
-        className="min-h-screen bg-white text-[#171717]"
+        className="min-h-screen bg-[#050508] text-white"
         style={{
           fontFeatureSettings: '"ss01", "cv11", "tnum"',
         }}

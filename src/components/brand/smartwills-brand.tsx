@@ -5,12 +5,14 @@ interface SmartWillsBrandProps {
   size?: 'sm' | 'md' | 'lg';
   centered?: boolean;
   className?: string;
+  textColor?: string;
 }
 
 export function SmartWillsBrand({
   size = 'md',
   centered = false,
   className = '',
+  textColor = 'text-white',
 }: SmartWillsBrandProps) {
   const sizes = {
     sm: {
@@ -71,7 +73,7 @@ export function SmartWillsBrand({
           font-serif
           font-semibold
           tracking-[-0.04em]
-          text-[#171717]
+          ${textColor}
         `}
       >
         SmartWills.Ai
